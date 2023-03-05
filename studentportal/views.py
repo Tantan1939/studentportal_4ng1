@@ -618,8 +618,76 @@ class resend_admission(FormView):
     form_class = phb_admForms
     success_url = "/Applications/"
 
+    def check_docu_changes(self, form_docx, change_fields):
+        for docx in form_docx:
+            if docx in change_fields:
+                return True
+
     def form_valid(self, form):
-        return super().form_valid(form)
+        try:
+            if form.has_changed():
+                for field in form.changed_data:
+                    match field:
+                        case ("first_chosen_strand" | "second_chosen_strand"):
+                            setattr(self.get_adm, field, shs_strand.objects.get(
+                                id=int(form.cleaned_data[field])))
+                        case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137" | "dual_citizenship" | "philippine_passport"):
+                            pass
+                        case _:
+                            setattr(self.get_adm, field,
+                                    form.cleaned_data[field])
+                self.get_adm.is_accepted = False
+                self.get_adm.is_denied = False
+                self.get_adm.save()
+
+                if self.get_adm.type == '1' and self.check_docu_changes(list(admissionRequirementsForm.declared_fields.keys()), form.changed_data):
+                    ph_docx = ph_born.objects.get(admission=self.get_adm)
+                    for field in form.changed_data:
+                        match field:
+                            case ("good_moral" | "report_card" | "psa"):
+                                setattr(ph_docx, field,
+                                        form.cleaned_data[field])
+                            case "admission":
+                                setattr(ph_docx, field, self.get_adm)
+                            case _:
+                                pass
+                    ph_docx.save()
+
+                elif self.get_adm.type == '2' and self.check_docu_changes(list(foreignApplicantForm.declared_fields.keys()), form.changed_data):
+                    fcd_docx = foreign_citizen_documents.objects.get(
+                        admission=self.get_adm)
+                    for field in form.changed_data:
+                        match field:
+                            case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137"):
+                                setattr(fcd_docx, field,
+                                        form.cleaned_data[field])
+                            case "admission":
+                                setattr(fcd_docx, field, self.get_adm)
+                            case _:
+                                pass
+                    fcd_docx.save()
+
+                elif self.get_adm.type == '3' and self.check_docu_changes(list(dualCitizenApplicantForm.declared_fields.keys()), form.changed_data):
+                    dcd_docx = dual_citizen_documents.objects.get(
+                        admission=self.get_adm)
+                    for field in form.changed_data:
+                        match field:
+                            case ("good_moral" | "report_card" | "psa" | "dual_citizenship" | "philippine_passport" | "f137"):
+                                setattr(dcd_docx, field,
+                                        form.cleaned_data[field])
+                            case "admission":
+                                setattr(dcd_docx, field, self.get_adm)
+                            case _:
+                                pass
+                    dcd_docx.save()
+
+                else:
+                    pass
+                messages.success(self.request, "Admission resubmitted.")
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, e)
+            return self.form_invalid(form)
 
     def get_form_class(self):
         if self.get_adm.type == "1":
@@ -636,9 +704,12 @@ class resend_admission(FormView):
 
         for index, fieldname in enumerate(list(self.get_form_class().declared_fields.keys())):
             match fieldname:
-                case ("first_chosen_strand" | "second_chosen_strand"):
+                case "first_chosen_strand":
                     initial[fieldname] = str(
-                        getattr(self.get_adm, fieldname, ""))
+                        self.get_adm.first_chosen_strand.id)
+                case "second_chosen_strand":
+                    initial[fieldname] = str(
+                        self.get_adm.second_chosen_strand.id)
                 case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137" | "dual_citizenship" | "philippine_passport"):
                     pass
                 case _:

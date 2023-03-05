@@ -69,7 +69,7 @@ class admission_personal_details(forms.Form):
         second_strand_choices = ((strand.assignedStrand.id, f"{strand.assignedStrand.track.track_name}: {strand.assignedStrand.strand_name}")
                                  for strand in schoolSections.latestSections.order_by('assignedStrand').distinct('assignedStrand'))
         super(admission_personal_details, self).__init__(*args, **kwargs)
-        self.fields["sex"] = forms.ChoiceField(choices=sex_choices)
+        self.fields["sex"] = forms.TypedChoiceField(choices=sex_choices)
         self.fields["first_chosen_strand"] = forms.TypedChoiceField(
             choices=first_strand_choices)
         self.fields["second_chosen_strand"] = forms.TypedChoiceField(
@@ -81,7 +81,8 @@ class admission_personal_details(forms.Form):
         label="Middle Name", max_length=20, required=False)
     last_name = forms.CharField(
         label="Last Name", max_length=20, required=False)
-    sex = forms.ChoiceField(label="Sex", choices=(), required=False)
+    sex = forms.TypedChoiceField(
+        label="Sex", choices=(), coerce=str, required=False)
     date_of_birth = forms.DateField(label="Birthdate", validators=[
         birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     birthplace = forms.CharField(
@@ -103,12 +104,12 @@ class elementary_school_details(forms.Form):
         label="School Region", max_length=30, required=False)
     elem_year_completed = forms.DateField(label="Year Completed", validators=[
                                           birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False)
-    elem_pept_passer = forms.ChoiceField(
-        label="Are you a passer of Philippine Educational Placement Test (PEPT) for Elementary Level?", choices=boolean_choices(), required=False)
+    elem_pept_passer = forms.TypedChoiceField(
+        label="Are you a passer of Philippine Educational Placement Test (PEPT) for Elementary Level?", choices=boolean_choices(), coerce=str, required=False)
     elem_pept_date_completion = forms.DateField(label="Date Completed", validators=[
                                                 birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False, help_text="Enter date completion if PEPT passer")
-    elem_ae_passer = forms.ChoiceField(
-        label="Are you a passer of Accreditation and Equivalency (A&E) Test for Elementary Level?", choices=boolean_choices(), required=False)
+    elem_ae_passer = forms.TypedChoiceField(
+        label="Are you a passer of Accreditation and Equivalency (A&E) Test for Elementary Level?", coerce=str, choices=boolean_choices(), required=False)
     elem_ae_date_completion = forms.DateField(label="Date Completed", validators=[
                                               birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False, help_text="Enter date completion if A&E passer")
     elem_community_learning_center = forms.CharField(
@@ -126,12 +127,12 @@ class jhs_details(forms.Form):
         label="School Region", max_length=30, required=False)
     jhs_year_completed = forms.DateField(label="Year Completed", validators=[
         birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False)
-    jhs_pept_passer = forms.ChoiceField(
-        label="Are you a passer of Philippine Educational Placement Test (PEPT) for JHS Level?", choices=boolean_choices(), required=False)
+    jhs_pept_passer = forms.TypedChoiceField(
+        label="Are you a passer of Philippine Educational Placement Test (PEPT) for JHS Level?", coerce=str, choices=boolean_choices(), required=False)
     jhs_pept_date_completion = forms.DateField(label="Date Completed", validators=[
                                                birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False, help_text="Enter date completion if PEPT passer")
-    jhs_ae_passer = forms.ChoiceField(
-        label="Are you a passer of Accreditation and Equivalency (A&E) Test for JHS Level?", choices=boolean_choices(), required=False)
+    jhs_ae_passer = forms.TypedChoiceField(
+        label="Are you a passer of Accreditation and Equivalency (A&E) Test for JHS Level?", coerce=str, choices=boolean_choices(), required=False)
     jhs_ae_date_completion = forms.DateField(label="Date Completed", validators=[
                                              birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False, help_text="Enter date completion if A&E passer")
     jhs_community_learning_center = forms.CharField(
