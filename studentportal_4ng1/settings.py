@@ -149,7 +149,7 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''  # App password
 
 
-PASSWORD_RESET_TIMEOUT = 60  # 20 Minutes
+PASSWORD_RESET_TIMEOUT = 86400  # 1 Day
 ENROLLMENT_TOKEN_TIMEOUT = 604800  # 7 Days
 
 # Default primary key field type

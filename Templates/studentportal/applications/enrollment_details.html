@@ -1,0 +1,52 @@
+{% extends 'studentportal/base1.html' %}
+{% block content %}
+{% include 'studentportal/applications/menus.html' %}
+{% include 'studentportal/messages/messages.html' %}
+
+<div class="container col-md-8">
+    {% for sy in sy_enrolled %}
+        <a href="{% url 'studentportal:get_submitted_enrollments' key=sy.id %}" class="btn btn-primary btn-sm"> {{sy.enrolled_school_year}} </a>
+    {% endfor %}
+
+    {% if enrollments %}
+        {% if enrollments.can_resub %} <a href="" class="btn btn-primary btn-sm"> Resubmit </a> {% endif %}
+
+        {% for img in enrollments.studentpicture|slice:"1" %}
+            <img src="{{ img.user_image.url }}" alt="">
+        {% endfor %}
+
+        <p> {{enrollments.enrolled_school_year}} </p>
+        <p> Name: {{enrollments.full_name}} - {{enrollments.age}} </p>
+        <p> Year: {{enrollments.get_year_level_display}} </p>
+
+        {% for contact in enrollments.contactnumber|slice:"1" %}
+            <p> Contact: {{contact}} </p>
+        {% endfor %}
+
+        {% for loc in enrollments.address|slice:"1" %}
+            <p> Address: {{loc}} </p>
+        {% endfor %}
+
+        {% for img in enrollments.reportcard|slice:"1" %}
+            <img src="{{ img.report_card.url }}" alt="">
+        {% endfor %}
+
+        <p> Date Applied: {{enrollments.created_on|date:"l, j M o"}} </p>
+
+        <p>
+            Status:
+            {% if not enrollments.is_accepted and not enrollments.is_denied %}
+                For validation
+            {% elif enrollments.is_accepted %}
+                Validated
+            {% else %}
+                Denied
+            {% endif %}
+        </p>
+
+    {% else %}
+        <h6> No enrollment... </h6>
+    {% endif %}
+</div>
+
+{% endblock content %}

@@ -456,8 +456,7 @@ class enrollment_new_admission(FormView):
             if get_age.user_age():
                 save_this = student_enrollment_details()
                 save_this.applicant = self.request.user
-                save_this.admission = student_admission_details.objects.get(
-                    admission_owner=self.request.user)
+                save_this.admission = self.admObj
                 save_this.strand = shs_strand.objects.get(
                     id=int(form.cleaned_data["select_strand"]))
                 save_this.full_name = form.cleaned_data["full_name"]
@@ -468,86 +467,18 @@ class enrollment_new_admission(FormView):
                 save_this.save()
 
                 student_home_address.objects.create(
-                    home_of=self.request.user, permanent_home_address=form.cleaned_data["home_address"])
+                    home_of=self.request.user, enrollment=save_this, permanent_home_address=form.cleaned_data["home_address"])
                 student_contact_number.objects.create(
-                    own_by=self.request.user, cellphone_number=form.cleaned_data["contact_number"])
+                    own_by=self.request.user, enrollment=save_this, cellphone_number=form.cleaned_data["contact_number"])
                 student_report_card.objects.create(
                     card_from=save_this, report_card=form.cleaned_data["card"])
                 student_id_picture.objects.create(
                     image_from=save_this, user_image=form.cleaned_data["profile_image"])
 
-                adm = student_admission_details.objects.get(
-                    admission_owner=self.request.user)
-                adm.with_enrollment = True
-                adm.save()
-
-                messages.success(
-                    self.request, "We received your enrollment. Please wait us to validate it.")
-                return super().form_valid(form)
-            else:
-                messages.warning(
-                    self.request, "Enrollment Failed. Please complete your profile to continue.")
-                return self.form_invalid(form)
-        except Exception as e:
-            messages.error(
-                self.request, "Enrollment Failed. Nakapag-apply kana this school year.")
-            return self.form_invalid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Enrollment"
-        return context
-
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
-            admObj = student_admission_details.objects.get(
-                pk=uid, admission_owner=request.user)
-        except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
-            admObj = None
-
-        if admObj is not None and generate_enrollment_token.check_token(admObj, self.kwargs['token']):
-            # Return true if token is still valid
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            # if there's no user found, or the token is no longer valid, or both.
-            messages.error(request, "Enrollment link is no longer valid!")
-            return HttpResponseRedirect(reverse("studentportal:index"))
-
-
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class enrollment_old_students(FormView):
-    template_name = "studentportal/enrollmentForms/oldStudent_form.html"
-    form_class = enrollment_form2
-    success_url = "/"
-
-    def form_valid(self, form):
-        try:
-            get_age = user_profile.objects.get(user=self.request.user)
-            if get_age.user_age():
-                save_this = student_enrollment_details()
-                save_this.applicant = self.request.user
-                save_this.admission = student_admission_details.objects.get(
-                    admission_owner=self.request.user)
-                save_this.strand = shs_strand.objects.get(
-                    id=int(form.cleaned_data["select_strand"]))
-                save_this.full_name = form.cleaned_data["full_name"]
-
-                save_this.age = get_age.user_age()
-                save_this.enrolled_school_year = schoolYear.objects.first()
-                save_this.year_level = '12'
-                save_this.save()
-
-                student_home_address.objects.create(
-                    home_of=self.request.user, permanent_home_address=form.cleaned_data["home_address"])
-                student_contact_number.objects.create(
-                    own_by=self.request.user, cellphone_number=form.cleaned_data["contact_number"])
-                student_report_card.objects.create(
-                    card_from=save_this, report_card=form.cleaned_data["card"])
-                student_id_picture.objects.create(
-                    image_from=save_this, user_image=form.cleaned_data["profile_image"])
-
-                self.admObj.is_accepted = True
+                self.admObj.with_enrollment = True
+                self.admObj.first_chosen_strand = save_this.strand
+                self.admObj.assigned_curriculum = curriculum.objects.filter(
+                    strand=save_this.strand).first()
                 self.admObj.save()
 
                 messages.success(
@@ -570,12 +501,87 @@ class enrollment_old_students(FormView):
     def dispatch(self, request, *args, **kwargs):
         try:
             uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
-            self.admObj = enrollment_invitations.objects.get(
-                pk=uid, invitation_to__admission_owner=request.user)
+            self.admObj = student_admission_details.objects.get(
+                pk=uid, admission_owner=request.user)
         except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
             self.admObj = None
 
-        if self.admObj is not None and new_enrollment_token_for_old_students.check_token(self.admObj, self.kwargs['token']):
+        if self.admObj is not None and generate_enrollment_token.check_token(self.admObj, self.kwargs['token']):
+            # Return true if token is still valid
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            # if there's no user found, or the token is no longer valid, or both.
+            messages.error(request, "Enrollment link is no longer valid!")
+            return HttpResponseRedirect(reverse("studentportal:index"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class enrollment_old_students(FormView):
+    template_name = "studentportal/enrollmentForms/oldStudent_form.html"
+    form_class = enrollment_form2
+    success_url = "/"
+
+    def form_valid(self, form):
+        try:
+            get_age = user_profile.objects.get(user=self.request.user)
+            if get_age.user_age():
+                save_this = student_enrollment_details()
+                save_this.applicant = self.request.user
+                save_this.admission = self.admObj
+                save_this.strand = shs_strand.objects.get(
+                    id=int(form.cleaned_data["select_strand"]))
+                save_this.full_name = form.cleaned_data["full_name"]
+
+                save_this.age = get_age.user_age()
+                save_this.enrolled_school_year = schoolYear.objects.first()
+                save_this.year_level = '12'
+                save_this.save()
+
+                student_home_address.objects.create(
+                    home_of=self.request.user, enrollment=save_this, permanent_home_address=form.cleaned_data["home_address"])
+                student_contact_number.objects.create(
+                    own_by=self.request.user, enrollment=save_this, cellphone_number=form.cleaned_data["contact_number"])
+                student_report_card.objects.create(
+                    card_from=save_this, report_card=form.cleaned_data["card"])
+                student_id_picture.objects.create(
+                    image_from=save_this, user_image=form.cleaned_data["profile_image"])
+
+                self.invObj.is_accepted = True
+                self.invObj.save()
+
+                self.admObj.first_chosen_strand = save_this.strand
+                self.admObj.assigned_curriculum = curriculum.objects.filter(
+                    strand=save_this.strand).first()
+                self.admObj.save()
+
+                messages.success(
+                    self.request, "We received your enrollment. Please wait us to validate it.")
+                return super().form_valid(form)
+            else:
+                messages.warning(
+                    self.request, "Enrollment Failed. Please complete your profile to continue.")
+                return self.form_invalid(form)
+        except Exception as e:
+            messages.error(
+                self.request, "Enrollment Failed. Nakapag-apply kana this school year.")
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment"
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
+            self.invObj = enrollment_invitations.objects.get(
+                pk=uid, invitation_to__admission_owner=request.user)
+            self.admObj = student_admission_details.objects.get(
+                admission_owner=request.user)
+        except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+            self.invObj = None
+
+        if self.invObj is not None and new_enrollment_token_for_old_students.check_token(self.invObj, self.kwargs['token']):
             # Return true if token is still valid
             return super().dispatch(request, *args, **kwargs)
         else:
@@ -731,3 +737,39 @@ class resend_admission(FormView):
             messages.warning(
                 request, "Application can no longer be resubmitted.")
             return HttpResponseRedirect(reverse("studentportal:get_submitted_admission"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class get_submitted_enrollments(TemplateView):
+    template_name = "studentportal/applications/enrollment_details.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment"
+
+        context["sy_enrolled"] = student_enrollment_details.objects.only(
+            "id", "enrolled_school_year").filter(applicant=self.request.user)
+
+        if not "key" in self.kwargs:
+            context["enrollments"] = student_enrollment_details.objects.filter(applicant=self.request.user).prefetch_related(
+                Prefetch("enrollment_address",
+                         queryset=student_home_address.objects.all(), to_attr="address"),
+                Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(
+                ), to_attr="contactnumber"),
+                Prefetch("report_card", queryset=student_report_card.objects.all(
+                ), to_attr="reportcard"),
+                Prefetch("stud_pict", queryset=student_id_picture.objects.all(
+                ), to_attr="studentpicture"),
+            ).annotate(
+                can_resub=Case(
+                    When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(
+                    ), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)),
+                    default=Value(False)
+                )
+            ).first()
+
+        else:
+            context["enrollments"] = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(Prefetch("enrollment_address", queryset=student_home_address.objects.all(), to_attr="address"), Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(), to_attr="contactnumber"), Prefetch(
+                "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch("stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
+
+        return context

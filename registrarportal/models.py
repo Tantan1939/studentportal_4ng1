@@ -267,6 +267,8 @@ class student_home_address(models.Model):
     home_of = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="user_address")
     permanent_home_address = models.CharField(max_length=50)
+    enrollment = models.ForeignKey(
+        student_enrollment_details, on_delete=models.RESTRICT, related_name="enrollment_address", null=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -283,6 +285,8 @@ class student_contact_number(models.Model):
     cp_number_regex = RegexValidator(regex=r"^(09)([0-9]{9})$")
     cellphone_number = models.CharField(
         max_length=11, validators=[cp_number_regex])
+    enrollment = models.ForeignKey(
+        student_enrollment_details, on_delete=models.RESTRICT, related_name="enrollment_contactnumber", null=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
