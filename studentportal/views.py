@@ -773,3 +773,86 @@ class get_submitted_enrollments(TemplateView):
                 "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch("stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
 
         return context
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class resend_enrollment(FormView):
+    template_name = "studentportal/applications/resubmit_enrollment.html"
+    form_class = resend_enrollment_form
+    success_url = "/Applications/Enrollment/"
+
+    def get_success_url(self):
+        return super().get_success_url() + str(self.kwargs["key"])
+
+    def form_valid(self, form):
+        try:
+            if form.has_changed():
+                for field in form.changed_data:
+                    match field:
+                        case "select_strand":
+                            setattr(self.get_enrollment, "strand", shs_strand.objects.get(
+                                id=int(form.cleaned_data[field])))
+                        case "home_address":
+                            student_home_address.objects.filter(id=self.get_enrollment.address[0].id).update(
+                                permanent_home_address=form.cleaned_data[field])
+                        case "contact_number":
+                            student_contact_number.objects.filter(id=self.get_enrollment.contactnumber[0].id).update(
+                                cellphone_number=form.cleaned_data[field])
+                        case "card":
+                            student_report_card.objects.create(
+                                card_from=self.get_enrollment, report_card=form.cleaned_data[field])
+                        case "profile_image":
+                            student_id_picture.objects.create(
+                                image_from=self.get_enrollment, user_image=form.cleaned_data[field])
+                        case _:
+                            setattr(self.get_enrollment, field,
+                                    form.cleaned_data[field])
+                self.get_enrollment.is_accepted = False
+                self.get_enrollment.is_denied = False
+
+                to_updateFields = [field for field in form.changed_data if not field in (
+                    "home_address", "contact_number", "card", "profile_image")]
+                to_updateFields.append("is_accepted")
+                to_updateFields.append("is_denied")
+
+                self.get_enrollment.save(update_fields=to_updateFields)
+                messages.success(
+                    self.request, "Enrollment resubmitted successfully.")
+
+            return super().form_valid(form)
+        except Exception as e:
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment Resubmission"
+        context["return_key"] = self.get_enrollment.id
+        return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["full_name"] = self.get_enrollment.full_name
+        initial["year_level"] = self.get_enrollment.year_level
+        initial["select_strand"] = str(self.get_enrollment.strand.id)
+        initial["home_address"] = str(
+            self.get_enrollment.address[0].permanent_home_address)
+        initial["contact_number"] = str(
+            self.get_enrollment.contactnumber[0].cellphone_number)
+        return initial
+
+    def dispatch(self, request, *args, **kwargs):
+        self.get_enrollment = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(
+            Prefetch("enrollment_address",
+                     queryset=student_home_address.objects.all(), to_attr="address"),
+            Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(
+            ), to_attr="contactnumber"),
+            Prefetch("report_card", queryset=student_report_card.objects.all(
+            ), to_attr="reportcard"),
+            Prefetch("stud_pict", queryset=student_id_picture.objects.all(
+            ), to_attr="studentpicture")
+        ).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
+
+        if self.get_enrollment and self.get_enrollment.can_resub:
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse("studentportal:get_submitted_enrollments"))

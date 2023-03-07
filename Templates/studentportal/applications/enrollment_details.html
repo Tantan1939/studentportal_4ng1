@@ -9,7 +9,7 @@
     {% endfor %}
 
     {% if enrollments %}
-        {% if enrollments.can_resub %} <a href="" class="btn btn-primary btn-sm"> Resubmit </a> {% endif %}
+        {% if enrollments.can_resub %} <a href="{% url 'studentportal:resubmit_enrollment' key=enrollments.id %}" class="btn btn-primary btn-sm"> Resubmit </a> {% endif %}
 
         {% for img in enrollments.studentpicture|slice:"1" %}
             <img src="{{ img.user_image.url }}" alt="">

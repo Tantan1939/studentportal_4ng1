@@ -346,3 +346,10 @@ class dca_admForms(dualCitizenApplicantForm, phb_admForms):
         self.fields["dual_citizenship"].required = False
         self.fields["philippine_passport"].required = False
         self.fields["f137"].required = False
+
+
+class resend_enrollment_form(enrollment_form1):
+    def __init__(self, *args, **kwargs):
+        super(resend_enrollment_form, self).__init__(*args, **kwargs)
+        self.fields["card"].required = False
+        self.fields["profile_image"].required = False

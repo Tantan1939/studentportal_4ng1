@@ -33,7 +33,11 @@ urlpatterns = [
         path("", get_submitted_admission.as_view(),
              name="get_submitted_admission"),
         path("Resubmit/", resend_admission.as_view(), name="resend_admission"),
-        re_path(r"Enrollment/(?:(?P<key>[0-9]+)/)?$",
-                get_submitted_enrollments.as_view(), name="get_submitted_enrollments"),
+        path("Enrollment/", include([
+            re_path(r"(?:(?P<key>[0-9]+)/)?$", get_submitted_enrollments.as_view(),
+                    name="get_submitted_enrollments"),
+            path("Resubmit/<key>/", resend_enrollment.as_view(),
+                 name="resubmit_enrollment"),
+        ])),
     ])),
 ]
