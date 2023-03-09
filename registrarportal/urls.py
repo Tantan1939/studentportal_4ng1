@@ -26,6 +26,7 @@ urlpatterns = [
     ])),
 
     path("Enrollment/", include([
+        path("", validate_enrollments.as_view(), name="validate_enrollment"),
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
     ])),

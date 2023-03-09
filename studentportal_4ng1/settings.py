@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'formtools',
+    'rest_framework',
 
 
     'studentportal.apps.StudentportalConfig',

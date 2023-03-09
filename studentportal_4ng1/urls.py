@@ -3,12 +3,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import render
-from . views import here
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("studentportal.urls")),
-    path('reactka/', here.as_view()),
     path('School_admin/', include("adminportal.urls")),
     path('Registrar/', include("registrarportal.urls")),
     path('users/', include("usersPortal.urls")),

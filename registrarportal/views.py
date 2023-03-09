@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.base import TemplateView, RedirectView, View
 from django.views.generic import ListView, DetailView
@@ -24,6 +24,9 @@ from . forms import *
 from formtools.wizard.views import SessionWizardView
 from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule
 from . emailSenders import enrollment_invitation_emails
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from . serializers import NoteSerializer
 import re
 
 
@@ -576,3 +579,17 @@ class get_enrolled_students(ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrolled Students"
         return context
+
+
+@api_view(['GET'])
+def getRoutes(request):
+    notes = note.objects.all()
+    serializer = NoteSerializer(notes, many=True)
+    # many = True  serialize multiple objects
+    # many = False  serialize single object
+    return Response(serializer.data)
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
+class validate_enrollments(TemplateView):
+    template_name = 'index.html'
