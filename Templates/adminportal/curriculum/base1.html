@@ -25,22 +25,24 @@
 
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-light">
+ 
+ 
+      <nav class="navbar navbar-expand-lg navbar-light py-3">
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav w-100 mb-2 mb-lg-0 d-flex">
                     <li class="nav-item ms-auto">
-                        <a href="{% url 'adminportal:index' %}" class="nav-link"> Dashboard </a>
+                        <a href="{% url 'adminportal:index' %}" class="btn btn-outline-primary"> Dashboard </a>
                     </li>                    
                     <li class="nav-item">
-                        <a href="{% url 'adminportal:view_curriculum' %}" class="nav-link"> Curriculums </a>
+                        <a href="{% url 'adminportal:view_curriculum' %}" class="btn btn-outline-primary"> Curriculums </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'usersPortal:logout' %}" class="nav-link"> Logout </a>
+                        <a href="{% url 'usersPortal:logout' %}" class="btn btn-outline-danger"> Logout </a>
                     </li>
                 </ul>
             </div>
