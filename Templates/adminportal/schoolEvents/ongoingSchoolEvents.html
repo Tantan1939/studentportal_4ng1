@@ -12,11 +12,11 @@
         <div class="d-flex flex-row-reverse justify-content-between">
             {% for event in value %}
             <div class="buttons d-flex">
-                <a href="{% url 'adminportal:edit_schoolEvent' pk=event.id %}" class="btn btn-primary btn-lg"> Edit </a>
+                <a href="{% url 'adminportal:edit_schoolEvent' pk=event.id %}" class="btn btn-primary btn-md"> Edit </a>
                 {% if event.can_cancel %}
                 <form id="postForm" method="post">
                     {% csrf_token %}
-                    <button type="submit" name="pk" value="{{event.id}}" class="btn btn-danger btn-lg"> Cancel </button>
+                    <button type="submit" name="pk" value="{{event.id}}" class="btn btn-danger btn-md"> Cancel </button>
                 </form>
                 {% endif %}
 
