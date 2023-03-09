@@ -82,9 +82,10 @@ body {
     font-weight: 700;
     margin-bottom: 15px;
     font-size: 18px;
+
   }
   
-  .featured-services  .title a {
+  .featured-services  .title  {
     color: #111;
   }
   
@@ -94,7 +95,7 @@ body {
     margin-bottom: 0;
   }
   
-  .featured-services  .icon-box:hover .title a,
+  .featured-services  .icon-box:hover .title ,
   .featured-services .icon-box:hover .description {
     color: #fff;
   }
