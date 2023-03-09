@@ -7,17 +7,16 @@
     <div class="landing_o">
         <div class="newfangled_title">
             <div class="logo">logo</div>
-            <h3 class="landing_title d-flex flex-column text-center mt-3">
-                Leandro Integrated School
+            <h3 class="landing_title d-flex flex-column text-center mt-3 text-white">
+                Leandro Locsin Integrated School
 
             </h3>
         </div>
     </div>
 </div>
 
-
     <!-- Offered Courses -->
-    <div class="container-fluid" style="background:#800000; border-top: 3px solid #fff;">
+    <div class="container-fluid" style="background:#f7f7f7; border-top: 3px solid #800000;">
         <div class="track_and_strand_wrapper container py-5 position-relative">
             <div class="tracks_strand_date">
                 <h3> School Year {% firstof sy %} </h3>
@@ -35,14 +34,14 @@
             </div>
 
 
-            <center> <h2 class="text-white"> Offered Courses </h2> </center>&nbsp;
+            <center> <h2 class="text-dark"> Offered Courses </h2> </center>&nbsp;
             <div class="wrap pt-0">
                 <div class="row py-3 justify-content-sm-center justify-content-md-start" style="padding-top:0;">
                     {% for course in courses %}
                     <div class="col-sm-12 col-md-4">
                         <div class="track_strand mb-3 p-2 px-3">
                             <h3 class="text-center"> {{course.track_name}} </h3>
-                            <div class="strand_box border-top border-danger">
+                            <div class="strand_box ">
                                 <!-- <h5 class="text-center"> Strands: </h5> -->
                                 {% for strand in course.strands %}
                                     <div class="strand d-flex justify-content-center text-center">
@@ -50,7 +49,7 @@
                                         <p> {{strand.strand_name}} </p>
                                     </div>
                                 {% empty %}
-                                    <p class="text-center">No Strand</p>
+                                    <p class="text-center m-0">No Strand</p>
                                 {% endfor %}
                             </div>
                         </div>
@@ -71,7 +70,7 @@
     <div class="icon" id="eyeicon2" style="display:none;"></div>
     <!-- Events -->
     {% if events %}
-    <div class="container-fluid  event py-5 mt-5" >  
+    <div class="container-fluid  event py-5" style="background: #fff;">  
         <div class="container">
             <div class="">
                 <center> 
@@ -140,7 +139,7 @@
 
 
 <!-- School location in google map and school contact details -->
-<section class="p-5 bg-light" id="contact">
+<section class="p-5" id="contact" style="background: #f7f7f7;">
     <div class="container">
         <div class="row g-4 ">
             <div class="col-md box border-top border-2 border-danger py-4 me-3 bg-white">
@@ -168,11 +167,6 @@
 </section>
 
 
-<style>
-    .box{
-        box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
-    }
-</style>
 
 
 <script type="text/javascript">

@@ -2,12 +2,20 @@
 {% block content %}
 {% include 'studentportal/messages/messages.html' %}
 
-
 <div class="container">
-    <div class="col-md-8">
-        <a href="{% url 'studentportal:create_documentRequest' %}" class="btn btn-primary"> Request + </a>
-        <br>
-        <br>
+    <div class="col-md-12 pt-4">
+        <div class="box_parent">
+            <a href="{% url 'studentportal:create_documentRequest' %}" class="card_btn_create"> 
+                <div class="box_btn">
+                    <i class="fa fa-file-text" aria-hidden="true"></i>
+                    <span>Request +</span> 
+                </div>
+                
+            
+            </a>
+
+        </div>
+      
         {% for document in requestedDocuments %}
             <p> Document: {{document.document}} </p>
             <p> Date Scheduled: {{document.scheduled_date|date:"l, M d, o"}}  </p>
