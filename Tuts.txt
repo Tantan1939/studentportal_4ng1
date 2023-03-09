@@ -1,10 +1,5 @@
 1: Delete db4ng1 database
 2: Create db4ng1 database
 3: enter pip install -r requirements.txt
-4: run python manage.py makemigrations
-5: run python manage.py migrate
-6: run python manage.py makemigrations adminportal --empty
-7: open this directory adminportal/migrations, select yung last migration file.
-8: Sa line 1, enter mo ito from django.contrib.postgres.operations import UnaccentExtension
-9: Under ng class Migration, enter UnaccentExtension() inside the operations variable.
-10. Balik sa cmd, run python manage.py migrate
+4: run python manage.py migrate
+5: End

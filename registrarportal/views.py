@@ -582,7 +582,7 @@ class get_enrolled_students(ListView):
 
 
 @api_view(['GET'])
-def getRoutes(request):
+def getNotes(request):
     notes = note.objects.all()
     serializer = NoteSerializer(notes, many=True)
     # many = True  serialize multiple objects
