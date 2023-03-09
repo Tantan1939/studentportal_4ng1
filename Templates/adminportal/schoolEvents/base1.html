@@ -40,12 +40,12 @@
         <ul class="navbar-nav w-100 mb-2 mb-lg-0 d-flex">
           <li class="nav-item ms-auto">
 
-            <a href="/School_admin/" class="btn btn-outline-primary"> Dashboard </a>
+            <a href="{% url 'adminportal:index' %}" class="btn btn-outline-primary"> Dashboard </a>
 
           </li>
           <li class="nav-item">
 
-            <a href="/users/logout/" class="btn btn-outline-danger"> Logout </a>
+            <a href="{% url 'usersPortal:logout' %}" class="btn btn-outline-danger"> Logout </a>
 
           </li>
         </ul>

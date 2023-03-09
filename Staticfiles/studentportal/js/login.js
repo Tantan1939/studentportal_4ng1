@@ -51,7 +51,6 @@ function ready() {
         em.classList.remove('active')
         line.classList.remove('active')
     }else{
-        console.log('sad')
         em.classList.add('active')
         line.classList.add('active')
     }
