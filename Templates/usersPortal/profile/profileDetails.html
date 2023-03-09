@@ -3,19 +3,34 @@
 {% include 'usersPortal/messages/messages.html' %}
 
 
-<div class="container">
-    <div class="col-md-8">
-        <img src="{{ userDetails.userimage.image.url }}" alt="">
-        <p> First Name: {{userDetails.first_name}} </p>
-        <p> Middle Name: {{userDetails.middle_name}} </p>
-        <p> Last Name: {{userDetails.last_name}} </p>
-        <p> Birthdate: {{userDetails.birth_date}} </p>
-        <p> Sex: {{userDetails.sex}} </p>
-        <p> Contact: {{userDetails.contactnum}} </p>
-        <p> Address: {{userDetails.useraddress}} </p>
-        <a href="{% url 'usersPortal:updateAccountProfile' %}" class="btn btn-primary btn-sm"> Edit </a>
-        <a href="{% url 'usersPortal:changepassword' %}" class="btn btn-primary btn-sm"> Change Password </a>
-        <a href="{% url 'usersPortal:resetpassword' %}" class="btn btn-primary btn-sm"> Reset Password </a>
+<div class="container py-3 pb-5 mt-5 mb-5" style="box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;">
+    <div class="row p-2 pt-3">
+        <div class="col-md-3">
+            <div class="l_img w-100 d-flex justify-content-center">
+                <img src="{{ userDetails.userimage.image.url }}" alt="">
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="r_content">
+                <div class="content_wrapper">
+                    <p> First Name: <span>{{userDetails.first_name}}</span></p>
+                    <p> Middle Name: <span>{{userDetails.middle_name}}</span> </p>
+                    <p> Last Name: <span>{{userDetails.last_name}}</span>  </p>
+                    <p> Birthdate: <span>{{userDetails.birth_date}}</span>  </p>
+                    <p> Sex: <span>{{userDetails.sex}}</span> </p>
+                    <p> Contact: <span>{{userDetails.contactnum}}</span>  </p>
+                    <p> Address: <span>{{userDetails.useraddress}}</span>  </p>
+                </div>
+                <div class="btns">
+                    <a href="{% url 'usersPortal:updateAccountProfile' %}" class="btn btn-primary btn-md"> Edit </a>
+                    <a href="{% url 'usersPortal:changepassword' %}" class="btn btn-primary btn-md"> Change Password </a>
+                    <a href="{% url 'usersPortal:resetpassword' %}" class="btn btn-primary btn-md"> Reset Password </a>
+                </div>
+            </div>
+
+        </div>
+      
+
     </div>
 </div>
 

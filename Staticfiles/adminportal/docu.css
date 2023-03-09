@@ -34,7 +34,7 @@ body{
 
 .main{
     background: #D7E5D8;
-    min-height: 89vh;
+    min-height: 93vh;
     height: 100%;
 }
 .main .track_docu{
@@ -50,17 +50,7 @@ body{
     font-weight: 460;
 }
 
-/* .accordion-button{
-    background:#25c784 !important;
-    color: #fff !important;
-} */
-.accordion-collapse.collapse.show  .accordion-header .accordion-button{
-    transform: rotate(120deg) !important;     
-    /* background: red !important; */
-}
-.accordion-button::after{
-    background: none;
-}
+
 
 
 .text-bold{

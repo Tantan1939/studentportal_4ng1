@@ -29,6 +29,19 @@
     .nav-link:hover{
         color: #fff !important;
     }
+
+    .studuser{}
+    .nav-link img{
+        margin-left: 20px;
+        height: auto;
+        width: 50px;
+        padding: 0;
+    }
+    .nav-item{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
     .logo{
         margin-right: 10px;
         height: 50px;
@@ -43,12 +56,12 @@
 
     .landing{
         /* min-height: 400px; */
-        min-height: 500px;
+        min-height: 580px;
         height: 100%;
 
-        /* background-image: url('/Media/homepage_img/pexels-johny-rebel-the-explorer-panda-357271 (1).jpg');    */
-        background-position: center 20%;
-        background-attachment: fixed;
+        background-image: url('/Media/homepage_img/pexels-ekrulila-2292837.jpg');   
+        background-position: center 30%;
+        /* background-attachment: fixed; */
         background-size: cover;
         position: relative;
     }
@@ -60,15 +73,16 @@
         width: 100%;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
-        /* background: rgba(0, 0,0,0.3); */
+        align-items: center;
+        background: rgba(0, 0, 0, 0.3);
     }
     .landing .newfangled_title{
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        margin-top: 120px;
+        margin-bottom: 50px;
+        /* margin-top: 120px; */
     }
     .landing .newfangled_title .logo{
         height: 130px;
@@ -103,8 +117,12 @@
         /* border: 1px solid #800000; */
         border-radius: 8px;
     }
-
-    
+    .track_strand{
+        border: 1px solid #800000;
+    }
+    .track_strand .strand_box{
+        border-top: 1px solid #800000;
+    }
 
     .track_strand h3{
         color: #000;
@@ -182,11 +200,11 @@
     .tracks_strand_date{
 
         position: absolute;
-        top: -73px;
+        top: -71px;
         left:12px;
     }
     .tracks_strand_date {
-        border: 1px solid #800000;
+        border: 2px solid #800000;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         border-bottom: 0;
@@ -208,6 +226,7 @@
     }
     .strand_box .strand p {
         margin: 0;
+        font-size: 20px;
     }
     .strand_box .strand{
         display: flex;

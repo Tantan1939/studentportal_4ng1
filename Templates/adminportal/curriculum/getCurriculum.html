@@ -3,15 +3,21 @@
 {% include 'adminportal/messages/messages.html' %}
 
 <div class="container pt-5 d-flex flex-column">
-<a href="{% url 'adminportal:add_curriculum' %}" class=" add_curriculum btn btn-success">
+<a href="{% url 'adminportal:add_curriculum' %}" class="add_curriculum btn btn-success">
 <i class="bi bi-plus-lg">
 </i>
 New Curriculum
 </a>
 
-<div class="container-fluid" style="background: #fff;">
 
-    <div class="track_and_strand_wrapper container py-5">
+
+
+
+
+
+<div class="container-fluid mt-2" style="background: #fff;">
+
+    <div class="track_and_strand_wrapper container py-2">
         <div class="row grid">
             {% for curriculum in curriculums %}
                 <div class="track_strand mb-3 " style="background: #fff;">
@@ -56,7 +62,7 @@ New Curriculum
                         <hr>
 
                         {% if curriculum.can_edit %} <a href="{% url 'adminportal:update_curriculum' pk=curriculum.id %}" class="btn btn-primary btn-sm"> Update </a> {% endif %}
-
+                        <a href="{% url 'adminportal:index' %}" class="btn btn-primary btn-sm"> Back </a>
                     </div>
                 </div>
             {% empty %}
@@ -103,6 +109,6 @@ New Curriculum
 </style>
 
 
-<a href="{% url 'adminportal:index' %}" class="btn btn-primary"> Back </a>
+
 
 {% endblock content %}
