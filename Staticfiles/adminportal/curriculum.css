@@ -12,29 +12,10 @@ body{
 }
 
 
-.add_track{
-    /* background: #173979; */
-    color: #fff;
-    padding: 10px;
-    text-decoration: none;
-    transition: 0.3s ease;
-    margin-left: auto;
-    border-radius: 5px;
-}
-.add_track:hover{
-    /* background: #2FB47D; */
-    color: #fff;
-}
-
-.btn-success {
-    color: #fff;
-    background-color: #198754;
-    border-color: #198754;
-}
 
 .main{
     background: #D7E5D8;
-    min-height: 89vh;
+    min-height: 93vh;
     height: 100%;
 }
 .main .track_docu{
@@ -48,6 +29,20 @@ body{
 .document h4{
     font-family: 'Poppins', sans-serif !important;
     font-weight: 460;
+}
+
+.add_curriculum{
+    /* background: #173979; */
+    color: #fff;
+    padding: 10px;
+    text-decoration: none;
+    transition: 0.3s ease;
+    margin-left: auto;
+    border-radius: 5px;
+}
+add_curriculum:hover{
+    /* background: #2FB47D; */
+    color: #fff;
 }
 
 
@@ -68,13 +63,6 @@ body{
 
 .box_shadow{
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-}
-
-
-
-*{
-    margin: 0;
-    padding: 0;
 }
 
 

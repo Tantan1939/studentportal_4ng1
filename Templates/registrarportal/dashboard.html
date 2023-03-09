@@ -59,12 +59,12 @@
             <div class="center">
                 <div class="admin_portal_function" data-aos="fade-left" data-aos-duration="1500">
 
-                    <a href="" aria-current="page" class="nav-link a_p_card d-flex">
+                    <a href="{% url 'registrarportal:view_admissions' %}" aria-current="page" class="nav-link a_p_card d-flex">
                         <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
                         <h4>Admission</h4>
                     </a>
 
-                    <a href="" aria-current="page" class="nav-link a_p_card d-flex">
+                    <a href="{% url 'registrarportal:validate_enrollment' %}" aria-current="page" class="nav-link a_p_card d-flex">
                         <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
                         <h4>Enrollment</h4>
                     </a>
@@ -77,16 +77,6 @@
                     <a href="{% url 'registrarportal:requestedDocuments' %}" aria-current="page" class="nav-link a_p_card d-flex">
                         <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
                         <h4>Document Request</h4>
-                    </a>
-
-                    <a href="" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>Manage Sections</h4>
-                    </a>
-
-                    <a href="" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>Add Validators</h4>
                     </a>
 
                     <a href="{% url 'usersPortal:changepassword' %}" aria-current="page" class="nav-link a_p_card d-flex">

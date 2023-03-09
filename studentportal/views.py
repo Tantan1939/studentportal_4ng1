@@ -34,7 +34,7 @@ from registrarportal.models import student_admission_details
 import cv2
 import pytesseract
 from PIL import Image
-from registrarportal.tokenGenerators import generate_enrollment_token
+from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -117,7 +117,7 @@ class index(TemplateView):
 
 def user_no_admission(user):
     # Return False if the user has validated admission or to_validate admission
-    return not student_admission_details.objects.filter(admission_owner=user).exclude(is_denied=True).exists()
+    return not student_admission_details.objects.filter(admission_owner=user).exclude(is_accepted=False, is_denied=True).exists()
 
 
 def check_for_admission_availability(user):
@@ -456,8 +456,7 @@ class enrollment_new_admission(FormView):
             if get_age.user_age():
                 save_this = student_enrollment_details()
                 save_this.applicant = self.request.user
-                save_this.admission = student_admission_details.objects.get(
-                    admission_owner=self.request.user)
+                save_this.admission = self.admObj
                 save_this.strand = shs_strand.objects.get(
                     id=int(form.cleaned_data["select_strand"]))
                 save_this.full_name = form.cleaned_data["full_name"]
@@ -468,18 +467,19 @@ class enrollment_new_admission(FormView):
                 save_this.save()
 
                 student_home_address.objects.create(
-                    home_of=self.request.user, permanent_home_address=form.cleaned_data["home_address"])
+                    home_of=self.request.user, enrollment=save_this, permanent_home_address=form.cleaned_data["home_address"])
                 student_contact_number.objects.create(
-                    own_by=self.request.user, cellphone_number=form.cleaned_data["contact_number"])
+                    own_by=self.request.user, enrollment=save_this, cellphone_number=form.cleaned_data["contact_number"])
                 student_report_card.objects.create(
                     card_from=save_this, report_card=form.cleaned_data["card"])
                 student_id_picture.objects.create(
                     image_from=save_this, user_image=form.cleaned_data["profile_image"])
 
-                adm = student_admission_details.objects.get(
-                    admission_owner=self.request.user)
-                adm.with_enrollment = True
-                adm.save()
+                self.admObj.with_enrollment = True
+                self.admObj.first_chosen_strand = save_this.strand
+                self.admObj.assigned_curriculum = curriculum.objects.filter(
+                    strand=save_this.strand).first()
+                self.admObj.save()
 
                 messages.success(
                     self.request, "We received your enrollment. Please wait us to validate it.")
@@ -501,15 +501,358 @@ class enrollment_new_admission(FormView):
     def dispatch(self, request, *args, **kwargs):
         try:
             uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
-            admObj = student_admission_details.objects.get(
+            self.admObj = student_admission_details.objects.get(
                 pk=uid, admission_owner=request.user)
         except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
-            admObj = None
+            self.admObj = None
 
-        if admObj is not None and generate_enrollment_token.check_token(admObj, self.kwargs['token']):
+        if self.admObj is not None and generate_enrollment_token.check_token(self.admObj, self.kwargs['token']):
             # Return true if token is still valid
             return super().dispatch(request, *args, **kwargs)
         else:
             # if there's no user found, or the token is no longer valid, or both.
             messages.error(request, "Enrollment link is no longer valid!")
             return HttpResponseRedirect(reverse("studentportal:index"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class enrollment_old_students(FormView):
+    template_name = "studentportal/enrollmentForms/oldStudent_form.html"
+    form_class = enrollment_form2
+    success_url = "/"
+
+    def form_valid(self, form):
+        try:
+            get_age = user_profile.objects.get(user=self.request.user)
+            if get_age.user_age():
+                save_this = student_enrollment_details()
+                save_this.applicant = self.request.user
+                save_this.admission = self.admObj
+                save_this.strand = shs_strand.objects.get(
+                    id=int(form.cleaned_data["select_strand"]))
+                save_this.full_name = form.cleaned_data["full_name"]
+
+                save_this.age = get_age.user_age()
+                save_this.enrolled_school_year = schoolYear.objects.first()
+                save_this.year_level = '12'
+                save_this.save()
+
+                student_home_address.objects.create(
+                    home_of=self.request.user, enrollment=save_this, permanent_home_address=form.cleaned_data["home_address"])
+                student_contact_number.objects.create(
+                    own_by=self.request.user, enrollment=save_this, cellphone_number=form.cleaned_data["contact_number"])
+                student_report_card.objects.create(
+                    card_from=save_this, report_card=form.cleaned_data["card"])
+                student_id_picture.objects.create(
+                    image_from=save_this, user_image=form.cleaned_data["profile_image"])
+
+                self.invObj.is_accepted = True
+                self.invObj.save()
+
+                self.admObj.first_chosen_strand = save_this.strand
+                self.admObj.assigned_curriculum = curriculum.objects.filter(
+                    strand=save_this.strand).first()
+                self.admObj.save()
+
+                messages.success(
+                    self.request, "We received your enrollment. Please wait us to validate it.")
+                return super().form_valid(form)
+            else:
+                messages.warning(
+                    self.request, "Enrollment Failed. Please complete your profile to continue.")
+                return self.form_invalid(form)
+        except Exception as e:
+            messages.error(
+                self.request, "Enrollment Failed. Nakapag-apply kana this school year.")
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment"
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
+            self.invObj = enrollment_invitations.objects.get(
+                pk=uid, invitation_to__admission_owner=request.user)
+            self.admObj = student_admission_details.objects.get(
+                admission_owner=request.user)
+        except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+            self.invObj = None
+
+        if self.invObj is not None and new_enrollment_token_for_old_students.check_token(self.invObj, self.kwargs['token']):
+            # Return true if token is still valid
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            # if there's no user found, or the token is no longer valid, or both.
+            messages.error(request, "Enrollment link is no longer valid!")
+            return HttpResponseRedirect(reverse("studentportal:index"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class get_submitted_admission(TemplateView):
+    template_name = "studentportal/applications/admission_details.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Application"
+
+        context["details"] = student_admission_details.objects.filter(admission_owner=self.request.user).prefetch_related(
+            Prefetch("softCopy_admissionRequirements_phBorn",
+                     queryset=ph_born.objects.all(), to_attr="phborndocx"),
+            Prefetch("softCopy_admissionRequirements_foreigner",
+                     queryset=foreign_citizen_documents.objects.all(), to_attr="fborndocx"),
+            Prefetch("softCopy_admissionRequirements_dualCitizen",
+                     queryset=dual_citizen_documents.objects.all(), to_attr="dborndocx")
+        ).annotate(
+            can_resub=Case(
+                When(is_accepted=False, is_denied=True, admission_sy__until__gt=date.today(
+                ), admission_sy__e_a_setup__end_date__gte=date.today(), then=Value(True)),
+                default=Value(False)
+            )
+        )
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
+        return context
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class resend_admission(FormView):
+    template_name = "studentportal/applications/admissionForm.html"
+    form_class = phb_admForms
+    success_url = "/Applications/"
+
+    def check_docu_changes(self, form_docx, change_fields):
+        for docx in form_docx:
+            if docx in change_fields:
+                return True
+
+    def form_valid(self, form):
+        try:
+            if form.has_changed():
+                for field in form.changed_data:
+                    match field:
+                        case ("first_chosen_strand" | "second_chosen_strand"):
+                            setattr(self.get_adm, field, shs_strand.objects.get(
+                                id=int(form.cleaned_data[field])))
+                        case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137" | "dual_citizenship" | "philippine_passport"):
+                            pass
+                        case _:
+                            setattr(self.get_adm, field,
+                                    form.cleaned_data[field])
+                self.get_adm.is_accepted = False
+                self.get_adm.is_denied = False
+                self.get_adm.save()
+
+                if self.get_adm.type == '1' and self.check_docu_changes(list(admissionRequirementsForm.declared_fields.keys()), form.changed_data):
+                    ph_docx = ph_born.objects.get(admission=self.get_adm)
+                    for field in form.changed_data:
+                        match field:
+                            case ("good_moral" | "report_card" | "psa"):
+                                setattr(ph_docx, field,
+                                        form.cleaned_data[field])
+                            case "admission":
+                                setattr(ph_docx, field, self.get_adm)
+                            case _:
+                                pass
+                    ph_docx.save()
+
+                elif self.get_adm.type == '2' and self.check_docu_changes(list(foreignApplicantForm.declared_fields.keys()), form.changed_data):
+                    fcd_docx = foreign_citizen_documents.objects.get(
+                        admission=self.get_adm)
+                    for field in form.changed_data:
+                        match field:
+                            case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137"):
+                                setattr(fcd_docx, field,
+                                        form.cleaned_data[field])
+                            case "admission":
+                                setattr(fcd_docx, field, self.get_adm)
+                            case _:
+                                pass
+                    fcd_docx.save()
+
+                elif self.get_adm.type == '3' and self.check_docu_changes(list(dualCitizenApplicantForm.declared_fields.keys()), form.changed_data):
+                    dcd_docx = dual_citizen_documents.objects.get(
+                        admission=self.get_adm)
+                    for field in form.changed_data:
+                        match field:
+                            case ("good_moral" | "report_card" | "psa" | "dual_citizenship" | "philippine_passport" | "f137"):
+                                setattr(dcd_docx, field,
+                                        form.cleaned_data[field])
+                            case "admission":
+                                setattr(dcd_docx, field, self.get_adm)
+                            case _:
+                                pass
+                    dcd_docx.save()
+
+                else:
+                    pass
+                messages.success(self.request, "Admission resubmitted.")
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, e)
+            return self.form_invalid(form)
+
+    def get_form_class(self):
+        if self.get_adm.type == "1":
+            return super().get_form_class()
+        elif self.get_adm.type == "2":
+            return fa_admForms
+        elif self.get_adm.type == "3":
+            return dca_admForms
+        else:
+            pass
+
+    def get_initial(self):
+        initial = super().get_initial()
+
+        for index, fieldname in enumerate(list(self.get_form_class().declared_fields.keys())):
+            match fieldname:
+                case "first_chosen_strand":
+                    initial[fieldname] = str(
+                        self.get_adm.first_chosen_strand.id)
+                case "second_chosen_strand":
+                    initial[fieldname] = str(
+                        self.get_adm.second_chosen_strand.id)
+                case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137" | "dual_citizenship" | "philippine_passport"):
+                    pass
+                case _:
+                    initial[fieldname] = getattr(self.get_adm, fieldname, "")
+
+        return initial
+
+    def dispatch(self, request, *args, **kwargs):
+        self.get_adm = student_admission_details.objects.filter(admission_owner=request.user).annotate(
+            can_resub=Case(
+                When(is_accepted=False, is_denied=True, admission_sy__until__gt=date.today(
+                ), admission_sy__e_a_setup__end_date__gte=date.today(), then=Value(True)),
+                default=Value(False)
+            )
+        ).first()
+        if self.get_adm and self.get_adm.can_resub:
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            messages.warning(
+                request, "Application can no longer be resubmitted.")
+            return HttpResponseRedirect(reverse("studentportal:get_submitted_admission"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class get_submitted_enrollments(TemplateView):
+    template_name = "studentportal/applications/enrollment_details.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment"
+
+        context["sy_enrolled"] = student_enrollment_details.objects.only(
+            "id", "enrolled_school_year").filter(applicant=self.request.user)
+
+        if not "key" in self.kwargs:
+            context["enrollments"] = student_enrollment_details.objects.filter(applicant=self.request.user).prefetch_related(
+                Prefetch("enrollment_address",
+                         queryset=student_home_address.objects.all(), to_attr="address"),
+                Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(
+                ), to_attr="contactnumber"),
+                Prefetch("report_card", queryset=student_report_card.objects.all(
+                ), to_attr="reportcard"),
+                Prefetch("stud_pict", queryset=student_id_picture.objects.all(
+                ), to_attr="studentpicture"),
+            ).annotate(
+                can_resub=Case(
+                    When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(
+                    ), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)),
+                    default=Value(False)
+                )
+            ).first()
+
+        else:
+            context["enrollments"] = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(Prefetch("enrollment_address", queryset=student_home_address.objects.all(), to_attr="address"), Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(), to_attr="contactnumber"), Prefetch(
+                "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch("stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
+
+        return context
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class resend_enrollment(FormView):
+    template_name = "studentportal/applications/resubmit_enrollment.html"
+    form_class = resend_enrollment_form
+    success_url = "/Applications/Enrollment/"
+
+    def get_success_url(self):
+        return super().get_success_url() + str(self.kwargs["key"])
+
+    def form_valid(self, form):
+        try:
+            if form.has_changed():
+                for field in form.changed_data:
+                    match field:
+                        case "select_strand":
+                            setattr(self.get_enrollment, "strand", shs_strand.objects.get(
+                                id=int(form.cleaned_data[field])))
+                        case "home_address":
+                            student_home_address.objects.filter(id=self.get_enrollment.address[0].id).update(
+                                permanent_home_address=form.cleaned_data[field])
+                        case "contact_number":
+                            student_contact_number.objects.filter(id=self.get_enrollment.contactnumber[0].id).update(
+                                cellphone_number=form.cleaned_data[field])
+                        case "card":
+                            student_report_card.objects.create(
+                                card_from=self.get_enrollment, report_card=form.cleaned_data[field])
+                        case "profile_image":
+                            student_id_picture.objects.create(
+                                image_from=self.get_enrollment, user_image=form.cleaned_data[field])
+                        case _:
+                            setattr(self.get_enrollment, field,
+                                    form.cleaned_data[field])
+                self.get_enrollment.is_accepted = False
+                self.get_enrollment.is_denied = False
+
+                to_updateFields = [field for field in form.changed_data if not field in (
+                    "home_address", "contact_number", "card", "profile_image")]
+                to_updateFields.append("is_accepted")
+                to_updateFields.append("is_denied")
+
+                self.get_enrollment.save(update_fields=to_updateFields)
+                messages.success(
+                    self.request, "Enrollment resubmitted successfully.")
+
+            return super().form_valid(form)
+        except Exception as e:
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment Resubmission"
+        context["return_key"] = self.get_enrollment.id
+        return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["full_name"] = self.get_enrollment.full_name
+        initial["year_level"] = self.get_enrollment.year_level
+        initial["select_strand"] = str(self.get_enrollment.strand.id)
+        initial["home_address"] = str(
+            self.get_enrollment.address[0].permanent_home_address)
+        initial["contact_number"] = str(
+            self.get_enrollment.contactnumber[0].cellphone_number)
+        return initial
+
+    def dispatch(self, request, *args, **kwargs):
+        self.get_enrollment = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(
+            Prefetch("enrollment_address",
+                     queryset=student_home_address.objects.all(), to_attr="address"),
+            Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(
+            ), to_attr="contactnumber"),
+            Prefetch("report_card", queryset=student_report_card.objects.all(
+            ), to_attr="reportcard"),
+            Prefetch("stud_pict", queryset=student_id_picture.objects.all(
+            ), to_attr="studentpicture")
+        ).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
+
+        if self.get_enrollment and self.get_enrollment.can_resub:
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse("studentportal:get_submitted_enrollments"))
