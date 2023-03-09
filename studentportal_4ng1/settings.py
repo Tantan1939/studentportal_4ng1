@@ -51,7 +51,7 @@ ROOT_URLCONF = 'studentportal_4ng1.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, "Templates"), ],
+        'DIRS': [os.path.join(BASE_DIR, "Templates"), os.path.join(BASE_DIR, "enrollmentapp/build")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,7 +134,8 @@ USE_TZ = False  # Defaults to True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Staticfiles'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Staticfiles'),
+                    os.path.join(BASE_DIR, "enrollmentapp/build/static"))
 
 MEDIA_URL = 'Media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
