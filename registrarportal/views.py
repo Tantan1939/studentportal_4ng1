@@ -27,6 +27,7 @@ from . emailSenders import enrollment_invitation_emails
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from . serializers import NoteSerializer
+from . notes import *
 import re
 
 
@@ -581,13 +582,26 @@ class get_enrolled_students(ListView):
         return context
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def getNotes(request):
-    notes = note.objects.all()
-    serializer = NoteSerializer(notes, many=True)
-    # many = True  serialize multiple objects
-    # many = False  serialize single object
-    return Response(serializer.data)
+    if request.method == 'GET':
+        return getNotesList(request)
+
+    if request.method == 'POST':
+        return createNote(request)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def getNote(request, pk):
+
+    if request.method == 'GET':
+        return getNoteDetail(request, pk)
+
+    if request.method == 'PUT':
+        return updateNote(request, pk)
+
+    if request.method == 'DELETE':
+        return deleteNote(request, pk)
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
