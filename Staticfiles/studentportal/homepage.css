@@ -19,7 +19,10 @@
         color: #800000;
     }
     .nav-link{
-        color: rgb(233, 233, 233) !important;
+        transition: 0.5s ease !important; 
+    }
+    .nav-link a{
+        color: rgb(15, 15, 15) !important;
         transition: 0.3s ease;
         font-family: 'Open Sans', sans-serif;
         transition: 0.4s ease-in;
@@ -27,7 +30,7 @@
 
    
     .nav-link:hover{
-        color: #fff !important;
+        /* color: #fff !important; */
     }
 
     .studuser{}
@@ -118,14 +121,22 @@
         border-radius: 8px;
     }
     .track_strand{
-        border: 1px solid #800000;
+        height: 100%;
+        display: grid;
+        grid-template-rows: 90px minmax(180px, 100%);
+        align-items: center;
+        color: #fff;
+        background-color: #800000 !important;
     }
     .track_strand .strand_box{
-        border-top: 1px solid #800000;
+        height: 100%;
+        grid-row: 2/3;
+        border-top: 2px solid #fff;
     }
 
     .track_strand h3{
-        color: #000;
+        color: #fff;
+
         font-family: 'Open Sans', sans-serif;
     }
     /* .track_strand .strand_box{

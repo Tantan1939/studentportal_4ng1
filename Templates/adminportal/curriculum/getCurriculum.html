@@ -15,7 +15,7 @@ New Curriculum
 
 
 
-<div class="container-fluid mt-2" style="background: #fff;">
+<div class="container-fluid mt-2"  style="background: #fff;">
 
     <div class="track_and_strand_wrapper container py-2">
         <div class="row grid">
@@ -60,9 +60,9 @@ New Curriculum
                             </div>
                         {% endfor %}
                         <hr>
-
-                        {% if curriculum.can_edit %} <a href="{% url 'adminportal:update_curriculum' pk=curriculum.id %}" class="btn btn-primary btn-sm"> Update </a> {% endif %}
-                        <a href="{% url 'adminportal:index' %}" class="btn btn-primary btn-sm"> Back </a>
+                        <a href="{% url 'adminportal:index' %}" class="btn btn-primary btn-md"> Back </a>
+                        {% if curriculum.can_edit %} <a href="{% url 'adminportal:update_curriculum' pk=curriculum.id %}" class="btn btn-success btn-md"> Update </a> {% endif %}
+                        
                     </div>
                 </div>
             {% empty %}
