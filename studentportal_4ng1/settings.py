@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'formtools',
     'rest_framework',
+    'corsheaders',
 
 
     'studentportal.apps.StudentportalConfig',
@@ -38,6 +39,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'db4ng1',
         'USER': 'postgres',
-        'PASSWORD': '',
+        'PASSWORD': 'luke123',
         'HOST': 'localhost'
     }
 }
@@ -100,6 +103,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
 
 # Remove this in production
 LOGGING = {
@@ -136,7 +145,7 @@ USE_TZ = False  # Defaults to True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Staticfiles'),
-                    os.path.join(BASE_DIR, "enrollmentapp/build/static"))
+                    os.path.join(BASE_DIR, r"enrollmentapp\build\static"))
 
 MEDIA_URL = 'Media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
@@ -154,7 +163,18 @@ EMAIL_HOST_PASSWORD = ''  # App password
 PASSWORD_RESET_TIMEOUT = 86400  # 1 Day
 ENROLLMENT_TOKEN_TIMEOUT = 604800  # 7 Days
 
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_METHODS = [
+#     "DELETE",
+#     "GET",
+#     "OPTIONS",
+#     "PATCH",
+#     "POST",
+#     "PUT",
+# ]

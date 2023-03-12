@@ -5,7 +5,7 @@
 
 
 <div class="container py-3 d-flex justify-content-end">
-    <a href="{% url 'adminportal:view_courses' %}" class="btn btn-primary" > Back </a>
+   
 </div>
 
 <form id="postForm" class="p-3" method="post">
@@ -14,9 +14,15 @@
     {{ form.non_field_errors }}
 
     <div class="container col-md-8 bg-white box_shadow p-3">
-        <h4> Edit Strand </h4>
+        <h4> 
+            <i class="fa fa-pencil" aria-hidden="true"></i>
 
-        <div class="form-outline mb-4">
+<i>
+    Edit Strand
+</i>
+        </h4>
+
+        <div class="form-outline mb-4 mt-3">
             {{ form.track.errors }} <!-- Field errors -->
             <label for="{{ form.track.id_for_label }}" class="form-label"> Track: </label>
             {{ form.track|addclass:"form-control"}} <!-- Choice Field -->
@@ -33,8 +39,9 @@
             <label for="{{ form.strand_details.id_for_label }}" class="form-label"> Strand Details: </label>
             {{ form.strand_details|addclass:"form-control"}} <!-- Input Field -->
         </div>
-
-        <input type="submit" value="Update" class="btn btn-primary btn-block mb-4">
+        <a href="{% url 'adminportal:view_courses' %}" class="btn btn-secondary mb-4" > Back </a>
+        <input type="submit" value="Update" class="btn btn-success btn-block mb-4">
+       
     </div>
 
 </form>

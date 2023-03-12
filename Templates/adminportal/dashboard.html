@@ -81,22 +81,6 @@
             </a>
           </div>
 
-
-            <!-- <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
-              <div class="icon">
-                <i class="fa-sharp fa-solid fa-list"></i>
-                </i>
-              </div>
-              <h4 class="title">
-                <a href="{% url 'adminportal:view_courses' %}" class="nav-link">Courses</a>
-              </h4>
-              <p class="description">A course catalog is a list of courses that are offered by a post-secondary institution.</p>
-            </div> -->
-      
-
-
-
-
           <div class="col-md-6 col-lg-3  mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
             <a href="#" class="icon-box" style="text-decoration: none; color:black">
               <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="300">
@@ -113,102 +97,130 @@
 
 
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'usersPortal:create_adminAccount' %}" class="icon-box" style="text-decoration: none; color:black">
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
               <div class="icon">
                 <i class="fa-solid fa-user-shield"></i>
               </div>
               <h4 class="title">
-                <a href="{% url 'usersPortal:create_adminAccount' %}" class="nav-link">Create admin</a>
+                Create admin
               </h4>
               <!-- <p class="description">A person who is in charge of the operation of a network of computers, a website, a group of computer users, etc.,</p> -->
             </div>
+            </a>
           </div>
           
 
 
 
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'usersPortal:create_registrarAccount' %}" class="icon-box" style="text-decoration: none; color:black">
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
               <div class="icon">
                 <i class="fa-sharp fa-solid fa-user"></i>
               </div>
               <h4 class="title">
-                <a href="{% url 'usersPortal:create_registrarAccount' %}" class="nav-link">Create Registrar</a>
+                Create Registrar
               </h4>
               <!-- <p class="description">Registrar maintains student records and course data, which can include helping students schedule or register for classes.</p> -->
             </div>
-          </div>
+        </a>
         </div>
+        
 
 
 
-
-        <div class="row">
+ 
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'adminportal:schoolDocuments' %}" class="icon-box" style="text-decoration: none; color:black">
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
               <div class="icon">
                 <i class="fa-sharp fa-solid fa-file"></i>
               </div>
               <h4 class="title">
-                <a href="{% url 'adminportal:schoolDocuments' %}" class="nav-link">School Documents</a>
+               School Documents
               </h4>
               <!-- <p class="description"> File containing information about each student in a school, college, etc, such as demographic information and information about grades, etc.</p> -->
             </div>
+            </a>
           </div>
 
+
+
+
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'adminportal:get_ongoingSchoolEvents' %}" class="icon-box" style="text-decoration: none; color:black">  
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
               <div class="icon">
                 <i class="fa-sharp fa-solid fa-calendar-days"></i>
               </div>
               <h4 class="title">
-                <a href="{% url 'adminportal:get_ongoingSchoolEvents' %}" class="nav-link">Events</a>
+               Events
               </h4>
               <!-- <p class="description"> An activity that is planned for a special purpose and usually involves a lot of people</p> -->
             </div>
+          </a>
           </div>
 
+
+
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'adminportal:view_curriculum' %}" class="icon-box" style="text-decoration: none; color:black"> 
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
               <div class="icon">
                 <i class="fa-solid fa-graduation-cap"></i>
               </div>
               <h4 class="title">
-                <a href="{% url 'adminportal:view_curriculum' %}" class="nav-link">Curriculum</a>
+              Curriculum
               </h4>
               <!-- <p class="description">Lessons and academic content taught in a school or in a specific course or program.</p> -->
             </div>
+            </a>
           </div>
 
 
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
+            <a href="{% url 'adminportal:getSubjects' %}" class="icon-box" style="text-decoration: none; color:black"> 
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
               <div class="icon">
                 <i class="fa-sharp fa-solid fa-list"></i>
                 </i>
               </div>
               <h4 class="title">
-                <a href="{% url 'adminportal:getSubjects' %}" class="nav-link"> Subjects</a>
+              Subjects
               </h4>
               <!-- <p class="description">A school subject constitutes an organizing framework that gives meaning and shape to curriculum content, teaching, and learning activities</p> -->
             </div>
+          </a>
           </div>
 
+     
+          
+       
           <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
+            <a href="{% url 'adminportal:get_sections' %}" class="icon-box" style="text-decoration: none; color:black"> 
+            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
               <div class="icon">
                 <i class="fa-sharp fa-solid fa-list"></i>
                 </i>
               </div>
               <h4 class="title">
-                <a href="{% url 'adminportal:get_sections' %}" class="nav-link"> Sections </a>
+                Sections
               </h4>
               <!-- <p class="description">A school subject constitutes an organizing framework that gives meaning and shape to curriculum content, teaching, and learning activities</p> -->
             </div>
+            </a>
           </div>
 
-        </div>
 
+
+
+
+          
+
+
+
+   
 
 
       </div>

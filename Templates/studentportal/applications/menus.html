@@ -1,2 +1,13 @@
-<a href="{% url 'studentportal:get_submitted_admission' %}" class="btn btn-primary"> Admission </a>
-<a href="{% url 'studentportal:get_submitted_enrollments' %}" class="btn btn-primary"> Enrollment </a>
+
+<div class="container">
+    <div class="d-flex mt-4">
+        <div class="box_btn me-3">
+            <a href="{% url 'studentportal:get_submitted_admission' %}" class=""> Admission </a>
+        </div>
+        <div class="box_btn">
+            <a href="{% url 'studentportal:get_submitted_enrollments' %}" class=""> Enrollment </a>
+        </div>
+
+    </div>
+
+</div>
