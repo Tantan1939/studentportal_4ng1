@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.base import TemplateView, RedirectView, View
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView, CreateView, DeletionMixin
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.db import IntegrityError, transaction
@@ -24,8 +25,11 @@ from . forms import *
 from formtools.wizard.views import SessionWizardView
 from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule
 from . emailSenders import enrollment_invitation_emails
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework import status
+from . drf_permissions import EnrollmentValidationPermissions
 from . serializers import NoteSerializer
 from . notes import *
 import re
@@ -582,26 +586,68 @@ class get_enrolled_students(ListView):
         return context
 
 
-@api_view(['GET', 'POST'])
-def getNotes(request):
-    if request.method == 'GET':
-        return getNotesList(request)
+# @api_view(['GET', 'POST'])
+# def getNotes(request):
+#     if request.method == 'GET':
+#         return getNotesList(request)
 
-    if request.method == 'POST':
-        return createNote(request)
+#     if request.method == 'POST':
+#         return createNote(request)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def getNote(request, pk):
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def getNote(request, pk):
 
-    if request.method == 'GET':
-        return getNoteDetail(request, pk)
+#     if request.method == 'GET':
+#         return getNoteDetail(request, pk)
 
-    if request.method == 'PUT':
-        return updateNote(request, pk)
+#     if request.method == 'PUT':
+#         return updateNote(request, pk)
 
-    if request.method == 'DELETE':
-        return deleteNote(request, pk)
+#     if request.method == 'DELETE':
+#         return deleteNote(request, pk)
+
+class get_notes(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, format=None):
+        notes = note.objects.all()
+        serializer = NoteSerializer(notes, many=True)
+        return Response(serializer.data)
+
+
+class get_note_details(get_notes):
+
+    def get(self, request, pk, format=None):
+        # return Response({"Bad Request": "pk parameter not found."})
+        try:
+            notes = note.objects.get(id=int(pk))
+            serializer = NoteSerializer(notes, many=False)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"Bad Request": e}, status=status.HTTP_409_CONFLICT)
+
+    def post(self, request, pk):
+        data = request.data
+        update_this_note = note.objects.get(id=int(pk))
+        update_this_note.body = data["body"]
+        update_this_note.save()
+        serializer = NoteSerializer(update_this_note, many=False)
+        return Response(serializer.data)
+        # return Response({"body": "Save"}, status=status.HTTP_200_OK)
+
+
+# @api_view(['PUT'])
+# def update_note(request, pk):
+#     data = request.data
+#     notes = note.objects.get(id=pk)
+#     notes.body = data["body"]
+#     notes.save()
+#     notes.refresh_from_db()
+
+#     serializer = NoteSerializer(note, many=False)
+
+#     return Response(serializer.data)
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")

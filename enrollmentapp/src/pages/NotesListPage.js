@@ -10,7 +10,7 @@ const NotesListPage = () => {
     }, [])
 
     let getNotes = async () => {
-        let response = await fetch('/Registrar/getNotes/')
+        let response = await fetch('/Registrar/Notes/')
         let data = await response.json()
         setNotes(data)
     }

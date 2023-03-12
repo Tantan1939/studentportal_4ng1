@@ -29,13 +29,13 @@ urlpatterns = [
         path("", validate_enrollments.as_view(), name="validate_enrollment"),
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
-        path("Note/<pk>", validate_enrollments.as_view(),
+        path("Note/<pk>/", validate_enrollments.as_view(),
              name="validate_enrollments"),
     ])),
 
     # For DRF API
-    path("getNotes/", include([
-        path("", views.getNotes, name="get_notes"),
-        path("note/<pk>/", views.getNote, name="note"),
+    path("Notes/", include([
+        path("", get_notes.as_view(), name="get_notes"),
+        path("Details/<pk>/", get_note_details.as_view(), name="get_note_details"),
     ])),
 ]
