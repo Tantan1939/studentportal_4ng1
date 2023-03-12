@@ -18,7 +18,7 @@
     <!-- Offered Courses -->
     <div class="container-fluid" style="background:#f7f7f7; border-top: 3px solid #800000;">
         <div class="track_and_strand_wrapper container py-5 position-relative">
-            <div class="tracks_strand_date">
+            <div class="tracks_strand_date"  style="background: #f7f7f7;">
                 <h3> School Year {% firstof sy %} </h3>
                 {% if enroll_now == "postpone" %}
                     <p> Enrollment and Admission are currently postponed. </p>
@@ -32,14 +32,14 @@
         
                 {% endif %}
             </div>
+            <!-- #b93535 -->
 
-
-            <center> <h2 class="text-dark"> Offered Courses </h2> </center>&nbsp;
-            <div class="wrap pt-0">
+            <center> <h2 class="text-dark" id="courses"> Offered Courses </h2> </center>&nbsp;
+            <div class="wrap pt-0" >
                 <div class="row py-3 justify-content-sm-center justify-content-md-start" style="padding-top:0;">
                     {% for course in courses %}
-                    <div class="col-sm-12 col-md-4">
-                        <div class="track_strand mb-3 p-2 px-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
+                        <div class="track_strand p-2 px-3">
                             <h3 class="text-center"> {{course.track_name}} </h3>
                             <div class="strand_box ">
                                 <!-- <h5 class="text-center"> Strands: </h5> -->
