@@ -630,10 +630,10 @@ class get_note_details(get_notes):
     def post(self, request, pk):
         data = request.data
         update_this_note = note.objects.get(id=int(pk))
-        update_this_note.body = data["body"]
-        update_this_note.save()
-        serializer = NoteSerializer(update_this_note, many=False)
-        return Response(serializer.data)
+        if update_this_note.body != data["body"]:
+            update_this_note.body = data["body"]
+            update_this_note.save()
+        return Response({"Done": "Success transaction."}, status=status.HTTP_200_OK)
         # return Response({"body": "Save"}, status=status.HTTP_200_OK)
 
 
