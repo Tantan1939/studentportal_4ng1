@@ -9,6 +9,7 @@
     <a href="{% url 'adminportal:get_sections' year=12 %}" class="btn btn-primary btn-sm"> Grade 12 </a>
 
     {% for key, value in sections.items %}
+
     <!-- Loop to display strand name -->
     
     {% if forloop.counter == 1 %} <h2 class="text-center mt-2 mb-5"> {{yearLevel}} </h2> {% endif %}
@@ -41,12 +42,14 @@
         </div>
 
     </div>
+    
     {% empty %}
         <h4> No sections... </h4>
     {% endfor %}
 
-    <a href="{% url 'adminportal:index' %}" class="btn btn-primary"> Back </a>
-</div>
+    <!-- <a href="{% url 'adminportal:index' %}" class="btn btn-primary"> Back </a> -->
+
+
 
 
 {% endblock content %}
