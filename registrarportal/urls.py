@@ -31,6 +31,8 @@ urlpatterns = [
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
         path("Note/<pk>/", validate_enrollments.as_view(),
              name="validate_enrollments"),
+        re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
+                get_enrollment_batches.as_view(), name="get_enrollment_batches"),
     ])),
 
     # For DRF API
