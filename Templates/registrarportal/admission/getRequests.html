@@ -5,7 +5,7 @@
 
 <div class="container-fluid" style="background: #fff;">
 
-    <div class="container py-5">
+    <div class="container pt-2 pb-4">
         {% for batch in batches %}
             <form action="" method="post">
                 {% csrf_token %}
@@ -65,31 +65,33 @@
 
 </div>
 
-
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary btn-sm"> Prev </a>
-        {% endif %}
-
-        {% block pagination %}
-            {% for page_number in page_obj.paginator.get_elided_page_range %}
-                {% if page_number == page_obj.paginator.ELLIPSIS %}
-                    {{page_number}}
-                {% else %}
-                    <a href="?page={{page_number}}" class="btn btn-secondary btn-sm"> {{page_number}} </a>
-                {% endif %}
-            {% endfor %}
-        {% endblock %}
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary btn-sm"> Next </a>
-        {% endif %}
-
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+<div class="container">
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary btn-sm"> Prev </a>
+            {% endif %}
+    
+            {% block pagination %}
+                {% for page_number in page_obj.paginator.get_elided_page_range %}
+                    {% if page_number == page_obj.paginator.ELLIPSIS %}
+                        {{page_number}}
+                    {% else %}
+                        <a href="?page={{page_number}}" class="btn btn-secondary btn-sm"> {{page_number}} </a>
+                    {% endif %}
+                {% endfor %}
+            {% endblock %}
+    
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary btn-sm"> Next </a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
         </span>
-    </span>
+    </div>
+
 </div>
 
 
