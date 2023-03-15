@@ -616,6 +616,7 @@ class get_note_details(get_notes):
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
 class validate_enrollments(TemplateView):
+    # This class will render the react app
     template_name = 'index.html'
 
 

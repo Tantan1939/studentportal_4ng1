@@ -62,7 +62,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = student_enrollment_details
-        fields = ['applicant', 'strand', 'year_level', 'full_name', 'age', 'is_accepted',
+        fields = ['id', 'applicant', 'strand', 'year_level', 'full_name', 'age', 'is_accepted',
                   'is_denied', 'enrolled_school_year', 'enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict']
 
 
