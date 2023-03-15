@@ -3,17 +3,24 @@
 {% include 'adminportal/messages/messages.html' %}
 
 
-<div class="container pb-4">
-    <a href="{% url 'adminportal:new_section' %}" class="btn btn-primary"> Make Section </a>
-    <a href="{% url 'adminportal:get_sections' year=11 %}" class="btn btn-primary btn-sm"> Grade 11 </a>
-    <a href="{% url 'adminportal:get_sections' year=12 %}" class="btn btn-primary btn-sm"> Grade 12 </a>
+<div class="container pt-5">
+    <div class="w-100 d-flex justify-content-end">
+       
+   
+    <a href="{% url 'adminportal:new_section' %}" class="btn btn-success btn-md me-2"> Make Section </a>
+    <a href="{% url 'adminportal:get_sections' year=11 %}" class="btn btn-success btn-md me-2"> Grade 11 </a>
+    <a href="{% url 'adminportal:get_sections' year=12 %}" class="btn btn-success btn-md"> Grade 12 </a>
 
+    </div>
     {% for key, value in sections.items %}
 
     <!-- Loop to display strand name -->
     
-    {% if forloop.counter == 1 %} <h2 class="text-center mt-2 mb-5"> {{yearLevel}} </h2> {% endif %}
-    <div class="parent mb-3 border" style="box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;">
+
+    <div class="parent mb-3 border rounded bg-white  mt-4" style="box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;">
+        {% if forloop.counter == 1 %} <h2 class="text-center mt-2 mb-3">
+            <i>{{yearLevel}} </i>
+        </h2> {% endif %}
         <h4 class="text-center mt-3"> {{key}} </h4>
         <div class=" row py-3 px-2">
         {% for item in value %}
