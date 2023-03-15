@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from . drf_permissions import EnrollmentValidationPermissions
-from . serializers import NoteSerializer
+from . serializers import *
 from . notes import *
 import re
 
@@ -586,27 +586,6 @@ class get_enrolled_students(ListView):
         return context
 
 
-# @api_view(['GET', 'POST'])
-# def getNotes(request):
-#     if request.method == 'GET':
-#         return getNotesList(request)
-
-#     if request.method == 'POST':
-#         return createNote(request)
-
-
-# @api_view(['GET', 'PUT', 'DELETE'])
-# def getNote(request, pk):
-
-#     if request.method == 'GET':
-#         return getNoteDetail(request, pk)
-
-#     if request.method == 'PUT':
-#         return updateNote(request, pk)
-
-#     if request.method == 'DELETE':
-#         return deleteNote(request, pk)
-
 class get_notes(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
@@ -619,7 +598,6 @@ class get_notes(APIView):
 class get_note_details(get_notes):
 
     def get(self, request, pk, format=None):
-        # return Response({"Bad Request": "pk parameter not found."})
         try:
             notes = note.objects.get(id=int(pk))
             serializer = NoteSerializer(notes, many=False)
@@ -630,26 +608,53 @@ class get_note_details(get_notes):
     def post(self, request, pk):
         data = request.data
         update_this_note = note.objects.get(id=int(pk))
-        update_this_note.body = data["body"]
-        update_this_note.save()
-        serializer = NoteSerializer(update_this_note, many=False)
-        return Response(serializer.data)
-        # return Response({"body": "Save"}, status=status.HTTP_200_OK)
-
-
-# @api_view(['PUT'])
-# def update_note(request, pk):
-#     data = request.data
-#     notes = note.objects.get(id=pk)
-#     notes.body = data["body"]
-#     notes.save()
-#     notes.refresh_from_db()
-
-#     serializer = NoteSerializer(note, many=False)
-
-#     return Response(serializer.data)
+        if update_this_note.body != data["body"]:
+            update_this_note.body = data["body"]
+            update_this_note.save()
+        return Response({"Done": "Success transaction."}, status=status.HTTP_200_OK)
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
 class validate_enrollments(TemplateView):
+    # This class will render the react app
     template_name = 'index.html'
+
+
+class get_enrollment_batches(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get_batches(self):
+        self.this_batches = enrollment_batch.objects.filter(sy__until__gte=date.today()).alias(count_applicants=Count(
+            "members", filter=Q(members__is_accepted=False, members__is_denied=False))).exclude(count_applicants__lt=1)
+        serializer = BatchSerializer(self.this_batches, many=True)
+        return serializer.data
+
+    def get_applicants(self):
+        self.get_enrollees = student_enrollment_details.objects.filter(enrollment_batch_member=self.this_batches.first(
+        ), is_accepted=False, is_denied=False).prefetch_related('enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict')
+        serializer = EnrollmentSerializer(self.get_enrollees, many=True)
+        return serializer.data
+
+    def get_applicants_from_pk(self, pk):
+        self.get_spec_enrollees = student_enrollment_details.objects.filter(enrollment_batch_member__id=int(pk), is_accepted=False, is_denied=False).exclude(
+            enrolled_school_year__until__lt=date.today()).prefetch_related('enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict')
+        serializer = EnrollmentSerializer(self.get_spec_enrollees, many=True)
+        return serializer.data
+
+    def get_their_pks(self, enrollees):
+        serializer = EnrolleesPkSerializer(enrollees, many=True)
+        return serializer.data
+
+    def get(self, request, pk=None, format=None):
+        if pk:
+            return Response({
+                "batches": self.get_batches(),
+                "applicants": self.get_applicants_from_pk(pk),
+                "applicants_pks": self.get_their_pks(self.get_spec_enrollees)
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "batches": self.get_batches(),
+                "applicants": self.get_applicants(),
+                "applicants_pks": self.get_their_pks(self.get_enrollees)
+            }, status=status.HTTP_200_OK)

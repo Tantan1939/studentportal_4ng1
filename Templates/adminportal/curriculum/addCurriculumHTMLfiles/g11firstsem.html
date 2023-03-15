@@ -10,7 +10,12 @@
 <div class="container col-md-8 mt-4 p-3 bg-white box_shadow border rounded">
     <form id="postForm" method="post">
 
-        <h4 class="py-2"> Grade 11 - First Semester </h4>
+        <h4 class="py-2"> 
+            <i class="fa fa-pencil"></i>
+            <i>
+                Grade 11 - First Semester
+            </i>
+        </h4>
         {{ wizard.form.non_field_errors }}
         {% csrf_token %}
         <table>
