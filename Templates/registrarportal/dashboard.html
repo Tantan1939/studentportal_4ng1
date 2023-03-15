@@ -11,7 +11,7 @@
     {% else %}
     <title> Dashboard </title>
     {% endif %}
-    <link rel="stylesheet" href="{% static 'adminportal/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'registrarportal/css/registrardashboard.css' %}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
 
@@ -39,60 +39,73 @@
     
     {% include 'registrarportal/messages/messages.html' %}
 
-    <nav class="navbar py-3 navbar-expand-lg navbar-light">
+    <nav class="navbar py-3 navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Dashboard</a>
+            <!-- <a class="navbar-brand text-white" href="#">Dashboard</a> -->
       
-            <ul class="navbar-nav ">
-                <li class="nav-item ms-auto">
+            <ul class="navbar-nav ms-auto d-flex align-items-center flex-row">
+                <li class="nav-item me-3 text-white">
                     {{user.display_name}}
                 </li>
-                <li class="nav-item ms-auto">
+                <li class="nav-item">
                     <a href="{% url 'usersPortal:logout' %}" class="nav-link"> Logout </a>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <div class="adming_portal_landing">
-        <div class="o">
-            <div class="center">
-                <div class="admin_portal_function" data-aos="fade-left" data-aos-duration="1500">
+    <nav class="admin_sidebar bg-dark nav-dark">
+            <div class="bars bg-dark text-light ">
+                <i class="fa fa-bars" aria-hidden="true"></i>
+            </div>
+            <div class="admin_portal_function">
+                <a class="navbar-brand text-white" href="#">Dashboard</a>
 
-                    <a href="{% url 'registrarportal:view_admissions' %}" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>Admission</h4>
-                    </a>
 
-                    <a href="{% url 'registrarportal:validate_enrollment' %}" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>Enrollment</h4>
-                    </a>
-
-                    <a href="{% url 'registrarportal:schoolyear' %}" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>School Years</h4>
-                    </a>
-
-                    <a href="{% url 'registrarportal:requestedDocuments' %}" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>Document Request</h4>
-                    </a>
-
-                    <a href="{% url 'usersPortal:changepassword' %}" aria-current="page" class="nav-link a_p_card d-flex">
-                        <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i>
-                        <h4>Change Password</h4>
-                    </a>
+                <div class="links_wrap navbar-nav">
+                    <a href="{% url 'registrarportal:view_admissions' %}" aria-current="page" class="nav-link a_p_card">
+                       <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
+                       <h4>Admission</h4>
+                   </a>
+   
+                   <a href="{% url 'registrarportal:validate_enrollment' %}" aria-current="page" class="nav-link a_p_card">
+                       <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
+                       <h4>Enrollment</h4>
+                   </a>
+   
+                   <a href="{% url 'registrarportal:schoolyear' %}" aria-current="page" class="nav-link a_p_card">
+                       <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
+                       <h4>School Years</h4>
+                   </a>
+   
+                   <a href="{% url 'registrarportal:requestedDocuments' %}" aria-current="page" class="nav-link a_p_card">
+                       <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
+                       <h4>Document Request</h4>
+                   </a>
+   
+                   <a href="{% url 'usersPortal:changepassword' %}" aria-current="page" class="nav-link a_p_card">
+                       <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
+                       <h4>Change Password</h4>
+                   </a>
 
                 </div>
+
             </div>
-        </div>
-    </div>
+    
+
+        </nav>
       
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
       AOS.init({once: true});
+
+
+      const bars = document.querySelector('.bars')
+      const admin_sidebar = document.querySelector('.admin_sidebar')
+      bars.addEventListener('click', () => {
+        admin_sidebar.classList.toggle('active')
+      })
     </script>
 
 </body>

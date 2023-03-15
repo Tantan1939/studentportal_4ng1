@@ -6,9 +6,11 @@
 <div class="container col-md-12">
     {% for sy in listOfSchoolYear %}
         <div id="yes">
-            {{sy.display_sy}}
+            <div class="alert alert-dark" style="font-size:22px;">
+                {{sy.display_sy}}
+            </div>
         </div>
-        {% if sy.can_update %} <a href="{% url 'registrarportal:updateSchoolYear' pk=sy.id %}" class="btn btn-primary btn-sm"> Update </a> {% endif %}
+        {% if sy.can_update %} <a href="{% url 'registrarportal:updateSchoolYear' pk=sy.id %}" class="btn btn-primary btn-md"> Update </a> {% endif %}
         <input type="text" id="tangina" value="{{sy.display_sy}}" hidden>
     {% empty %}
         <p> No School Year... </p>
@@ -16,7 +18,7 @@
 
     <canvas id="myChart" width="400" height="100"></canvas>
    
-    <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Back </a>
+    <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary my-3"> Back </a>
 
     <div class="pagination">
         <span class="step-links">

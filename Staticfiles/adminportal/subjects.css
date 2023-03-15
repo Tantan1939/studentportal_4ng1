@@ -12,7 +12,7 @@ body{
 }
 
 
-.add_track{
+.add_subject{
     /* background: #173979; */
     color: #fff;
     padding: 10px;
@@ -21,9 +21,14 @@ body{
     margin-left: auto;
     border-radius: 5px;
 }
-.add_track:hover{
+.add_subject:hover{
     /* background: #2FB47D; */
     color: #fff;
+}
+.btn-success {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
 }
 
 .main{
@@ -33,4 +38,7 @@ body{
 }
 .main .track_parent{
     box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+}
+.color {
+    background-color: royalblue;
 }
