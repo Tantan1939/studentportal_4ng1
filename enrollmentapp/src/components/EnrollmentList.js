@@ -6,31 +6,35 @@ export default function EnrollmentList() {
     let [applicants, setApplicants] = useState([])
     let [batchPagination, setBatchPagination] = useState([])
     let [applicantsPk, setApplicantsPk] = useState([])
-    let [currentBatch, setCurrentBatch] = useState([])
+    let [currentBatch, setCurrentBatch] = useState(null)
 
     useEffect(() => {
         getEnrollees()
     }, [])
 
-    let spreadData = (datas) => {
+    function spreadData(datas) {
         setApplicants(datas.applicants)
-        setBatchPagination((datas.batches).map(batch_val => conv_batch_num(batch_val)))
+        setBatchPagination(datas.batches.map(batch_val => conv_batch_num(batch_val)))
         setApplicantsPk(datas.applicants_pks)
-        if (batchPagination.length > 0 && currentBatch === null){
-            setCurrentBatch(parseInt(batchPagination[0]))
+    }
+
+    useEffect(()=>{
+        if (currentBatch === null){
+            setCurrentBatch(2)
         }
-    }
+    }, [applicants])
 
-    let getEnrollees = async () => {
-        let response = await fetch('/Registrar/Enrollment/applicants/')
-        let data = await response.json()
-        spreadData(data)
-    }
 
-    let getEnrollees_withPk = async (batchKey) => {
-        let response = await fetch(`/Registrar/Enrollment/applicants/${batchKey}`)
-        let data = await response.json()
-        spreadData(data)
+    let getEnrollees = async (batchKey=null) => {
+        if (batchKey){
+            let response = await fetch(`/Registrar/Enrollment/applicants/${batchKey}`)
+            let data = await response.json()
+            spreadData(data)
+        }else{
+            let response = await fetch('/Registrar/Enrollment/applicants/')
+            let data = await response.json()
+            spreadData(data)
+        }
     }
 
     function moveBatchHandler(pk){
@@ -47,7 +51,7 @@ export default function EnrollmentList() {
 
     function batchClickHandler(key){
         setCurrentBatch(key);
-        getEnrollees_withPk(key);
+        getEnrollees(key);
     }
 
     function conv_batch_num(num){
