@@ -78,7 +78,7 @@ color: #F0F9FF;
 font-size: 20px;
 }
 
-@media screen and (min-width: 1400px){
+/* @media screen and (min-width: 1400px){
 .adming_portal_landing .o .admin_portal_landing_content h1{
     max-width: 820px;
     font-size: 50px;
@@ -97,4 +97,13 @@ font-size: 28px;
     grid-template-columns: 1fr;
 }
 
+} */
+
+/* registrar */
+.admin_portal_function{
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    width: 300px;
 }

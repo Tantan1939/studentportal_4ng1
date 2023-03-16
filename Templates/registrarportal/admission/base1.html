@@ -22,6 +22,7 @@
     <!-- Css -->
     <link rel="stylesheet" href="{% static 'studentportal/styles.css' %}">
     <link rel="stylesheet" href="{% static 'studentportal/homepage.css' %}">
+    <link rel="stylesheet" href="{% static 'registrarportal/css/regsitraradmission.css' %}">
 
 
     <!-- Bootstrap -->
@@ -43,10 +44,12 @@
 </head>
 <body>
 
-    <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Dashboard </a>
-    <a href="{% url 'registrarportal:update_admission_schedule' %}" class="btn btn-primary"> Sched </a>
-    <a href="{% url 'registrarportal:get_admitted_students' %}" class="btn btn-primary"> Admitted Students </a>
-    <a href="{% url 'usersPortal:logout' %}" class="btn btn-primary"> Logout </a>
+    <div class="container pt-4 d-flex mb-3">
+        <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-dark mb-2 me-1"> Dashboard </a>
+        <a href="{% url 'registrarportal:update_admission_schedule' %}" class="btn btn-success mb-2 me-1"> Sched </a>
+        <a href="{% url 'registrarportal:get_admitted_students' %}" class="btn btn-success mb-2 me-1"> Admitted Students </a>
+        <a href="{% url 'usersPortal:logout' %}" class="btn btn-success mb-2 ms-auto "> Logout </a>
+    </div>
 
     {% block content %}{% endblock content %}
           
