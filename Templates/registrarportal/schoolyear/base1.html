@@ -47,9 +47,12 @@
 </head>
 <body>
 
-    <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Dashboard </a>
-    <a href="{% url 'registrarportal:addSchoolYear' %}" class="btn btn-primary"> Add </a>
-    <a href="{% url 'usersPortal:logout' %}" class="btn btn-primary"> Logout </a>
+    <div class="container pt-4 d-flex mb-3">
+        <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-success mb-2 me-1"> Dashboard </a>
+        <a href="{% url 'registrarportal:addSchoolYear' %}" class="btn btn-success mb-2 me-1"> Add </a>
+        <a href="{% url 'usersPortal:logout' %}" class="btn btn-dark mb-2 ms-auto"> Logout </a>
+
+    </div>
 
 
     {% block content %}{% endblock content %}
