@@ -7,6 +7,7 @@ import EnrollmentList from "./components/EnrollmentList";
 import Header from './components/Header'
 import NotePage from "./pages/NotePage";
 import NotesListPage from './pages/NotesListPage'
+import ForAdmissionStudents from "./components/admissionComponents/ForAdmissionStudents";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/Registrar/Enrollment/" exact component={EnrollmentList} />
           {/* <Route path="/Registrar/Enrollment/" exact component={NotesListPage} /> */}
           {/* <Route path="/Registrar/Enrollment/Note/:id/" exact component={NotePage} /> */}
+          <Route path="/Registrar/Admission/" exact component={ForAdmissionStudents} />
         </div>
 
       </div>

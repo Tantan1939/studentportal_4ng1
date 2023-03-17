@@ -615,7 +615,7 @@ class get_note_details(get_notes):
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class validate_enrollments(TemplateView):
+class get_react_app(TemplateView):
     # This class will render the react app
     template_name = 'index.html'
 
@@ -658,3 +658,13 @@ class get_enrollment_batches(APIView):
                 "applicants": self.get_applicants(),
                 "applicants_pks": self.get_their_pks(self.get_enrollees)
             }, status=status.HTTP_200_OK)
+
+
+class get_new_admission(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, format=None):
+        get_them = student_admission_details.objects.all().prefetch_related('softCopy_admissionRequirements_phBorn',
+                                                                            'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen')
+        serializer = AdmissionSerializer(get_them, many=True)
+        return Response(serializer.data)

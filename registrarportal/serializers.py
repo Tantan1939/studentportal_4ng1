@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from . models import note, student_enrollment_details, enrollment_batch, student_report_card, student_id_picture
+from . models import *
 
 
 def add_school_year(start_year, year):
@@ -76,3 +76,42 @@ class EnrolleesPkSerializer(serializers.ModelSerializer):
     class Meta:
         model = student_enrollment_details
         fields = ['id']
+
+
+class Ph_born_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ph_born
+        fields = ['good_moral', 'report_card', 'psa']
+
+
+class Fc_docx_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = foreign_citizen_documents
+        fields = ['good_moral', 'report_card', 'psa',
+                  'alien_certificate_of_registration', 'study_permit', 'f137']
+
+
+class Dc_docx_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = dual_citizen_documents
+        fields = ['good_moral', 'report_card', 'psa',
+                  'dual_citizenship', 'philippine_passport', 'f137']
+
+
+class AdmissionSerializer(serializers.ModelSerializer):
+    admission_owner = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='email'
+    )
+    softCopy_admissionRequirements_phBorn = Ph_born_Serializer(
+        many=True, read_only=True, required=False)
+    softCopy_admissionRequirements_foreigner = Fc_docx_Serializer(
+        many=True, read_only=True, required=False)
+    softCopy_admissionRequirements_dualCitizen = Dc_docx_Serializers(
+        many=True, read_only=True, required=False)
+
+    class Meta:
+        model = student_admission_details
+        fields = ['first_name', 'middle_name', 'last_name', 'admission_owner', 'type', 'softCopy_admissionRequirements_phBorn',
+                  'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen']

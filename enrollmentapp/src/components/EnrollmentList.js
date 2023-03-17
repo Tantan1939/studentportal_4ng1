@@ -19,10 +19,10 @@ export default function EnrollmentList() {
     }
 
     useEffect(()=>{
-        if (currentBatch === null){
-            setCurrentBatch(2)
+        if (batchPagination.length > 1 && currentBatch === null){
+            setCurrentBatch(batchPagination[batchPagination.length - 1])
         }
-    }, [applicants])
+    }, [batchPagination])
 
 
     let getEnrollees = async (batchKey=null) => {
