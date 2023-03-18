@@ -3,11 +3,14 @@ import {
   Route,
 } from "react-router-dom";
 import './App.css';
+import './index.css'
 import EnrollmentList from "./components/EnrollmentList";
 import Header from './components/Header'
 import NotePage from "./pages/NotePage";
 import NotesListPage from './pages/NotesListPage'
 import ForAdmissionStudents from "./components/admissionComponents/ForAdmissionStudents";
+import ModalHandler from "./components/ModalHandler";
+import HoverHandler from "./components/HoverHandler";
 
 function App() {
   return (

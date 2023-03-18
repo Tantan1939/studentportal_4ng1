@@ -2,9 +2,11 @@ import React, {useState, useEffect} from 'react'
 import DcDocx from './docxComponents/DcDocx'
 import FbornDocx from './docxComponents/FbornDocx'
 import PhbornDocx from './docxComponents/PhbornDocx'
+import AdmissionDetailsModal from './modals/AdmissionDetailsModal'
 
 export default function StudentLists({admission, DeniedHandler}) {
   let [docx, setDocx] = useState(null)
+  const [openModal, setOpenModal] = useState(false)
 
   useEffect(()=>{
     setDocx(()=> renderDocx())
@@ -21,17 +23,12 @@ export default function StudentLists({admission, DeniedHandler}) {
   }
 
   return (
-    <div>
-      <h5> {admission.admission_owner} </h5>
-      <h5> {admission.first_name} {admission.middle_name} {admission.last_name} - {admission.sex} </h5>
-      <h5> {admission.date_of_birth} </h5>
-      <h5> {admission.birthplace} </h5>
-      <h5> {admission.nationality} </h5>
-      <h5> {admission.type} </h5>
-      <h5> {admission.first_chosen_strand} </h5>
-      <h5> {admission.second_chosen_strand} </h5>
-      {docx}
-
+    <div className='container'>
+      <div>
+        <h5 onMouseMove={() => setOpenModal(true)} onMouseOut={() => setOpenModal(false)}> {admission.first_name} {admission.middle_name} {admission.last_name} - {admission.sex} </h5>
+        <AdmissionDetailsModal isHovering={openModal} admission={admission}/>
+        {docx}
+      </div>
       <button onClick={() => DeniedHandler(admission.id)}> Decline </button>
     </div>
   )
