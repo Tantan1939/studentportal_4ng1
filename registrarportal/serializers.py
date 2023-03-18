@@ -110,8 +110,31 @@ class AdmissionSerializer(serializers.ModelSerializer):
         many=True, read_only=True, required=False)
     softCopy_admissionRequirements_dualCitizen = Dc_docx_Serializers(
         many=True, read_only=True, required=False)
+    type = serializers.CharField(source='get_type_display')
+    first_chosen_strand = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='strand_name'
+    )
+    second_chosen_strand = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='strand_name'
+    )
 
     class Meta:
         model = student_admission_details
-        fields = ['first_name', 'middle_name', 'last_name', 'admission_owner', 'type', 'softCopy_admissionRequirements_phBorn',
-                  'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen']
+        fields = ['id', 'admission_owner', 'first_name', 'middle_name', 'last_name', 'sex', 'date_of_birth', 'birthplace', 'nationality',
+                  'elem_name', 'elem_address', 'elem_region', 'elem_year_completed',
+                  'jhs_name', 'jhs_address', 'jhs_region', 'jhs_year_completed',
+                  'first_chosen_strand', 'second_chosen_strand', 'type',
+                  'softCopy_admissionRequirements_phBorn', 'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen']
+
+
+class BatchAdmissionSerializer(serializers.ModelSerializer):
+    members = AdmissionSerializer(many=True, read_only=True)
+    number_of_applicants = serializers.IntegerField()
+
+    class Meta:
+        model = admission_batch
+        fields = ['id', 'members', 'number_of_applicants']

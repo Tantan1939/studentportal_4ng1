@@ -1,16 +1,31 @@
 import React, {useState, useEffect} from 'react'
+import StudentLists from './StudentLists'
 
-export default function StudentsPerBatch(props) {
-    let [studDetails, setStudDetails] = useState(null)
+export default function StudentsPerBatch({admissionBatch, AdmitHandler, DeniedHandler}) {
 
-    useEffect(() => {
-        setStudDetails(props.stud)
-    }, [])
+  let [admitAllPks, setAdmitAllPks] = useState([])
 
-  return (
+  useEffect(()=> {
+    setAdmitAllPks(admissionBatch.members.map(obj => get_id(obj)))
+  }, [admissionBatch])
+
+  let renderAdmissionApplicants = admissionBatch.members.map((admission, index) => (
+    <StudentLists key={index} admission={admission} DeniedHandler={DeniedHandler}/>
+  ))
+
+  function get_id(obj){
+    return obj.id
+  }
+
+  return admitAllPks.length ? (
     <div>
-      <h5> {props.stud.id} - {props.stud.name} - {props.stud.age} - {props.stud.skill} </h5>
-      <button onClick={() => props.clickHandler(studDetails)}> Click Me </button>
+      <h3> Batch ID #{admissionBatch.id} - {admissionBatch.number_of_applicants} Applicant/s </h3>
+      <button onClick={() => AdmitHandler(admitAllPks)}> Admit All </button>
+      {renderAdmissionApplicants}
+    </div>
+  ) : (
+    <div>
+      <h3> No Applicants... </h3>
     </div>
   )
 }

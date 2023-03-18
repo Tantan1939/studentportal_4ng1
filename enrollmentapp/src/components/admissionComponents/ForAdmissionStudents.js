@@ -1,40 +1,42 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import StudentsPerBatch from './StudentsPerBatch'
 
 export default function ForAdmissionStudents() {
+  let [batchList, setBatchList] = useState([]);
 
-  function clickHandler(details){
-    alert(`${details.id} - ${details.name} - ${details.age} - ${details.skill}`);
+  useEffect(()=>{
+    getBatches();
+  }, [])
+
+  let getBatches = async () => {
+    let response = await fetch('/Registrar/Admission/Api/getadmission/');
+    let data = await response.json();
+    setBatchList(data);
   }
 
-  const students =[
-      {
-          id: 1,
-          name: 'Bruce',
-          age: 30,
-          skill: 'ReactJS'
-      },
-      {
-          id: 2,
-          name: 'Clark',
-          age: 30,
-          skill: 'ReactJS'
-      },
-      {
-          id: 3,
-          name: 'Diane',
-          age: 30,
-          skill: 'ReactJS'
-      }
-  ]
-
-  let renderStudents = students.map((stud, index) => (
-    <StudentsPerBatch key={index} stud={stud} clickHandler={clickHandler}/>
+  let renderBatches = batchList.map((admissionBatch, index) => (
+    <StudentsPerBatch key={index} admissionBatch={admissionBatch} AdmitHandler={AdmitAllHandler} DeniedHandler={DeniedHandler}/>
   ))
 
-  return (
+  function AdmitAllHandler(pks){
+    alert(pks);
+    getBatches();
+  }
+
+  function DeniedHandler(pk){
+    alert(pk);
+    getBatches();
+  }
+
+  return batchList.length ? (
     <div>
-      {renderStudents}
+      <button> Exit </button>
+      {renderBatches}
+    </div>
+  ) : (
+    <div>
+      <button> Exit </button>
+      <h3> No Admission... </h3>
     </div>
   )
 }

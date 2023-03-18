@@ -664,7 +664,14 @@ class get_new_admission(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def get(self, request, format=None):
-        get_them = student_admission_details.objects.all().prefetch_related('softCopy_admissionRequirements_phBorn',
-                                                                            'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen')
-        serializer = AdmissionSerializer(get_them, many=True)
+        applicant_lists = admission_batch.new_batches.annotate(number_of_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_applicants__gte=1).prefetch_related(
+            Prefetch("members",
+                     queryset=student_admission_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                         Prefetch("softCopy_admissionRequirements_phBorn", queryset=ph_born.objects.all(
+                         )),
+                         Prefetch("softCopy_admissionRequirements_foreigner", queryset=foreign_citizen_documents.objects.all(
+                         )),
+                         Prefetch("softCopy_admissionRequirements_dualCitizen", queryset=dual_citizen_documents.objects.all())),
+                     ))
+        serializer = BatchAdmissionSerializer(applicant_lists, many=True)
         return Response(serializer.data)

@@ -24,7 +24,9 @@ urlpatterns = [
         re_path(r"admitted_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_admitted_students.as_view(), name="get_admitted_students"),
 
-        path("Api/", get_new_admission.as_view()),
+        path("Api/", include([
+            path("getadmission/", get_new_admission.as_view()),
+        ])),
     ])),
 
     path("Enrollment/", include([
