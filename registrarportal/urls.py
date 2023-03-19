@@ -26,6 +26,8 @@ urlpatterns = [
 
         path("Api/", include([
             path("getadmission/", get_new_admission.as_view()),
+            path("deniedAdmission/", deniedAdmission.as_view()),
+            path("admitApplicants/", admitAdmission.as_view()),
         ])),
     ])),
 

@@ -7,7 +7,7 @@ export default function ModalHandler() {
   return (
     <div className='container'>
         <div>
-            <button className='modalBtn' onClick={() => setOpenModal(true)}> Modal </button>
+            <button className='modalBtn' onMouseOver={() => setOpenModal(false)} onClick={() => setOpenModal(true)}> Modal </button>
             <Modal open={openModal} onClose={() => setOpenModal(false)}/>
         </div>
     </div>

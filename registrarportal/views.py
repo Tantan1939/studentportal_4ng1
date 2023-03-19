@@ -14,6 +14,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value, F
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.core.exceptions import ObjectDoesNotExist
 from ratelimit.decorators import ratelimit
 from adminportal.models import *
 from datetime import date, datetime
@@ -675,3 +676,32 @@ class get_new_admission(APIView):
                      ))
         serializer = BatchAdmissionSerializer(applicant_lists, many=True)
         return Response(serializer.data)
+
+
+class deniedAdmission(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            to_deny = student_admission_details.objects.get(
+                id=int(data["key"]))
+            to_deny.is_denied = True
+            to_deny.save()
+            return Response({"Done": "Admission Denied"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"Warning": "Admission no longer exist."}, status=status.HTTP_200_OK)
+
+
+class admitAdmission(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            admissions = student_admission_details.objects.filter(
+                pk__in=data["keys"])
+            serializers = AdmissionSerializer(admissions, many=True)
+            return Response(serializers.data)
+        except Exception as e:
+            return Response({"Error": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

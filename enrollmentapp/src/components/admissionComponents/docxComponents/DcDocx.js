@@ -1,4 +1,10 @@
 import React, {useState, useEffect} from 'react'
+import GoodMoralModal from '../modals/GoodMoralModal'
+import PsaModal from '../modals/PsaModal'
+import ReportCardModal from '../modals/ReportCardModal'
+import DualCitizenshipModal from '../modals/DualCitizenshipModal'
+import F137Modal from '../modals/F137Modal'
+import PhilippinePassportModal from '../modals/PhilippinePassportModal'
 
 export default function DcDocx(props) {
   let [good_moral, setGood_moral] = useState('')
@@ -7,6 +13,13 @@ export default function DcDocx(props) {
   let [dual_citizenship, setDual_citizenship] = useState('')
   let [philippine_passport, setPhilippine_passport] = useState('')
   let [f137, setF137] = useState('')
+
+  const [openGoodMoralModal, setOpenGoodMoralModal] = useState(false);
+  const [openReportCardModal, setOpenReportCardModal] = useState(false);
+  const [openPsaModal, setOpenPsaModal] = useState(false);
+  const [openDCModal, setOpenDCModal] = useState(false);
+  const [openPPModal, setOpenPPModal] = useState(false);
+  const [openF137, setOpenF137Modal] = useState(false);
 
   const fetch_goodmoral = async (imgurl) => {
     const res = await fetch(imgurl);
@@ -61,12 +74,24 @@ export default function DcDocx(props) {
 
   return (
     <div>
-      <p> Good Moral </p> <img src={good_moral} />
-      <p> Report Card </p> <img src={report_card} />
-      <p> PSA </p> <img src={psa} />
-      <p> Dual Citizenship </p> <img src={dual_citizenship} />
-      <p> Philippine Passport </p> <img src={philippine_passport} />
-      <p> F137 </p> <img src={f137} />
+      <p onMouseMove={() => setOpenGoodMoralModal(true)} onMouseOut={() => setOpenGoodMoralModal(false)}> Good Moral </p>
+      <GoodMoralModal isHovering={openGoodMoralModal} goodmoral={good_moral}/>
+
+      <p onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </p>
+      <ReportCardModal isHovering={openReportCardModal} reportcard={report_card}/>
+
+      <p onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </p>
+      <PsaModal isHovering={openPsaModal} psa={psa}/>
+
+      <p onMouseMove={() => setOpenDCModal(true)} onMouseOut={() => setOpenDCModal(false)}> Dual Citizenship </p>
+      <DualCitizenshipModal isHovering={openDCModal} dc={dual_citizenship}/>
+
+      <p onMouseMove={() => setOpenPPModal(true)} onMouseOut={() => setOpenPPModal(false)}> Philippine Passport </p>
+      <PhilippinePassportModal isHovering={openPPModal} ppm={philippine_passport}/>
+
+      <p onMouseMove={() => setOpenF137Modal(true)} onMouseOut={() => setOpenF137Modal(false)}> F137 </p>
+      <F137Modal isHovering={openF137} f137={f137}/>
+
     </div>
   )
 }

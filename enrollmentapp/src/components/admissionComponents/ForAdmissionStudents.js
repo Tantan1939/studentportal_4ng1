@@ -17,14 +17,36 @@ export default function ForAdmissionStudents() {
   let renderBatches = batchList.map((admissionBatch, index) => (
     <StudentsPerBatch key={index} admissionBatch={admissionBatch} AdmitHandler={AdmitAllHandler} DeniedHandler={DeniedHandler}/>
   ))
+  
+  let CSRF = document.cookie.slice(10)
 
   function AdmitAllHandler(pks){
-    alert(pks);
+    let admit = async (pks) => {
+      fetch('/Registrar/Admission/Api/admitApplicants/', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": CSRF,
+        },
+        body: JSON.stringify({keys: pks})
+      }).then(response => response.json()).then(json => console.log(json))
+    }
+    admit(pks);
     getBatches();
   }
 
   function DeniedHandler(pk){
-    alert(pk);
+    let denied = async (pk) => {
+      fetch('/Registrar/Admission/Api/deniedAdmission/', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": CSRF,
+        },
+        body: JSON.stringify({key: pk})
+      }).then(response => response.json()).then(json => console.log(json))
+    }
+    denied(pk);
     getBatches();
   }
 

@@ -21,6 +21,7 @@ function App() {
           {/* <Route path="/Registrar/Enrollment/" exact component={NotesListPage} /> */}
           {/* <Route path="/Registrar/Enrollment/Note/:id/" exact component={NotePage} /> */}
           <Route path="/Registrar/Admission/" exact component={ForAdmissionStudents} />
+
         </div>
 
       </div>
