@@ -159,6 +159,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'nami.chwan2022.2023@gmail.com'
 EMAIL_HOST_PASSWORD = 'ofborvcigyinhwxa'  # App password
 
+CELERY_BROKER_URL = 'amqp://localhost'
+
 
 PASSWORD_RESET_TIMEOUT = 86400  # 1 Day
 ENROLLMENT_TOKEN_TIMEOUT = 604800  # 7 Days

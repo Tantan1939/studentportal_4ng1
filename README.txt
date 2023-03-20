@@ -119,7 +119,7 @@ Step 13: Report any errors
 	rabbitmq-server.bat : starts the broker as an application.
 	rabbitmq-service.bat : manages the service and starts the broker (The server should not be run as a service and application simultaneously).
 	rabbitmqctl.bat : manages a running broker.
-	rabbitmq-server.bat - detached : starts the broker at the background.
+	rabbitmq-server.bat -detached : starts the broker at the background.
 	rabbitmqctl.bat stop : stop the broker.
 	rabbitmqctl.bat status : check node status
 	rabbitmq-service.bat stop : stop the rabbitmq service from running
