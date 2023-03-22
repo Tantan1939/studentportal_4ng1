@@ -28,6 +28,7 @@ urlpatterns = [
             path("getadmission/", get_new_admission.as_view()),
             path("deniedAdmission/", deniedAdmission.as_view()),
             path("admitApplicants/", admitAdmission.as_view()),
+            path("clickhere/", try_asyncss.as_view()),
         ])),
     ])),
 

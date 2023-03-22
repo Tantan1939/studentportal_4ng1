@@ -74,6 +74,13 @@ WSGI_APPLICATION = 'studentportal_4ng1.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+CELERY_IMPORTS = {
+    'registrarportal.tasks'
+}
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_RESULT_BACKEND = 'rpc://'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -156,10 +163,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'nami.chwan2022.2023@gmail.com'
-EMAIL_HOST_PASSWORD = 'ofborvcigyinhwxa'  # App password
-
-CELERY_BROKER_URL = 'amqp://localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''  # App password
 
 
 PASSWORD_RESET_TIMEOUT = 86400  # 1 Day

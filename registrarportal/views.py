@@ -34,6 +34,7 @@ from . drf_permissions import EnrollmentValidationPermissions
 from . serializers import *
 from . notes import *
 import re
+from .tasks import send_email_task
 
 
 User = get_user_model()
@@ -699,9 +700,25 @@ class admitAdmission(APIView):
     def post(self, request, format=None):
         data = request.data
         try:
-            admissions = student_admission_details.objects.filter(
-                pk__in=data["keys"])
-            serializers = AdmissionSerializer(admissions, many=True)
-            return Response(serializers.data)
+            student_admission_details.admit_this_students(request, student_admission_details.objects.filter(
+                pk__in=data["keys"], is_accepted=False).exclude(is_denied=True).values_list('id', flat=True))
+            return Response({"Done": "Working with emails."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"Error": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class try_asyncss(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        # try:
+        #     emails = ['vincenthan19@gmail.com', 'meanhellow@gmail.com',
+        #               'jhanotan1224@gmail.com', 'armtan128@gmail.com']
+        #     message = "Email using celery"
+        #     subject = "Subject email using celery"
+        #     send_email_task.apply_async(args=(subject, message, emails))
+        #     return Response({"Nice": "Wow"}, status=status.HTTP_200_OK)
+        # except Exception as e:
+        #     return Response({"error": e}, status=status.HTTP_409_CONFLICT)
+        # lazymo.delay(5)
+        return Response({"nice": 'wow'}, status=status.HTTP_200_OK)

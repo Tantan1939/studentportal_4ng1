@@ -35,6 +35,21 @@ export default function ForAdmissionStudents() {
     getBatches();
   }
 
+  function clickhands(){
+    let admit = async (pks) => {
+      fetch('/Registrar/Admission/Api/clickhere/', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": CSRF,
+        },
+        body: JSON.stringify({keys: "Nothing here"})
+      }).then(response => response.json()).then(json => console.log(json))
+    }
+    admit();
+    getBatches();
+  }
+
   function DeniedHandler(pk){
     let denied = async (pk) => {
       fetch('/Registrar/Admission/Api/deniedAdmission/', {
@@ -54,11 +69,13 @@ export default function ForAdmissionStudents() {
     <div>
       <button> Exit </button>
       {renderBatches}
+      <button onClick={clickhands}> Click me baby </button>
     </div>
   ) : (
     <div>
       <button> Exit </button>
       <h3> No Admission... </h3>
+      <button onClick={clickhands}> Click me baby </button>
     </div>
   )
 }
