@@ -25,10 +25,9 @@ urlpatterns = [
                 get_admitted_students.as_view(), name="get_admitted_students"),
 
         path("Api/", include([
-            path("getadmission/", get_new_admission.as_view()),
-            path("deniedAdmission/", deniedAdmission.as_view()),
-            path("admitApplicants/", admitAdmission.as_view()),
-            path("clickhere/", try_asyncss.as_view()),
+            path("get/", get_admissions.as_view()),
+            path("denied/", denied_admission.as_view()),
+            path("admit/", admit_students.as_view()),
         ])),
     ])),
 

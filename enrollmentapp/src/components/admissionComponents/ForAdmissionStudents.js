@@ -9,7 +9,7 @@ export default function ForAdmissionStudents() {
   }, [])
 
   let getBatches = async () => {
-    let response = await fetch('/Registrar/Admission/Api/getadmission/');
+    let response = await fetch('/Registrar/Admission/Api/get/');
     let data = await response.json();
     setBatchList(data);
   }
@@ -22,60 +22,57 @@ export default function ForAdmissionStudents() {
 
   function AdmitAllHandler(pks){
     let admit = async (pks) => {
-      fetch('/Registrar/Admission/Api/admitApplicants/', {
+      fetch('/Registrar/Admission/Api/admit/', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": CSRF,
         },
         body: JSON.stringify({keys: pks})
-      }).then(response => response.json()).then(json => console.log(json))
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        getBatches();
+      })
+      .catch(error => {
+        console.log(error)
+      });
     }
     admit(pks);
-    getBatches();
-  }
-
-  function clickhands(){
-    let admit = async (pks) => {
-      fetch('/Registrar/Admission/Api/clickhere/', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": CSRF,
-        },
-        body: JSON.stringify({keys: "Nothing here"})
-      }).then(response => response.json()).then(json => console.log(json))
-    }
-    admit();
-    getBatches();
   }
 
   function DeniedHandler(pk){
     let denied = async (pk) => {
-      fetch('/Registrar/Admission/Api/deniedAdmission/', {
+      fetch('/Registrar/Admission/Api/denied/', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": CSRF,
         },
         body: JSON.stringify({key: pk})
-      }).then(response => response.json()).then(json => console.log(json))
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        getBatches();
+      })
+      .catch(error => {
+        console.log(error)
+      });
     }
     denied(pk);
-    getBatches();
   }
 
   return batchList.length ? (
     <div>
       <button> Exit </button>
       {renderBatches}
-      <button onClick={clickhands}> Click me baby </button>
     </div>
   ) : (
     <div>
       <button> Exit </button>
       <h3> No Admission... </h3>
-      <button onClick={clickhands}> Click me baby </button>
     </div>
   )
 }

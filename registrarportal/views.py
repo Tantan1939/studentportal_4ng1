@@ -34,7 +34,6 @@ from . drf_permissions import EnrollmentValidationPermissions
 from . serializers import *
 from . notes import *
 import re
-# from .tasks import send_email_task
 
 
 User = get_user_model()
@@ -286,7 +285,7 @@ class update_schoolYear(FormView):
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class get_admissions(ListView, DeletionMixin):
+class get_admissions_firstV(ListView, DeletionMixin):
     allow_empty = True
     context_object_name = "batches"
     paginate_by = 1
@@ -662,7 +661,7 @@ class get_enrollment_batches(APIView):
             }, status=status.HTTP_200_OK)
 
 
-class get_new_admission(APIView):
+class get_admissions(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def get(self, request, format=None):
@@ -679,7 +678,7 @@ class get_new_admission(APIView):
         return Response(serializer.data)
 
 
-class deniedAdmission(APIView):
+class denied_admission(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def post(self, request, format=None):
@@ -694,21 +693,17 @@ class deniedAdmission(APIView):
             return Response({"Warning": "Admission no longer exist."}, status=status.HTTP_200_OK)
 
 
-class admitAdmission(APIView):
+class admit_students(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def post(self, request, format=None):
         data = request.data
         try:
-            student_admission_details.admit_this_students(request, student_admission_details.objects.filter(
-                pk__in=data["keys"], is_accepted=False).exclude(is_denied=True).values_list('id', flat=True))
-            return Response({"Done": "Working with emails."}, status=status.HTTP_200_OK)
+            to_admit_students = student_admission_details.objects.filter(
+                pk__in=data['keys']).exclude(is_accepted=True).values_list('id', flat=True)
+            student_admission_details.admit_this_students(
+                request, to_admit_students)
+            return Response({"Done": "Admitted Students."}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"Error": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class try_asyncss(APIView):
-    permission_classes = [EnrollmentValidationPermissions]
-
-    def post(self, request, format=None):
-        return Response({"nice": 'wow'}, status=status.HTTP_200_OK)
+            print(e)
+            return Response({"Error": "Exception Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

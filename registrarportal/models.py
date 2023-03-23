@@ -4,8 +4,13 @@ from datetime import date
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
-from . emailSenders import send_enrollment_link
-# from .tasks import send_tokenized_enrollment
+from registrarportal.tasks import email_tokenized_enrollment_link
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from . tokenGenerators import generate_enrollment_token
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 
 def add_school_year(start_year, year):
@@ -134,7 +139,6 @@ class student_admission_details(models.Model):
 
     @classmethod
     def admit_this_students(cls, request, iDs):
-        lst = []
         for id in iDs:
             with transaction.atomic():
                 obj = cls.objects.select_for_update().get(id=id)
@@ -142,10 +146,14 @@ class student_admission_details(models.Model):
                 if obj.is_denied:
                     obj.is_denied = False
                 obj.save()
-                lst.append(obj)
-        else:
-            # send_tokenized_enrollment.delay(request, lst)
-            pass
+
+                email_tokenized_enrollment_link.delay({
+                    "username": obj.admission_owner.display_name,
+                    "domain": get_current_site(request).domain,
+                    "uid": urlsafe_base64_encode(force_bytes(obj.pk)),
+                    "token": generate_enrollment_token.make_token(obj),
+                    "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p")},
+                    send_to=obj.admission_owner.email)
 
 
 class admission_requirements(models.Model):
