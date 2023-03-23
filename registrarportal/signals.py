@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from . models import student_admission_details, admission_batch, student_enrollment_details, enrollment_batch
+from . models import student_admission_details, admission_batch, student_enrollment_details, enrollment_batch, note
 from django.db.models import Case, When, Value, Count, Q, F, Min
+from registrarportal.tasks import note_task, email_users
 
 
 def full_batches(instance):
@@ -42,3 +43,11 @@ def enrollmentBatch(sender, instance, created, **kwargs):
         else:
             # get min member val, remove others
             full_batches(instance)
+
+
+@receiver(post_save, sender=note)
+def signal_note(sender, instance, created, **kwargs):
+    if created:
+        note_task.delay(instance.body)
+    else:
+        email_users.delay("email@gmail.com")

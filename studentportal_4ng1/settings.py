@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
-
     'studentportal.apps.StudentportalConfig',
     'adminportal.apps.AdminportalConfig',
     'usersPortal.apps.UsersportalConfig',
@@ -77,7 +76,6 @@ WSGI_APPLICATION = 'studentportal_4ng1.wsgi.application'
 CELERY_IMPORTS = {
     'registrarportal.tasks'
 }
-
 CELERY_BROKER_URL = 'amqp://djangoapp:djangoapp@localhost:5672/'
 CELERY_RESULT_BACKEND = 'rpc://'
 
@@ -163,8 +161,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'nami.chwan2022.2023@gmail.com'
-EMAIL_HOST_PASSWORD = 'ofborvcigyinhwxa'  # App password
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''  # App password
 
 
 PASSWORD_RESET_TIMEOUT = 86400  # 1 Day

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 from . emailSenders import send_enrollment_link
-from .tasks import send_tokenized_enrollment
+# from .tasks import send_tokenized_enrollment
 
 
 def add_school_year(start_year, year):
@@ -144,7 +144,8 @@ class student_admission_details(models.Model):
                 obj.save()
                 lst.append(obj)
         else:
-            send_tokenized_enrollment.delay(request, lst)
+            # send_tokenized_enrollment.delay(request, lst)
+            pass
 
 
 class admission_requirements(models.Model):
