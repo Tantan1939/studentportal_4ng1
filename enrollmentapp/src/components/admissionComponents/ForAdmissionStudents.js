@@ -3,6 +3,7 @@ import StudentsPerBatch from './StudentsPerBatch'
 
 export default function ForAdmissionStudents() {
   let [batchList, setBatchList] = useState([]);
+  let [isLoading, setIsLoading] = useState(true);
 
   useEffect(()=>{
     getBatches();
@@ -64,6 +65,10 @@ export default function ForAdmissionStudents() {
     denied(pk);
   }
 
+  function exitHere(){
+    window.location.href = '/Registrar/';
+  }
+
   return batchList.length ? (
     <div>
       <button> Exit </button>
@@ -71,7 +76,7 @@ export default function ForAdmissionStudents() {
     </div>
   ) : (
     <div>
-      <button> Exit </button>
+      <button onClick={exitHere}> Exit </button>
       <h3> No Admission... </h3>
     </div>
   )
