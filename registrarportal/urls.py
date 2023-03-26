@@ -33,15 +33,18 @@ urlpatterns = [
 
     path("Enrollment/", include([
         path("", get_react_app.as_view(), name="validate_enrollment"),
-
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
-        path("Note/<pk>/", get_react_app.as_view(),
-             name="validate_enrollments"),
-        re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
-                get_enrollment_batches.as_view(), name="get_enrollment_batches"),
+
+        # re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
+        #         get_enrollment_batches_v0.as_view(), name="get_enrollment_batches"),
 
         # For enrollment DRF Api
+        path("Api/", include([
+            path("Get/", get_enrollment_batches.as_view()),
+            path("Denied/", denied_enrollee.as_view()),
+            path("Accept/", accept_enrollees.as_view()),
+        ])),
     ])),
 
     # For DRF API

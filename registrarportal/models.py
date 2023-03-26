@@ -272,6 +272,21 @@ class student_enrollment_details(models.Model):
         ordering = ["-enrolled_school_year__id", "created_on"]
         unique_together = ["applicant", "admission", "enrolled_school_year"]
 
+    @classmethod
+    def accept_students(cls, pks):
+        pk_list = []
+        for pk in pks:
+            with transaction.atomic():
+                stud = cls.objects.select_for_update().get(pk=pk)
+                stud.is_accepted = True
+                print('atomic')
+                if stud.is_denied:
+                    stud.is_denied = False
+                stud.save()
+                pk_list.append(pk)
+        else:
+            return pk_list
+
 
 class student_home_address(models.Model):
     home_of = models.ForeignKey(
@@ -335,7 +350,7 @@ class student_id_picture(models.Model):
         ordering = ["-created_on"]
 
 
-class enrollment_batch_manager(models.Model):
+class enrollment_batch_manager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(sy__until__gte=date.today())
 
@@ -343,8 +358,8 @@ class enrollment_batch_manager(models.Model):
 class enrollment_batch(models.Model):
     sy = models.ForeignKey(
         schoolYear, on_delete=models.RESTRICT, related_name="sy_enrollment_batches")
-    section = models.ForeignKey("adminportal.schoolSections",
-                                on_delete=models.RESTRICT, related_name="section_batch")
+    section = models.OneToOneField(
+        "adminportal.schoolSections", on_delete=models.RESTRICT, related_name="section_batch")
     members = models.ManyToManyField(
         student_enrollment_details, related_name="enrollment_batch_member")
     modified_on = models.DateTimeField(auto_now=True)

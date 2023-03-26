@@ -1,0 +1,21 @@
+{% autoescape off %}
+
+    Hi {{account_name}},
+
+    You are now officially enrolled in NewFangled Senior High School.
+    Here are your section details:
+    Section: {{section_name}}
+    Grade: {{yearlevel}}
+    Strand: {{strand}}
+
+    First Semester Classes:
+    {% for detail in first_sem %}
+        <p> {{subject__title}}: {{time_in}} - {{time_out}} </p>
+    {% endfor %}
+
+    Second Semester Classes:
+    {% for detail in second_sem %}
+        <p> {{subject__title}}: {{time_in}} - {{time_out}} </p>
+    {% endfor %}
+
+{% endautoescape %}

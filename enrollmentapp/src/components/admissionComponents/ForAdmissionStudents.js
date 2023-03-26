@@ -7,19 +7,24 @@ export default function ForAdmissionStudents() {
 
   useEffect(()=>{
     getBatches();
-  }, [])
+  }, []);
 
   let getBatches = async () => {
-    let response = await fetch('/Registrar/Admission/Api/get/');
-    let data = await response.json();
-    setBatchList(data);
-  }
+    try {
+      let response = await fetch('/Registrar/Admission/Api/get/');
+      let data = await response.json();
+      setBatchList(data);
+    } catch (error) {
+      console.error(error);
+      setBatchList([]);
+    };
+  };
 
   let renderBatches = batchList.map((admissionBatch, index) => (
     <StudentsPerBatch key={index} admissionBatch={admissionBatch} AdmitHandler={AdmitAllHandler} DeniedHandler={DeniedHandler}/>
-  ))
+  ));
   
-  let CSRF = document.cookie.slice(10)
+  let CSRF = document.cookie.slice(10);
 
   function AdmitAllHandler(pks){
     let admit = async (pks) => {
@@ -33,15 +38,13 @@ export default function ForAdmissionStudents() {
       })
       .then(response => response.json())
       .then(data => {
-        console.log(data)
+        console.log(data);
         getBatches();
       })
-      .catch(error => {
-        console.log(error)
-      });
+      .catch(error => console.error(error));
     }
     admit(pks);
-  }
+  };
 
   function DeniedHandler(pk){
     let denied = async (pk) => {
@@ -55,28 +58,22 @@ export default function ForAdmissionStudents() {
       })
       .then(response => response.json())
       .then(data => {
-        console.log(data)
+        console.log(data);
         getBatches();
       })
-      .catch(error => {
-        console.log(error)
-      });
+      .catch(error => console.log(error));
     }
     denied(pk);
-  }
-
-  function exitHere(){
-    window.location.href = '/Registrar/';
-  }
+  };
 
   return batchList.length ? (
     <div>
-      <button> Exit </button>
+      <button onClick={() => window.location.href = '/Registrar/'}> Exit </button>
       {renderBatches}
     </div>
   ) : (
     <div>
-      <button onClick={exitHere}> Exit </button>
+      <button onClick={() => window.location.href = '/Registrar/'}> Exit </button>
       <h3> No Admission... </h3>
     </div>
   )

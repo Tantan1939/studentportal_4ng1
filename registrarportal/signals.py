@@ -31,7 +31,7 @@ def admissionBatch(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=student_enrollment_details)
 def enrollmentBatch(sender, instance, created, **kwargs):
-    if created or ("is_accepted" in kwargs["update_fields"] and "is_denied" in kwargs["update_fields"]):
+    if created or ("update_fields" in kwargs):
         get_batches = enrollment_batch.objects.filter(sy=instance.enrolled_school_year, section__assignedStrand=instance.strand, section__yearLevel=instance.year_level).alias(
             count_members=Count("members", filter=Q(members__is_denied=False))).exclude(count_members__gte=F("section__allowedPopulation")).first()
 

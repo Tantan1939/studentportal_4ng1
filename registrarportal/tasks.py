@@ -5,6 +5,17 @@ from django.template.loader import render_to_string
 
 
 @shared_task
+def enrollment_acceptance(mail_details, receiver):
+    try:
+        mail_subject = "Validated Enrollment"
+        email = EmailMessage(mail_subject, mail_details, to=[receiver])
+        email.send()
+        return f"Enrollment Validation Email Sent"
+    except Exception as e:
+        return e
+
+
+@shared_task
 def email_tokenized_enrollment_link(instance_dict, send_to):
     try:
         mail_subject = "Enrollment Application"

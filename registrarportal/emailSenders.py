@@ -10,6 +10,8 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 import numpy as np
+from .tasks import enrollment_acceptance
+from adminportal.models import firstSemSchedule, secondSemSchedule
 
 
 def loop_enrollment_invitation(request, invitation):
@@ -42,3 +44,21 @@ def enrollment_invitation_emails(request, invitations):
 
     except Exception as e:
         pass
+
+
+def enrollment_acceptance_email(request, recipient, name, classDetails):
+    get_firstSemDetails = firstSemSchedule.objects.values(
+        'subject__title', 'time_in', 'time_out').filter(section__id=classDetails.id)
+
+    get_secondSemDetails = secondSemSchedule.objects.values(
+        'subject__title', 'time_in', 'time_out').filter(section__id=classDetails.id)
+
+    mail = render_to_string("registrarportal/emailTemplates/enrollment_acceptance.html", {
+        "account_name": name,
+        "section_name": classDetails.name,
+        "yearlevel": classDetails.get_yearLevel_display(),
+        "strand": classDetails.assignedStrand.strand_name,
+        "first_sem": get_firstSemDetails,
+        "second_sem": get_secondSemDetails
+    })
+    enrollment_acceptance.delay(mail, recipient)
