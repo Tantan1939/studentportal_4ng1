@@ -279,7 +279,6 @@ class student_enrollment_details(models.Model):
             with transaction.atomic():
                 stud = cls.objects.select_for_update().get(pk=pk)
                 stud.is_accepted = True
-                print('atomic')
                 if stud.is_denied:
                     stud.is_denied = False
                 stud.save()

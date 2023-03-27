@@ -39,7 +39,6 @@ export default function EnrollmentBatch() {
           body: JSON.stringify({key: pk})
         })
         let response = await denied.json();
-        setLoading(false);
         console.log(response);
         getEnrollees();
       } catch (error) {
@@ -62,7 +61,6 @@ export default function EnrollmentBatch() {
           body: JSON.stringify({keys : pks, batchID: batchID})
         });
         let response = await accepts.json();
-        setLoading(false);
         console.log(response);
         getEnrollees();
       } catch (error) {
@@ -86,13 +84,14 @@ export default function EnrollmentBatch() {
     <ListOfEnrollees key={index} enrollmentBatch={enrollmentBatch} DeniedEnrollee_Handler={DeniedEnrollee_Handler} AcceptEnrollees_Handler={AcceptEnrollees_Handler}/>
   ));
 
-  return loading ? (
+  return (
     <div>
-      <h4> Loading... </h4>
-    </div>
-  ) : (
-    <div>
-      <button onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+      <div> <button onClick={() => window.location.href = '/Registrar/'}> Exit </button> </div>
+
+      <div>
+        {loading && <h4> Loading... </h4>}
+      </div>
+
       {enrollees.length ? (
         <div>
           {renderEnrolleeBatches}
@@ -103,6 +102,7 @@ export default function EnrollmentBatch() {
           {!hasError && <p> No enrollees. </p>}
         </div>
       )}
+
     </div>
   )
 }

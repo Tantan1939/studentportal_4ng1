@@ -24,7 +24,7 @@ from django.middleware import csrf
 from studentportal.models import documentRequest
 from formtools.wizard.views import SessionWizardView
 from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule, class_student
-from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email
+from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -695,7 +695,23 @@ class denied_enrollee(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def post(self, request, format=None):
-        return Response({"Done": "Nice"}, status=status.HTTP_200_OK)
+        data = request.data
+        try:
+            with transaction.atomic():
+                to_denied = student_enrollment_details.objects.select_for_update().get(
+                    pk=int(data["key"]))
+                to_denied.is_denied = True
+                to_denied.save()
+
+            denied_stud = student_enrollment_details.objects.get(
+                id=int(data['key']))
+            denied_enrollment_email(
+                request, denied_stud.applicant.email, denied_stud.full_name)
+
+            return Response({"Done": "Successfully Denied Enrollee."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"Error": "Exception Occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class accept_enrollees(APIView):
@@ -706,7 +722,8 @@ class accept_enrollees(APIView):
         try:
             enrollees = student_enrollment_details.objects.values_list(
                 'id', flat=True).filter(pk__in=data["keys"], is_accepted=False, is_denied=False)
-            print(enrollees)
+
+            # To accept each enrollment via an atomic transaction to avoid race condition.
             accept_them = student_enrollment_details.accept_students(enrollees)
 
             if not accept_them:
@@ -718,8 +735,11 @@ class accept_enrollees(APIView):
                     section_batch__id=int(batch_id))
 
                 for student in student_enrollment_details.objects.filter(pk__in=accept_them):
+                    # Assign each enrolled students to the designated section.
                     class_student.objects.create(
                         section=get_section, enrollment=student)
+
+                    # Create an email template to send section, subject, and schedule details with the user enrollment parameters.
                     enrollment_acceptance_email(
                         request, student.applicant.email, student.applicant.display_name, get_section)
                 else:

@@ -10,7 +10,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 import numpy as np
-from .tasks import enrollment_acceptance
+from .tasks import enrollment_acceptance, failed_enrollment
 from adminportal.models import firstSemSchedule, secondSemSchedule
 
 
@@ -62,3 +62,10 @@ def enrollment_acceptance_email(request, recipient, name, classDetails):
         "second_sem": get_secondSemDetails
     })
     enrollment_acceptance.delay(mail, recipient)
+
+
+def denied_enrollment_email(request, recipient, name):
+    mail = render_to_string("registrarportal/emailTemplates/deniedEnrollmentEmail.html", {
+        "account_name": name
+    })
+    failed_enrollment.delay(mail, recipient)

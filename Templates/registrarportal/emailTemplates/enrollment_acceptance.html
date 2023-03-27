@@ -10,12 +10,12 @@
 
     First Semester Classes:
     {% for detail in first_sem %}
-        <p> {{subject__title}}: {{time_in}} - {{time_out}} </p>
+        {{detail.subject__title}}: {{detail.time_in}} - {{detail.time_out}}
     {% endfor %}
 
     Second Semester Classes:
     {% for detail in second_sem %}
-        <p> {{subject__title}}: {{time_in}} - {{time_out}} </p>
+        {{detail.subject__title}}: {{detail.time_in}} - {{detail.time_out}}
     {% endfor %}
 
 {% endautoescape %}
