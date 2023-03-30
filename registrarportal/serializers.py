@@ -140,3 +140,24 @@ class EnrollmentBatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = enrollment_batch
         fields = ['id', 'section', 'members', 'number_of_enrollment']
+
+
+class batchMemberSerializer(serializers.ModelSerializer):
+    stud_pict = StudentPicSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = student_enrollment_details
+        fields = ['id', 'full_name', 'age', 'stud_pict']
+
+
+class batchSerializer(serializers.ModelSerializer):
+    section = Batch_AssignedSection_Serializer(many=False, read_only=True)
+    is_full = serializers.BooleanField()
+    allowed_students = serializers.CharField()
+    count_members = serializers.IntegerField()
+    members = batchMemberSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = enrollment_batch
+        fields = ['id', 'section', 'is_full', 'members',
+                  'allowed_students', 'count_members']

@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import EnrolleeDetails from './EnrolleeDetails';
 import EnrollAllConfirmationModal from './enrollmentModals/EnrollAllConfirmationModal';
 
-export default function ListOfEnrollees({enrollmentBatch, DeniedEnrollee_Handler, AcceptEnrollees_Handler}) {
+export default function ListOfEnrollees({enrollmentBatch, DeniedEnrollee_Handler, AcceptEnrollees_Handler, move_function}) {
   let [enrolleesID, setEnrolleesID] = useState([]);
 
   const [enrollAllModal, setEnrollAllModal] = useState(false);
@@ -16,7 +16,7 @@ export default function ListOfEnrollees({enrollmentBatch, DeniedEnrollee_Handler
   };
 
   let render_enrollees = enrollmentBatch.members.map((enrollment, index) => (
-    <EnrolleeDetails key={index} DeniedEnrollee_Handler={DeniedEnrollee_Handler} enrollment={enrollment}/>
+    <EnrolleeDetails key={index} DeniedEnrollee_Handler={DeniedEnrollee_Handler} enrollment={enrollment} batchID={enrollmentBatch.id} move_function={move_function} />
   ));
 
   return (

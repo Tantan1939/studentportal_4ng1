@@ -44,6 +44,8 @@ urlpatterns = [
             path("Get/", get_enrollment_batches.as_view()),
             path("Denied/", denied_enrollee.as_view()),
             path("Accept/", accept_enrollees.as_view()),
+            path("Batches/<batchID>/<pk>/", get_available_batchs.as_view()),
+            path("Swap_v1/", swap_batches_v1.as_view()),
         ])),
     ])),
 

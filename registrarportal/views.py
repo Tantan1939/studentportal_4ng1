@@ -748,3 +748,58 @@ class accept_enrollees(APIView):
         except Exception as e:
             print(e)
             return Response({"Error": "Exception Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class get_available_batchs(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, batchID, pk, format=None):
+        this_strand = enrollment_batch.new_batches.values(
+            'section__assignedStrand__id', 'section__yearLevel').filter(id=int(batchID)).first()
+
+        if this_strand:
+            this_batches = enrollment_batch.new_batches.filter(
+                section__assignedStrand__id=int(this_strand["section__assignedStrand__id"]), section__yearLevel=this_strand["section__yearLevel"]).annotate(
+                    count_members=Count('members')).annotate(
+                        is_full=Case(When(section__allowedPopulation__lte=F('count_members'), then=Value(True)), default=Value(False)), allowed_students=F(
+                            'section__allowedPopulation')).prefetch_related(
+                                Prefetch("members", queryset=student_enrollment_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                                    Prefetch("stud_pict", queryset=student_id_picture.objects.all())))).exclude(
+                                        members__id=int(pk)).order_by('section__yearLevel', 'section__assignedStrand__strand_name')
+
+            serializer = batchSerializer(this_batches, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({"Data": "Empty Data."}, status.HTTP_204_NO_CONTENT)
+
+
+class swap_batches_v1(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+
+        try:
+            currentID = data["currentID"]
+            currentBatch = data["currentBatch"]
+            targetBatch = data["targetBatch"]
+            exchangeID = data["exchangeID"]
+
+            if exchangeID:
+                pass
+            else:
+                this_enrollment = student_enrollment_details.objects.get(
+                    id=int(currentID))
+                this_current_batch = enrollment_batch.objects.get(
+                    id=int(currentBatch))
+                this_target_batch = enrollment_batch.objects.get(
+                    id=int(targetBatch))
+
+                this_current_batch.members.remove(this_enrollment)
+                this_target_batch.members.add(this_enrollment)
+
+            return Response({"Done": "Swap successfully."}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({"Error": "An error occurred."}, status=status.HTTP_409_CONFLICT)

@@ -2,9 +2,10 @@ import React, {useState, useEffect} from 'react'
 import StudentDetailsModal from './enrollmentModals/StudentDetailsModal'
 import ImageModal from './enrollmentModals/ImageModal'
 import DeniedConfirmationModal from './enrollmentModals/DeniedConfirmationModal';
+import MoveToModal from './enrollmentModals/MoveToModal';
 
 
-export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment}) {
+export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, batchID, move_function}) {
   let [reportCard, setReportCard] = useState('');
   let [studentPicture, setStudentPicture] = useState('');
 
@@ -12,6 +13,7 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment}) {
   const [studDetailModal, setStudDetailModal] = useState(false);
   const [studCardModal, setReportCardModal] = useState(false);
   const [deniedConfirmationModal, setDeniedConfirmationModal] = useState(false);
+  const [moveToModal, setMoveToModal] = useState(false);
 
   const fetch_reportCard = async (imgurl) => {
     const res = await fetch(imgurl);
@@ -37,7 +39,7 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment}) {
       <img src={studentPicture} style={{ width: "20%", height: "20%" }} onMouseMove={() => setStudPictModal(true)} onMouseOut={() => setStudPictModal(false)}/>
       <ImageModal isHovering={studPictModal} img={studentPicture}/>
 
-      <h5 onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}> {enrollment.applicant}: {enrollment.full_name} - {enrollment.age} </h5>
+      <h5 onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}> #{enrollment.id} - {enrollment.applicant}: {enrollment.full_name} - {enrollment.age} </h5>
       <StudentDetailsModal isHovering={studDetailModal} studDetail={enrollment} studpict={studentPicture}/>
       
       <h5 onMouseMove={() => setReportCardModal(true)} onMouseOut={() => setReportCardModal(false)}> Report Card </h5>
@@ -46,7 +48,8 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment}) {
       <button onClick={() => setDeniedConfirmationModal(true)}> Denied </button>
       <DeniedConfirmationModal open={deniedConfirmationModal} closeModalFunc={() => setDeniedConfirmationModal(false)}  DeniedEnrollee_Handler={DeniedEnrollee_Handler} enrollment={enrollment} studentPicture={studentPicture}/>
 
-      <button> Move To </button>
+      <button onClick={() => setMoveToModal(true)}> Move To </button>
+      <MoveToModal open={moveToModal} closeModalFunc={() => setMoveToModal(false)} batchID={batchID} enrollmentID={enrollment.id} move_function={move_function}/>
     </div>
   )
 }
