@@ -9,15 +9,13 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
 
   // Move parameters
   let [selectedPk, setSelectedPk] = useState(null);
-  let [currentID, setCurrentID] = useState(enrollmentID);
-  let [currentBatch, setCurrentBatch] = useState(batchID);
   let [targetBatch, setTargetBatch] = useState(null);
 
   const [isNext, setIsNext] = useState(false);
   
   useEffect(()=>{
     getBatches(batchID, enrollmentID);
-  }, [batchID, enrollmentID]);
+  }, [isNext, open]);
 
   useEffect(()=>{
     if (isFull === true) setWarningMsg('Batch is Full. Select an enrollee to swap (required).');
@@ -75,8 +73,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
 
   function call_move_function(currentID, currentBatch, targetBatch, selectedPk){
     onOut_func();
-    const delay_handler = setTimeout(() => move_function(currentID, currentBatch, targetBatch, selectedPk), 100);
-    return () => clearTimeout(delay_handler);
+    setTimeout(() => move_function(currentID, currentBatch, targetBatch, selectedPk), 100);
   }
 
 
@@ -121,14 +118,14 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                       <div>
                         {selectedPk && <div>
                             <button className='btnOutline'>
-                                <span className='bold' onClick={() => call_move_function(currentID, currentBatch, targetBatch, selectedPk)}> Move </span>
+                                <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                             </button>
                           </div>}
 
                         {!selectedPk && <div>
                             {!isFull && <div>
                                   <button className='btnOutline'>
-                                    <span className='bold' onClick={() => call_move_function(currentID, currentBatch, targetBatch, selectedPk)}> Move </span>
+                                    <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                                   </button>
                               </div>}
                           </div>}
@@ -136,7 +133,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                     ) : (
                       <div>
                         <button className='btnOutline'>
-                            <span className='bold' onClick={() => call_move_function(currentID, currentBatch, targetBatch, selectedPk)}> Move </span>
+                            <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                         </button>
                       </div>
                     )}

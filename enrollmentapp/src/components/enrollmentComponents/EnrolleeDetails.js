@@ -8,6 +8,7 @@ import MoveToModal from './enrollmentModals/MoveToModal';
 export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, batchID, move_function}) {
   let [reportCard, setReportCard] = useState('');
   let [studentPicture, setStudentPicture] = useState('');
+  let [enrollmentID, setEnrollmentID] = useState(enrollment.id);
 
   const [studPictModal, setStudPictModal] = useState(false);
   const [studDetailModal, setStudDetailModal] = useState(false);
@@ -34,12 +35,16 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, bat
     fetch_studentPicture(enrollment.stud_pict[0].user_image);
   }, [enrollment]);
 
+  useEffect(()=> {
+    setEnrollmentID(enrollment.id);
+  }, [enrollment]);
+
   return (
     <div className='container'>
       <img src={studentPicture} style={{ width: "20%", height: "20%" }} onMouseMove={() => setStudPictModal(true)} onMouseOut={() => setStudPictModal(false)}/>
       <ImageModal isHovering={studPictModal} img={studentPicture}/>
 
-      <h5 onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}> #{enrollment.id} - {enrollment.applicant}: {enrollment.full_name} - {enrollment.age} </h5>
+      <h5 onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}> #{enrollmentID} - {enrollment.applicant}: {enrollment.full_name} - {enrollment.age} </h5>
       <StudentDetailsModal isHovering={studDetailModal} studDetail={enrollment} studpict={studentPicture}/>
       
       <h5 onMouseMove={() => setReportCardModal(true)} onMouseOut={() => setReportCardModal(false)}> Report Card </h5>
@@ -49,7 +54,7 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, bat
       <DeniedConfirmationModal open={deniedConfirmationModal} closeModalFunc={() => setDeniedConfirmationModal(false)}  DeniedEnrollee_Handler={DeniedEnrollee_Handler} enrollment={enrollment} studentPicture={studentPicture}/>
 
       <button onClick={() => setMoveToModal(true)}> Move To </button>
-      <MoveToModal open={moveToModal} closeModalFunc={() => setMoveToModal(false)} batchID={batchID} enrollmentID={enrollment.id} move_function={move_function}/>
+      <MoveToModal open={moveToModal} closeModalFunc={() => setMoveToModal(false)} batchID={batchID} enrollmentID={enrollmentID} move_function={move_function}/>
     </div>
   )
 }

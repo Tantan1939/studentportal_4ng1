@@ -360,7 +360,7 @@ class enrollment_batch(models.Model):
     section = models.OneToOneField(
         "adminportal.schoolSections", on_delete=models.RESTRICT, related_name="section_batch")
     members = models.ManyToManyField(
-        student_enrollment_details, related_name="enrollment_batch_member")
+        student_enrollment_details, related_name="enrollment_batch_member", blank=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 

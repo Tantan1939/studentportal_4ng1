@@ -795,10 +795,14 @@ class swap_batches_v1(APIView):
                 this_target_batch = enrollment_batch.objects.get(
                     id=int(targetBatch))
 
-                this_current_batch.members.remove(this_enrollment)
-                this_target_batch.members.add(this_enrollment)
-
-            return Response({"Done": "Swap successfully."}, status=status.HTTP_200_OK)
+                if this_enrollment.strand == this_target_batch.section.assignedStrand:
+                    this_current_batch.members.remove(this_enrollment)
+                    this_target_batch.members.add(this_enrollment)
+                    return Response({"Done": "Swap successfully."})
+                else:
+                    print(
+                        f"currentID: {currentID}, currentBatch: {currentBatch}, targetBatch: {targetBatch}")
+                    return Response({"Done": "Received with no errors. But enrollment strand and strand of target batch does not match."})
 
         except Exception as e:
             print(e)
