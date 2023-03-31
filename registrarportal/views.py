@@ -786,7 +786,25 @@ class swap_batches_v1(APIView):
             exchangeID = data["exchangeID"]
 
             if exchangeID:
-                pass
+                this_enrollment = student_enrollment_details.objects.get(
+                    id=int(currentID))
+                this_current_batch = enrollment_batch.objects.get(
+                    id=int(currentBatch))
+                this_target_batch = enrollment_batch.objects.get(
+                    id=int(targetBatch))
+                this_exchange_enrollment = student_enrollment_details.objects.get(
+                    id=int(exchangeID))
+
+                if (this_enrollment.strand == this_exchange_enrollment.strand) and (this_current_batch.section.assignedStrand == this_target_batch.section.assignedStrand):
+                    this_current_batch.members.remove(this_enrollment)
+                    this_target_batch.members.remove(this_exchange_enrollment)
+                    this_target_batch.members.add(this_enrollment)
+                    this_current_batch.members.add(this_exchange_enrollment)
+
+                    return Response({"Done": "Exchange successfully."})
+                else:
+                    return Response({"Done": "Received with no errors. But enrollment strand and strand of target batch does not match."})
+
             else:
                 this_enrollment = student_enrollment_details.objects.get(
                     id=int(currentID))
@@ -800,8 +818,6 @@ class swap_batches_v1(APIView):
                     this_target_batch.members.add(this_enrollment)
                     return Response({"Done": "Swap successfully."})
                 else:
-                    print(
-                        f"currentID: {currentID}, currentBatch: {currentBatch}, targetBatch: {targetBatch}")
                     return Response({"Done": "Received with no errors. But enrollment strand and strand of target batch does not match."})
 
         except Exception as e:
