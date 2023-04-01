@@ -13,6 +13,8 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
   let [targetBatch, setTargetBatch] = useState(null);
 
   const [isNext, setIsNext] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
   
   useEffect(()=>{
     getBatches(batchID, enrollmentID);
@@ -55,9 +57,10 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
   ));
 
   let renderBatchMembers = batchMembers.map((member_details, index) => (
-    <div key={index} onClick={() => {
-      setSelectedPk(member_details.id);
+    <div key={index} className={isHovered ? 'hover-bg' : isClicked ? 'clicked-bg' : ''} onMouseEnter={()=> setIsHovered(!isHovered)} onMouseLeave={()=> setIsHovered(!isHovered)} onClick={() => {
+      setSelectedPk(selectedPk ? null : member_details.id);
       setWarningMsg('');
+      setIsClicked(!isClicked);
     }}>
       <h4>
         <RenderStudentImage key={index} image={member_details.stud_pict[0].user_image}/> {member_details.full_name} - {member_details.age}
@@ -69,13 +72,19 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
     setIsNext(false);
     setSelectedPk(null);
     setIsFull(false);
+    reset_hover_effects();
     closeModalFunc();
-  }
+  };
+
+  function reset_hover_effects(){
+    setIsHovered(false);
+    setIsClicked(false);
+  };
 
   function call_move_function(currentID, currentBatch, targetBatch, selectedPk){
     onOut_func();
     setTimeout(() => move_function(currentID, currentBatch, targetBatch, selectedPk), 100);
-  }
+  };
 
 
   if (!open) return null;
@@ -111,6 +120,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                         <span className='bold' onClick={() => {
                           setSelectedPk(null);
                           setIsFull(false);
+                          reset_hover_effects();
                           setIsNext(false);
                         }}> Back </span>
                     </button>

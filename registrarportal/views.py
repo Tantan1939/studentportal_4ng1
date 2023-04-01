@@ -851,3 +851,52 @@ class get_available_batches_v2(APIView):
         except Exception as e:
             print(e)
             return Response({"": ""}, status=status.HTTP_409_CONFLICT)
+
+
+class swap_batches_v2(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+
+        try:
+            currentIDs = data["currentIDs"]
+            currentBatch = int(data["currentBatch"])
+            targetBatch = int(data["targetBatch"])
+            exchangeIDs = data["exchangeIDs"]
+
+            this_enrollments = student_enrollment_details.objects.filter(
+                pk__in=currentIDs)
+            this_exchange_enrollments = student_enrollment_details.objects.filter(
+                pk__in=exchangeIDs)
+            this_current_batch = enrollment_batch.objects.get(id=currentBatch)
+            this_target_batch = enrollment_batch.objects.get(id=targetBatch)
+
+            if (this_current_batch.section.assignedStrand == this_target_batch.section.assignedStrand) and self.validate_strands(this_enrollments, this_target_batch.section.assignedStrand):
+                this_current_batch.members.remove(*this_enrollments)
+                this_target_batch.members.add(*this_enrollments)
+
+                if this_exchange_enrollments and self.validate_strands(this_exchange_enrollments, this_current_batch.section.assignedStrand):
+                    this_target_batch.members.remove(
+                        *this_exchange_enrollments)
+                    this_current_batch.members.add(*this_exchange_enrollments)
+
+                    return Response({"Done": "Exchange successfully."})
+                else:
+                    return Response({"Done": "Swap successfully."})
+
+            else:
+                return Response({"": ""}, status=status.HTTP_409_CONFLICT)
+
+        except Exception as e:
+            print(e)
+            return Response({"": ""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def validate_strands(self, modelInstances, strand):
+        for instance in modelInstances:
+            if instance.strand == strand:
+                continue
+            else:
+                return False
+        else:
+            return True

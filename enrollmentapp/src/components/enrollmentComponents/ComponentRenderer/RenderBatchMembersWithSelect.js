@@ -1,10 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import RenderStudentImage from './RenderStudentImage';
 
-export default function RenderBatchMembersWithSelect({open, members, setIsNextClose, targetBatch, closeModalFunc, selectedPKs, freeSpace}) {
+export default function RenderBatchMembersWithSelect({open, members, setIsNextClose, closeModalFunc, move_multiple_enrollees, targetBatch, currentBatch, selectedPKs}) {
     let [checkBoxes, setCheckBoxes] = useState({});
     let [checkedBoxes, setCheckedBoxes] = useState([]);
-    let [warningMessage, setWarningMessage] = useState('');
 
     useEffect(()=> {
         if (open){
@@ -15,10 +14,6 @@ export default function RenderBatchMembersWithSelect({open, members, setIsNextCl
             });
         }
     }, [open]);
-
-    useEffect(()=>{
-
-    }, []);
 
     const handleCheckboxChanges = (event) => {
         const {name, checked} = event.target;
@@ -40,8 +35,15 @@ export default function RenderBatchMembersWithSelect({open, members, setIsNextCl
         closeModalFunc();
     };
 
+    function exchange_swap_this(selectedPKs, currentBatch, targetBatch, checkedBoxes){
+        closeThisModal();
+        setTimeout(() => {
+            move_multiple_enrollees(selectedPKs, currentBatch, targetBatch, checkedBoxes);
+        }, 100);
+    };
+
     let render_members = members.map((member, index) => (
-        <div>
+        <div key={index}>
             <input type={'checkbox'} name={member.id} checked={checkBoxes[member.id]} onChange={handleCheckboxChanges} />
             <RenderStudentImage key={index} image={member.stud_pict[0].user_image}/> {member.full_name} - {member.age}
         </div>
@@ -69,10 +71,13 @@ export default function RenderBatchMembersWithSelect({open, members, setIsNextCl
                 <span className='bold'> Back </span>
             </button>
 
+            <button className='btnOutline'>
+                <span className='bold' onClick={()=> exchange_swap_this(selectedPKs, currentBatch, targetBatch, checkedBoxes)}> Move </span>
+            </button>
+
             <button className='btnOutline' onClick={() => closeThisModal()}>
                 <span className='bold'> Cancel, exit </span>
             </button>
-
         </div>
     </div>
   )

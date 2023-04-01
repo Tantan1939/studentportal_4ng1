@@ -28,6 +28,14 @@ code {
   padding: 12px 24px;
 }
 
+.hover-bg {
+  background-color: #ccc;
+}
+
+.clicked-bg {
+  background-color: #f00;
+}
+
 
 /* Modal */
 .overlay {

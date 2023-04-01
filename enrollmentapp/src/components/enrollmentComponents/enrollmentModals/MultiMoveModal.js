@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import RenderBatchMembersWithSelect from '../ComponentRenderer/RenderBatchMembersWithSelect';
 
-export default function MultiMoveModal({open, closeModalFunc, selectedPKs, batchID}) {
+export default function MultiMoveModal({open, closeModalFunc, selectedPKs, batchID, move_multiple_enrollees}) {
 
     let [isNext, setIsNext] = useState(false);
     let [batchs, setBatchs] = useState([]);
@@ -32,7 +32,7 @@ export default function MultiMoveModal({open, closeModalFunc, selectedPKs, batch
     let render_batchs = batchs.map((details, index) => (
         <div key={index}>
             <h4 onClick={() => {
-                setBatchMembers(<RenderBatchMembersWithSelect open={open} members={details.members} setIsNextClose={()=> setIsNext(false)} targetBatch={details.id} closeModalFunc={closeModalFunc} selectedPKs={selectedPKs} freeSpace={details.allowed_students - details.count_members}/>);
+                setBatchMembers(<RenderBatchMembersWithSelect open={open} members={details.members} setIsNextClose={()=> setIsNext(false)} closeModalFunc={closeModalFunc} move_multiple_enrollees={move_multiple_enrollees} targetBatch={details.id} currentBatch={batchID} selectedPKs={selectedPKs} />);
                 setIsNext(true);
             }}>
                 {details.section}: {details.count_members}/{details.allowed_students} {details.is_full ? <p style={{color: "red"}}> - Full </p> : ""}

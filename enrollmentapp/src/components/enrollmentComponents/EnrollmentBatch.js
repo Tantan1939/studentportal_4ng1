@@ -99,6 +99,33 @@ export default function EnrollmentBatch() {
     me_move(currentID, currentBatch, targetBatch, exchangeID);
   };
 
+  function move_multiple_enrollees(selectedIDs, currentBatch, targetBatch, exchangeID = []){
+    let me_move = async (selectedIDs, currentBatch, targetBatch, exchangeID) => {
+      try{
+        let move_now = await fetch('/Registrar/Enrollment/Api/Swap_v2/', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRFToken
+          },
+          body: JSON.stringify({
+            currentIDs: selectedIDs,
+            currentBatch: currentBatch,
+            targetBatch: targetBatch,
+            exchangeIDs: exchangeID})
+        });
+        let response = await move_now.json();
+        console.log(response);
+        getEnrollees();
+      } catch (error) {
+        errorHandler(error);
+      };
+    };
+
+    setLoading(true);
+    me_move(selectedIDs, currentBatch, targetBatch, exchangeID);
+  };
+
   function errorHandler(error){
     setLoading(false);
     console.error(error);
@@ -108,7 +135,7 @@ export default function EnrollmentBatch() {
   };
 
   let renderEnrolleeBatches = enrollees.map((enrollmentBatch, index) => (
-    <ListOfEnrollees key={index} enrollmentBatch={enrollmentBatch} DeniedEnrollee_Handler={DeniedEnrollee_Handler} AcceptEnrollees_Handler={AcceptEnrollees_Handler} move_function={move_enrollee_to_another_batch}/>
+    <ListOfEnrollees key={index} enrollmentBatch={enrollmentBatch} DeniedEnrollee_Handler={DeniedEnrollee_Handler} AcceptEnrollees_Handler={AcceptEnrollees_Handler} move_function={move_enrollee_to_another_batch} move_multiple_enrollees={move_multiple_enrollees}/>
   ));
 
   return (
