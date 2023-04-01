@@ -46,6 +46,7 @@ urlpatterns = [
             path("Accept/", accept_enrollees.as_view()),
             path("Batches/<batchID>/<pk>/", get_available_batchs.as_view()),
             path("Swap_v1/", swap_batches_v1.as_view()),
+            path("Batchesv2/<batchId>/", get_available_batches_v2.as_view()),
         ])),
     ])),
 

@@ -823,3 +823,31 @@ class swap_batches_v1(APIView):
         except Exception as e:
             print(e)
             return Response({"Error": "An error occurred."}, status=status.HTTP_409_CONFLICT)
+
+
+class get_available_batches_v2(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, batchId, format=None):
+        try:
+            this_strand = enrollment_batch.new_batches.values(
+                'section__assignedStrand__id', 'section__yearLevel').filter(id=batchId).first()
+
+            if this_strand:
+                this_batches = enrollment_batch.new_batches.filter(
+                    section__assignedStrand__id=int(this_strand["section__assignedStrand__id"]), section__yearLevel=this_strand["section__yearLevel"]).annotate(
+                        count_members=Count('members')).annotate(
+                            is_full=Case(When(section__allowedPopulation__lte=F('count_members'), then=Value(True)), default=Value(False)), allowed_students=F(
+                                'section__allowedPopulation')).prefetch_related(
+                                    Prefetch("members", queryset=student_enrollment_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                                        Prefetch("stud_pict", queryset=student_id_picture.objects.all())))).exclude(
+                                            id=batchId).order_by('section__yearLevel', 'section__assignedStrand__strand_name')
+
+                serializer = batchSerializer(this_batches, many=True)
+                return Response(serializer.data)
+            else:
+                return Response({"": ""}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            print(e)
+            return Response({"": ""}, status=status.HTTP_409_CONFLICT)

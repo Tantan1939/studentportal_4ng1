@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import RenderStudentImage from '../ComponentRenderer/RenderStudentImage';
 
 function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function}) {
 
@@ -49,7 +50,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
         setIsNext(true);
         setIsFull(() => details.count_members >= details.allowed_students);
         setTargetBatch(details.id);
-      }}> #{details.id}: {details.section}   {details.count_members}/{details.allowed_students}   {details.is_full ? <p style={{color: "red"}}> Full </p> : ""} </h4>
+      }}> {details.section}   {details.count_members}/{details.allowed_students}   {details.is_full ? <p style={{color: "red"}}> Full </p> : ""} </h4>
     </div>
   ));
 
@@ -59,7 +60,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
       setWarningMsg('');
     }}>
       <h4>
-        {member_details.full_name} - {member_details.age}
+        <RenderStudentImage key={index} image={member_details.stud_pict[0].user_image}/> {member_details.full_name} - {member_details.age}
       </h4>
     </div>
   ));
