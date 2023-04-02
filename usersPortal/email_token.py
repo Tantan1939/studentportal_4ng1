@@ -11,6 +11,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from datetime import date, datetime
 from django.conf import settings
+from usersPortal.tasks import email_account_activation_link, email_account_reset_link
 
 
 def createAccount_activationLink(request, user_instance):
@@ -22,17 +23,13 @@ def createAccount_activationLink(request, user_instance):
         "token": account_activation_token.make_token(user_instance),
         "expiration_date": (timezone.now() + relativedelta(seconds=settings.PASSWORD_RESET_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p"),
     })
-    email = EmailMessage(mail_subject, message, to=[user_instance.email])
 
-    try:
-        email.send()
-        messages.success(
-            request, f"Hi {user_instance.display_name}, your email authentication link is sent to {user_instance.email}. Click it to validate your account.")
-        return True
-    except Exception as e:
-        raise ValidationError(
-            {'emailToken_failed': _(e)}
-        )
+    email_account_activation_link.delay(
+        mail_subject, message, user_instance.email, user_instance.display_name)
+
+    messages.success(
+        request, f"Hi {user_instance.display_name}, your email authentication link is sent to {user_instance.email}. Click it to validate your account.")
+    return True
 
 
 def forgotPassword_resetLink(request, user_instance):
@@ -44,14 +41,10 @@ def forgotPassword_resetLink(request, user_instance):
         "token": password_reset_token.make_token(user_instance),
         "expiration_date": (timezone.now() + relativedelta(seconds=settings.PASSWORD_RESET_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p"),
     })
-    email = EmailMessage(mail_subject, message, to=[user_instance.email])
 
-    try:
-        email.send()
-        messages.success(
-            request, f"Hi {user_instance.display_name}, your password reset link is sent to {user_instance.email}. Click it to change your password.")
-        return True
-    except Exception as e:
-        raise ValidationError(
-            {'emailToken_failed': _(e)}
-        )
+    email_account_reset_link.delay(
+        mail_subject, message, user_instance.email, user_instance.display_name)
+
+    messages.success(
+        request, f"Hi {user_instance.display_name}, your password reset link is sent to {user_instance.email}. Click it to change your password.")
+    return True

@@ -14,17 +14,17 @@ from django.db import IntegrityError, transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value, F
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.core.exceptions import ObjectDoesNotExist
 from ratelimit.decorators import ratelimit
 from adminportal.models import *
 from datetime import date, datetime
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import IntegrityError
-from . models import *
+from django.middleware import csrf
 from studentportal.models import documentRequest
-from . forms import *
 from formtools.wizard.views import SessionWizardView
-from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule
-from . emailSenders import enrollment_invitation_emails
+from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule, class_student
+from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -32,6 +32,8 @@ from rest_framework import status
 from . drf_permissions import EnrollmentValidationPermissions
 from . serializers import *
 from . notes import *
+from . models import *
+from . forms import *
 import re
 
 
@@ -284,7 +286,7 @@ class update_schoolYear(FormView):
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class get_admissions(ListView, DeletionMixin):
+class get_admissions_firstV(ListView, DeletionMixin):
     allow_empty = True
     context_object_name = "batches"
     paginate_by = 1
@@ -615,46 +617,300 @@ class get_note_details(get_notes):
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class validate_enrollments(TemplateView):
+class get_react_app(TemplateView):
     # This class will render the react app
     template_name = 'index.html'
+
+
+class get_admissions(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, format=None):
+        applicant_lists = admission_batch.new_batches.annotate(number_of_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_applicants__gte=1).prefetch_related(
+            Prefetch("members",
+                     queryset=student_admission_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                         Prefetch("softCopy_admissionRequirements_phBorn", queryset=ph_born.objects.all(
+                         )),
+                         Prefetch("softCopy_admissionRequirements_foreigner", queryset=foreign_citizen_documents.objects.all(
+                         )),
+                         Prefetch("softCopy_admissionRequirements_dualCitizen", queryset=dual_citizen_documents.objects.all())),
+                     ))
+        serializer = BatchAdmissionSerializer(applicant_lists, many=True)
+        return Response(serializer.data)
+
+
+class denied_admission(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            get_batch = admission_batch.objects.filter(
+                members__id=int(data["key"])).first()
+
+            to_deny = student_admission_details.objects.get(
+                id=int(data["key"]))
+            to_deny.is_denied = True
+            to_deny.save()
+            get_batch.members.remove(to_deny)
+
+            denied_admission_email(
+                request, to_deny.admission_owner.email, to_deny.last_name)
+
+            return Response({"Done": "Admission Denied"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"Warning": "Admission no longer exist."}, status=status.HTTP_200_OK)
+
+
+class admit_students(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            to_admit_students = student_admission_details.objects.filter(
+                pk__in=data['keys']).exclude(is_accepted=True).values_list('id', flat=True)
+            student_admission_details.admit_this_students(
+                request, to_admit_students)
+            return Response({"Done": "Admitted Students."}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({"Error": "Exception Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class get_enrollment_batches(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
-    def get_batches(self):
-        self.this_batches = enrollment_batch.objects.filter(sy__until__gte=date.today()).alias(count_applicants=Count(
-            "members", filter=Q(members__is_accepted=False, members__is_denied=False))).exclude(count_applicants__lt=1)
-        serializer = BatchSerializer(self.this_batches, many=True)
-        return serializer.data
+    def get(self, request, format=None):
+        # Get enrollment batches with pending enrollees.
+        batch_lists = enrollment_batch.new_batches.annotate(number_of_enrollment=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_enrollment__gte=1).prefetch_related(
+            Prefetch("members",
+                     queryset=student_enrollment_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                         Prefetch("enrollment_address",
+                                  queryset=student_home_address.objects.all()),
+                         Prefetch("enrollment_contactnumber",
+                                  queryset=student_contact_number.objects.all()),
+                         Prefetch("report_card",
+                                  queryset=student_report_card.objects.all()),
+                         Prefetch("stud_pict", queryset=student_id_picture.objects.all()))))
 
-    def get_applicants(self):
-        self.get_enrollees = student_enrollment_details.objects.filter(enrollment_batch_member=self.this_batches.first(
-        ), is_accepted=False, is_denied=False).prefetch_related('enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict')
-        serializer = EnrollmentSerializer(self.get_enrollees, many=True)
-        return serializer.data
+        serializer = EnrollmentBatchSerializer(batch_lists, many=True)
+        csrf_token = csrf.get_token(request)
+        return Response({"X_CSRFToken": csrf_token, "batch_lists": serializer.data, }, status=status.HTTP_200_OK)
 
-    def get_applicants_from_pk(self, pk):
-        self.get_spec_enrollees = student_enrollment_details.objects.filter(enrollment_batch_member__id=int(pk), is_accepted=False, is_denied=False).exclude(
-            enrolled_school_year__until__lt=date.today()).prefetch_related('enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict')
-        serializer = EnrollmentSerializer(self.get_spec_enrollees, many=True)
-        return serializer.data
 
-    def get_their_pks(self, enrollees):
-        serializer = EnrolleesPkSerializer(enrollees, many=True)
-        return serializer.data
+class denied_enrollee(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
 
-    def get(self, request, pk=None, format=None):
-        if pk:
-            return Response({
-                "batches": self.get_batches(),
-                "applicants": self.get_applicants_from_pk(pk),
-                "applicants_pks": self.get_their_pks(self.get_spec_enrollees)
-            }, status=status.HTTP_200_OK)
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            with transaction.atomic():
+                to_denied = student_enrollment_details.objects.select_for_update().get(
+                    pk=int(data["key"]))
+                to_denied.is_denied = True
+                to_denied.save()
+
+            denied_stud = student_enrollment_details.objects.get(
+                id=int(data['key']))
+
+            get_batch = enrollment_batch.new_batches.filter(
+                members__id=denied_stud.id).first()
+            get_batch.members.remove(denied_stud)
+
+            denied_enrollment_email(
+                request, denied_stud.applicant.email, denied_stud.full_name)
+
+            return Response({"Done": "Successfully Denied Enrollee."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"Error": "Exception Occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class accept_enrollees(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            enrollees = student_enrollment_details.objects.values_list(
+                'id', flat=True).filter(pk__in=data["keys"], is_accepted=False, is_denied=False)
+
+            # To accept each enrollment via an atomic transaction to avoid race condition.
+            accept_them = student_enrollment_details.accept_students(enrollees)
+
+            if not accept_them:
+                return Response({"Warning": "Primary keys of enrollees no longer exist as pending enrollees."}, status=status.HTTP_409_CONFLICT)
+
+            else:
+                batch_id = data["batchID"]
+                get_section = schoolSections.latestSections.get(
+                    section_batch__id=int(batch_id))
+
+                for student in student_enrollment_details.objects.filter(pk__in=accept_them):
+                    # Assign each enrolled students to the designated section.
+                    class_student.objects.create(
+                        section=get_section, enrollment=student)
+
+                    # Create an email template to send section, subject, and schedule details with the user enrollment parameters.
+                    enrollment_acceptance_email(
+                        request, student.applicant.email, student.applicant.display_name, get_section)
+                else:
+                    return Response({"Success": "success enrollment validation."}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({"Error": "Exception Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class get_available_batchs(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, batchID, pk, format=None):
+        this_strand = enrollment_batch.new_batches.values(
+            'section__assignedStrand__id', 'section__yearLevel').filter(id=int(batchID)).first()
+
+        if this_strand:
+            this_batches = enrollment_batch.new_batches.filter(
+                section__assignedStrand__id=int(this_strand["section__assignedStrand__id"]), section__yearLevel=this_strand["section__yearLevel"]).annotate(
+                    count_members=Count('members')).annotate(
+                        is_full=Case(When(section__allowedPopulation__lte=F('count_members'), then=Value(True)), default=Value(False)), allowed_students=F(
+                            'section__allowedPopulation')).prefetch_related(
+                                Prefetch("members", queryset=student_enrollment_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                                    Prefetch("stud_pict", queryset=student_id_picture.objects.all())))).exclude(
+                                        members__id=int(pk)).order_by('section__yearLevel', 'section__assignedStrand__strand_name')
+
+            serializer = batchSerializer(this_batches, many=True)
+            return Response(serializer.data)
         else:
-            return Response({
-                "batches": self.get_batches(),
-                "applicants": self.get_applicants(),
-                "applicants_pks": self.get_their_pks(self.get_enrollees)
-            }, status=status.HTTP_200_OK)
+            return Response({"Data": "Empty Data."}, status.HTTP_204_NO_CONTENT)
+
+
+class swap_batches_v1(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+
+        try:
+            currentID = data["currentID"]
+            currentBatch = data["currentBatch"]
+            targetBatch = data["targetBatch"]
+            exchangeID = data["exchangeID"]
+
+            if exchangeID:
+                this_enrollment = student_enrollment_details.objects.get(
+                    id=int(currentID))
+                this_current_batch = enrollment_batch.objects.get(
+                    id=int(currentBatch))
+                this_target_batch = enrollment_batch.objects.get(
+                    id=int(targetBatch))
+                this_exchange_enrollment = student_enrollment_details.objects.get(
+                    id=int(exchangeID))
+
+                if (this_enrollment.strand == this_exchange_enrollment.strand) and (this_current_batch.section.assignedStrand == this_target_batch.section.assignedStrand):
+                    this_current_batch.members.remove(this_enrollment)
+                    this_target_batch.members.remove(this_exchange_enrollment)
+                    this_target_batch.members.add(this_enrollment)
+                    this_current_batch.members.add(this_exchange_enrollment)
+
+                    return Response({"Done": "Exchange successfully."})
+                else:
+                    return Response({"Done": "Received with no errors. But enrollment strand and strand of target batch does not match."})
+
+            else:
+                this_enrollment = student_enrollment_details.objects.get(
+                    id=int(currentID))
+                this_current_batch = enrollment_batch.objects.get(
+                    id=int(currentBatch))
+                this_target_batch = enrollment_batch.objects.get(
+                    id=int(targetBatch))
+
+                if this_enrollment.strand == this_target_batch.section.assignedStrand:
+                    this_current_batch.members.remove(this_enrollment)
+                    this_target_batch.members.add(this_enrollment)
+                    return Response({"Done": "Swap successfully."})
+                else:
+                    return Response({"Done": "Received with no errors. But enrollment strand and strand of target batch does not match."})
+
+        except Exception as e:
+            print(e)
+            return Response({"Error": "An error occurred."}, status=status.HTTP_409_CONFLICT)
+
+
+class get_available_batches_v2(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, batchId, format=None):
+        try:
+            this_strand = enrollment_batch.new_batches.values(
+                'section__assignedStrand__id', 'section__yearLevel').filter(id=batchId).first()
+
+            if this_strand:
+                this_batches = enrollment_batch.new_batches.filter(
+                    section__assignedStrand__id=int(this_strand["section__assignedStrand__id"]), section__yearLevel=this_strand["section__yearLevel"]).annotate(
+                        count_members=Count('members')).annotate(
+                            is_full=Case(When(section__allowedPopulation__lte=F('count_members'), then=Value(True)), default=Value(False)), allowed_students=F(
+                                'section__allowedPopulation')).prefetch_related(
+                                    Prefetch("members", queryset=student_enrollment_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(
+                                        Prefetch("stud_pict", queryset=student_id_picture.objects.all())))).exclude(
+                                            id=batchId).order_by('section__yearLevel', 'section__assignedStrand__strand_name')
+
+                serializer = batchSerializer(this_batches, many=True)
+                return Response(serializer.data)
+            else:
+                return Response({"": ""}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            print(e)
+            return Response({"": ""}, status=status.HTTP_409_CONFLICT)
+
+
+class swap_batches_v2(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+
+        try:
+            currentIDs = data["currentIDs"]
+            currentBatch = int(data["currentBatch"])
+            targetBatch = int(data["targetBatch"])
+            exchangeIDs = data["exchangeIDs"]
+
+            this_enrollments = student_enrollment_details.objects.filter(
+                pk__in=currentIDs)
+            this_exchange_enrollments = student_enrollment_details.objects.filter(
+                pk__in=exchangeIDs)
+            this_current_batch = enrollment_batch.objects.get(id=currentBatch)
+            this_target_batch = enrollment_batch.objects.get(id=targetBatch)
+
+            if (this_current_batch.section.assignedStrand == this_target_batch.section.assignedStrand) and self.validate_strands(this_enrollments, this_target_batch.section.assignedStrand):
+                this_current_batch.members.remove(*this_enrollments)
+                this_target_batch.members.add(*this_enrollments)
+
+                if this_exchange_enrollments and self.validate_strands(this_exchange_enrollments, this_current_batch.section.assignedStrand):
+                    this_target_batch.members.remove(
+                        *this_exchange_enrollments)
+                    this_current_batch.members.add(*this_exchange_enrollments)
+
+                    return Response({"Done": "Exchange successfully."})
+                else:
+                    return Response({"Done": "Swap successfully."})
+
+            else:
+                return Response({"": ""}, status=status.HTTP_409_CONFLICT)
+
+        except Exception as e:
+            print(e)
+            return Response({"": ""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def validate_strands(self, modelInstances, strand):
+        for instance in modelInstances:
+            if instance.strand == strand:
+                continue
+            else:
+                return False
+        else:
+            return True

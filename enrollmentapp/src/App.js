@@ -3,21 +3,18 @@ import {
   Route,
 } from "react-router-dom";
 import './App.css';
-import EnrollmentList from "./components/EnrollmentList";
-import Header from './components/Header'
-import NotePage from "./pages/NotePage";
-import NotesListPage from './pages/NotesListPage'
+import './index.css'
+import ForAdmissionStudents from "./components/admissionComponents/ForAdmissionStudents";
+import EnrollmentBatch from "./components/enrollmentComponents/EnrollmentBatch";
 
 function App() {
   return (
     <Router>
       <div className="container">
         <div className="App">
-          <Route path="/Registrar/Enrollment/" exact component={EnrollmentList} />
-          {/* <Route path="/Registrar/Enrollment/" exact component={NotesListPage} /> */}
-          {/* <Route path="/Registrar/Enrollment/Note/:id/" exact component={NotePage} /> */}
+          <Route path="/Registrar/Admission/" exact component={ForAdmissionStudents} />
+          <Route path="/Registrar/Enrollment/" exact component={EnrollmentBatch} />
         </div>
-
       </div>
     </Router>
   );

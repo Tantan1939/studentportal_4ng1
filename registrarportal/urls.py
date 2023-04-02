@@ -16,26 +16,39 @@ urlpatterns = [
     ])),
 
     path("Admission/", include([
-        path("", get_admissions.as_view(), name="view_admissions"),
+        path("", get_react_app.as_view(), name="view_admissions"),
         path("enrollment_generate/", enrollment_invitation_oldStudents.as_view(),
              name="enrollment_invitation_oldStudents"),
         path("Update_schedule/", update_admission_schedule.as_view(),
              name="update_admission_schedule"),
         re_path(r"admitted_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_admitted_students.as_view(), name="get_admitted_students"),
+
+        path("Api/", include([
+            path("get/", get_admissions.as_view()),
+            path("denied/", denied_admission.as_view()),
+            path("admit/", admit_students.as_view()),
+        ])),
     ])),
 
     path("Enrollment/", include([
-        path("", validate_enrollments.as_view(), name="validate_enrollment"),
-
+        path("", get_react_app.as_view(), name="validate_enrollment"),
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
-        path("Note/<pk>/", validate_enrollments.as_view(),
-             name="validate_enrollments"),
-        re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
-                get_enrollment_batches.as_view(), name="get_enrollment_batches"),
+
+        # re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
+        #         get_enrollment_batches_v0.as_view(), name="get_enrollment_batches"),
 
         # For enrollment DRF Api
+        path("Api/", include([
+            path("Get/", get_enrollment_batches.as_view()),
+            path("Denied/", denied_enrollee.as_view()),
+            path("Accept/", accept_enrollees.as_view()),
+            path("Batches/<batchID>/<pk>/", get_available_batchs.as_view()),
+            path("Swap_v1/", swap_batches_v1.as_view()),
+            path("Swap_v2/", swap_batches_v2.as_view()),
+            path("Batchesv2/<batchId>/", get_available_batches_v2.as_view()),
+        ])),
     ])),
 
     # For DRF API
