@@ -4,7 +4,13 @@ from datetime import date
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
-from . emailSenders import send_enrollment_link
+from registrarportal.tasks import email_tokenized_enrollment_link
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from . tokenGenerators import generate_enrollment_token
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 
 def add_school_year(start_year, year):
@@ -133,7 +139,6 @@ class student_admission_details(models.Model):
 
     @classmethod
     def admit_this_students(cls, request, iDs):
-        lst = []
         for id in iDs:
             with transaction.atomic():
                 obj = cls.objects.select_for_update().get(id=id)
@@ -141,9 +146,14 @@ class student_admission_details(models.Model):
                 if obj.is_denied:
                     obj.is_denied = False
                 obj.save()
-                lst.append(obj)
-        else:
-            send_enrollment_link(request, lst)
+
+                email_tokenized_enrollment_link.delay({
+                    "username": obj.admission_owner.display_name,
+                    "domain": get_current_site(request).domain,
+                    "uid": urlsafe_base64_encode(force_bytes(obj.pk)),
+                    "token": generate_enrollment_token.make_token(obj),
+                    "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p")},
+                    send_to=obj.admission_owner.email)
 
 
 class admission_requirements(models.Model):
@@ -262,6 +272,20 @@ class student_enrollment_details(models.Model):
         ordering = ["-enrolled_school_year__id", "created_on"]
         unique_together = ["applicant", "admission", "enrolled_school_year"]
 
+    @classmethod
+    def accept_students(cls, pks):
+        pk_list = []
+        for pk in pks:
+            with transaction.atomic():
+                stud = cls.objects.select_for_update().get(pk=pk)
+                stud.is_accepted = True
+                if stud.is_denied:
+                    stud.is_denied = False
+                stud.save()
+                pk_list.append(pk)
+        else:
+            return pk_list
+
 
 class student_home_address(models.Model):
     home_of = models.ForeignKey(
@@ -325,7 +349,7 @@ class student_id_picture(models.Model):
         ordering = ["-created_on"]
 
 
-class enrollment_batch_manager(models.Model):
+class enrollment_batch_manager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(sy__until__gte=date.today())
 
@@ -333,10 +357,10 @@ class enrollment_batch_manager(models.Model):
 class enrollment_batch(models.Model):
     sy = models.ForeignKey(
         schoolYear, on_delete=models.RESTRICT, related_name="sy_enrollment_batches")
-    section = models.ForeignKey("adminportal.schoolSections",
-                                on_delete=models.RESTRICT, related_name="section_batch")
+    section = models.OneToOneField(
+        "adminportal.schoolSections", on_delete=models.RESTRICT, related_name="section_batch")
     members = models.ManyToManyField(
-        student_enrollment_details, related_name="enrollment_batch_member")
+        student_enrollment_details, related_name="enrollment_batch_member", blank=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 

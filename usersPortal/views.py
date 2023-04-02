@@ -106,7 +106,7 @@ def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+    except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
         user = None
 
     if user is not None and account_activation_token.check_token(user, token):
@@ -263,7 +263,7 @@ class passwordReset(FormView):
             uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
             user = User.objects.get(pk=uid)
             self.user_obj = user
-        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
 
         if user is not None and password_reset_token.check_token(user, self.kwargs['token']):

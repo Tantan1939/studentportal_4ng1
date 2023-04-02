@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from . models import note, student_enrollment_details, enrollment_batch, student_report_card, student_id_picture
+from . models import *
 
 
 def add_school_year(start_year, year):
@@ -16,14 +16,76 @@ class NoteSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class Ph_born_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ph_born
+        fields = ['good_moral', 'report_card', 'psa']
+
+
+class Fc_docx_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = foreign_citizen_documents
+        fields = ['good_moral', 'report_card', 'psa',
+                  'alien_certificate_of_registration', 'study_permit', 'f137']
+
+
+class Dc_docx_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = dual_citizen_documents
+        fields = ['good_moral', 'report_card', 'psa',
+                  'dual_citizenship', 'philippine_passport', 'f137']
+
+
+class AdmissionSerializer(serializers.ModelSerializer):
+    admission_owner = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='email'
+    )
+    softCopy_admissionRequirements_phBorn = Ph_born_Serializer(
+        many=True, read_only=True, required=False)
+    softCopy_admissionRequirements_foreigner = Fc_docx_Serializer(
+        many=True, read_only=True, required=False)
+    softCopy_admissionRequirements_dualCitizen = Dc_docx_Serializers(
+        many=True, read_only=True, required=False)
+    type = serializers.CharField(source='get_type_display')
+    first_chosen_strand = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='strand_name'
+    )
+    second_chosen_strand = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='strand_name'
+    )
+
+    class Meta:
+        model = student_admission_details
+        fields = ['id', 'admission_owner', 'first_name', 'middle_name', 'last_name', 'sex', 'date_of_birth', 'birthplace', 'nationality',
+                  'elem_name', 'elem_address', 'elem_region', 'elem_year_completed',
+                  'jhs_name', 'jhs_address', 'jhs_region', 'jhs_year_completed',
+                  'first_chosen_strand', 'second_chosen_strand', 'type',
+                  'softCopy_admissionRequirements_phBorn', 'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen']
+
+
+class BatchAdmissionSerializer(serializers.ModelSerializer):
+    members = AdmissionSerializer(many=True, read_only=True)
+    number_of_applicants = serializers.IntegerField()
+
+    class Meta:
+        model = admission_batch
+        fields = ['id', 'members', 'number_of_applicants']
+
+
 class displayCourseSerializer(serializers.RelatedField):
     def to_representation(self, value):
         return f"{value.track.track_name}: {value.strand_name}"
 
 
-class SchoolYearRelationSerializer(serializers.RelatedField):
-    def to_representation(self, value):
-        return " ".join(map(str, [value.start_on.strftime("%Y"), "-", (add_school_year(value.start_on, 1)).strftime("%Y")]))
+# class SchoolYearRelationSerializer(serializers.RelatedField):
+#     def to_representation(self, value):
+#         return " ".join(map(str, [value.start_on.strftime("%Y"), "-", (add_school_year(value.start_on, 1)).strftime("%Y")]))
 
 
 class ReportCardSerializer(serializers.ModelSerializer):
@@ -45,8 +107,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         slug_field='email'
     )
     strand = displayCourseSerializer(many=False, read_only=True)
-    enrolled_school_year = SchoolYearRelationSerializer(
-        many=False, read_only=True)
+    year_level = serializers.CharField(source='get_year_level_display')
     enrollment_address = serializers.SlugRelatedField(
         many=True,
         read_only=True,
@@ -62,17 +123,41 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = student_enrollment_details
-        fields = ['id', 'applicant', 'strand', 'year_level', 'full_name', 'age', 'is_accepted',
-                  'is_denied', 'enrolled_school_year', 'enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict']
+        fields = ['id', 'applicant', 'strand', 'year_level', 'full_name', 'age',
+                  'enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict']
 
 
-class BatchSerializer(serializers.ModelSerializer):
+class Batch_AssignedSection_Serializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return f"{value.name}"
+
+
+class EnrollmentBatchSerializer(serializers.ModelSerializer):
+    section = Batch_AssignedSection_Serializer(many=False, read_only=True)
+    members = EnrollmentSerializer(many=True, read_only=True)
+    number_of_enrollment = serializers.IntegerField()
+
     class Meta:
         model = enrollment_batch
-        fields = ['id']
+        fields = ['id', 'section', 'members', 'number_of_enrollment']
 
 
-class EnrolleesPkSerializer(serializers.ModelSerializer):
+class batchMemberSerializer(serializers.ModelSerializer):
+    stud_pict = StudentPicSerializer(many=True, read_only=True)
+
     class Meta:
         model = student_enrollment_details
-        fields = ['id']
+        fields = ['id', 'full_name', 'age', 'stud_pict']
+
+
+class batchSerializer(serializers.ModelSerializer):
+    section = Batch_AssignedSection_Serializer(many=False, read_only=True)
+    is_full = serializers.BooleanField()
+    allowed_students = serializers.CharField()
+    count_members = serializers.IntegerField()
+    members = batchMemberSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = enrollment_batch
+        fields = ['id', 'section', 'is_full', 'members',
+                  'allowed_students', 'count_members']
