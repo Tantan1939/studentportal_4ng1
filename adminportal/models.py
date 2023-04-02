@@ -1,14 +1,8 @@
 from django.db import models, transaction
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from datetime import date, datetime, timedelta
 from django.core.validators import RegexValidator
-from django.contrib.postgres.constraints import ExclusionConstraint
-from django.contrib.postgres.fields import RangeOperators
-from django.db.models import Q
-from django.shortcuts import HttpResponseRedirect
-from django.urls import reverse
-from registrarportal.models import schoolYear
+from datetime import date
 
 User = get_user_model()
 
@@ -456,15 +450,17 @@ class schoolSections(models.Model):
         grade_12 = '12', _('Grade 12')
 
     name = models.CharField(max_length=30)
-    yearLevel = models.CharField(max_length=7, choices=year_levels.choices)
+    yearLevel = models.CharField(max_length=2, choices=year_levels.choices)
     sy = models.ForeignKey(
-        schoolYear, on_delete=models.RESTRICT, related_name="sy_section")
+        "registrarportal.schoolYear", on_delete=models.RESTRICT, related_name="sy_section")
     assignedStrand = models.ForeignKey(
         shs_strand, on_delete=models.RESTRICT, related_name="section_strand")
     first_sem_subjects = models.ManyToManyField(
         subjects, through="firstSemSchedule", related_name="firstSemSubjects")
     second_sem_subjects = models.ManyToManyField(
         subjects, through="secondSemSchedule", related_name="secondSemSubjects")
+    students = models.ManyToManyField(
+        "registrarportal.student_enrollment_details", through="class_student", related_name="enrolled_section")
     # Model.m2mfield.through.objects.all()
     allowedPopulation = models.IntegerField()
     is_active = models.BooleanField(default=True)
@@ -482,6 +478,26 @@ class schoolSections(models.Model):
         return self.name
 
 
+class class_manager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(section__sy__until__gte=date.today())
+
+
+class class_student(models.Model):
+    section = models.ForeignKey(
+        schoolSections, on_delete=models.RESTRICT, related_name="classmate")
+    enrollment = models.ForeignKey(
+        "registrarportal.student_enrollment_details", on_delete=models.RESTRICT, related_name="class_group")
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    new_students = class_manager()
+
+    class Meta:
+        ordering = ['-created_on']
+
+
 class firstSemSchedule(models.Model):
     section = models.ForeignKey(
         schoolSections, on_delete=models.RESTRICT, related_name="firstSemSched")
@@ -493,7 +509,7 @@ class firstSemSchedule(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["time_in"]
+        ordering = ["-created_on"]
 
     @classmethod
     def save_sched(cls, firstSemSubjects, firstSemSchedules):
@@ -524,7 +540,7 @@ class secondSemSchedule(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["time_in"]
+        ordering = ["-created_on"]
 
     @classmethod
     def save_sched(cls, secondSemSubjects, secondSemSchedules):

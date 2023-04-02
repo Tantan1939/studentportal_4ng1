@@ -37,6 +37,7 @@ from PIL import Image
 from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
+from studentportal.tasks import admission_batching, enrollment_batching
 
 
 # pytesseract.pytesseract.tesseract_cmd = 'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
@@ -262,6 +263,8 @@ class admission(SessionWizardView):
             self.initialize_foreignTables(documents)
             self.init_docu.save()
 
+            admission_batching.delay(self.get_admission.id)
+
             messages.success(
                 self.request, "Admission saved. Kindly wait for the registrar to validate your request.")
 
@@ -481,6 +484,8 @@ class enrollment_new_admission(FormView):
                     strand=save_this.strand).first()
                 self.admObj.save()
 
+                enrollment_batching.delay(save_this.id)
+
                 messages.success(
                     self.request, "We received your enrollment. Please wait us to validate it.")
                 return super().form_valid(form)
@@ -489,8 +494,8 @@ class enrollment_new_admission(FormView):
                     self.request, "Enrollment Failed. Please complete your profile to continue.")
                 return self.form_invalid(form)
         except Exception as e:
-            messages.error(
-                self.request, "Enrollment Failed. Nakapag-apply kana this school year.")
+            # messages.error(
+            #     self.request, "Enrollment Failed. Nakapag-apply kana this school year.")
             return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -503,7 +508,7 @@ class enrollment_new_admission(FormView):
             uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
             self.admObj = student_admission_details.objects.get(
                 pk=uid, admission_owner=request.user)
-        except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+        except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
             self.admObj = None
 
         if self.admObj is not None and generate_enrollment_token.check_token(self.admObj, self.kwargs['token']):
@@ -554,6 +559,8 @@ class enrollment_old_students(FormView):
                     strand=save_this.strand).first()
                 self.admObj.save()
 
+                enrollment_batching.delay(save_this.id)
+
                 messages.success(
                     self.request, "We received your enrollment. Please wait us to validate it.")
                 return super().form_valid(form)
@@ -578,7 +585,7 @@ class enrollment_old_students(FormView):
                 pk=uid, invitation_to__admission_owner=request.user)
             self.admObj = student_admission_details.objects.get(
                 admission_owner=request.user)
-        except(TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+        except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
             self.invObj = None
 
         if self.invObj is not None and new_enrollment_token_for_old_students.check_token(self.invObj, self.kwargs['token']):
@@ -689,6 +696,7 @@ class resend_admission(FormView):
 
                 else:
                     pass
+                admission_batching.delay(self.get_adm.id)
                 messages.success(self.request, "Admission resubmitted.")
             return super().form_valid(form)
         except Exception as e:
@@ -816,6 +824,7 @@ class resend_enrollment(FormView):
                 to_updateFields.append("is_denied")
 
                 self.get_enrollment.save(update_fields=to_updateFields)
+                enrollment_batching.delay(self.get_enrollment.id)
                 messages.success(
                     self.request, "Enrollment resubmitted successfully.")
 
