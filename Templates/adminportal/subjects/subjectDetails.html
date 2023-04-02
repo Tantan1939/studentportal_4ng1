@@ -5,28 +5,27 @@
 
 
 
-<div class="container py-3 d-flex justify-content-end"></div>
+<div class="container pt-5">
+    <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
+
+  </div>
 
 
 
-
-        <form id="postForm" class="px-2 pb-5" method="post">
+  <div class="container col-md-8 mt-4 p-3 bg-white box_shadow border rounded">
+        <form id="postForm" class="p-3" method="post">
             {% csrf_token %}
 
 
             <!-- List of errors from forms.py -->
             {{ form.non_field_errors }}
 
-            <div class="container col-md-8 mt-4 p-3 bg-white box_shadow">
+      
                 <h4 class="py-2"> 
-                    
-
-                    <i class="fa fa-pencil me-2" aria-hidden="true">   
-                    </i>
-                    <i>
-                    Subject Details
-                </i>
+                    <i class="fa fa-pencil me-2" aria-hidden="true"></i>
+                    <i>Subject Details</i>
                 </h4>
+                <hr>
 
                 <div class="form-outline mb-4 mt-4">
                     {{ form.code.errors }} <!-- Field errors -->
