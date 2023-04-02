@@ -24,7 +24,7 @@ from django.middleware import csrf
 from studentportal.models import documentRequest
 from formtools.wizard.views import SessionWizardView
 from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule, class_student
-from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email
+from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -645,10 +645,18 @@ class denied_admission(APIView):
     def post(self, request, format=None):
         data = request.data
         try:
+            get_batch = admission_batch.objects.filter(
+                members__id=int(data["key"])).first()
+
             to_deny = student_admission_details.objects.get(
                 id=int(data["key"]))
             to_deny.is_denied = True
             to_deny.save()
+            get_batch.members.remove(to_deny)
+
+            denied_admission_email(
+                request, to_deny.admission_owner.email, to_deny.last_name)
+
             return Response({"Done": "Admission Denied"}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({"Warning": "Admission no longer exist."}, status=status.HTTP_200_OK)
@@ -665,6 +673,7 @@ class admit_students(APIView):
             student_admission_details.admit_this_students(
                 request, to_admit_students)
             return Response({"Done": "Admitted Students."}, status=status.HTTP_200_OK)
+
         except Exception as e:
             print(e)
             return Response({"Error": "Exception Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -705,6 +714,11 @@ class denied_enrollee(APIView):
 
             denied_stud = student_enrollment_details.objects.get(
                 id=int(data['key']))
+
+            get_batch = enrollment_batch.new_batches.filter(
+                members__id=denied_stud.id).first()
+            get_batch.members.remove(denied_stud)
+
             denied_enrollment_email(
                 request, denied_stud.applicant.email, denied_stud.full_name)
 

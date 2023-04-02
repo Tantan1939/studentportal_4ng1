@@ -5,6 +5,17 @@ from django.template.loader import render_to_string
 
 
 @shared_task
+def failed_admission(mail_details, receiver):
+    try:
+        mail_subject = "Admission Validation Failed"
+        email = EmailMessage(mail_subject, mail_details, to=[receiver])
+        email.send()
+        return f"Admission Validation Failed Email is Sent"
+    except Exception as e:
+        return e
+
+
+@shared_task
 def failed_enrollment(mail_details, receiver):
     try:
         mail_subject = "Enrollment Validation Failed"
