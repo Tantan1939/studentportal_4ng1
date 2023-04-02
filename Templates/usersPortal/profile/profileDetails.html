@@ -3,14 +3,14 @@
 {% include 'usersPortal/messages/messages.html' %}
 
 
-<div class="container py-3 pb-5 mt-5 mb-5" style="box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;">
-    <div class="row p-2 pt-3">
-        <div class="col-md-3">
-            <div class="l_img w-100 d-flex justify-content-center">
+<div class="container mt-5 mb-5" style="box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;">
+    <div class="row ">
+        <div class="col-md-3" style="background: rgb(138, 21, 21);">
+            <div class="l_img w-100 d-flex justify-content-center pt-3">
                 <img src="{{ userDetails.userimage.image.url }}" alt="">
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-9 px-5 pt-3 pb-5">
             <div class="r_content">
                 <div class="content_wrapper">
                     <p> First Name: <span>{{userDetails.first_name}}</span></p>
@@ -22,9 +22,9 @@
                     <p> Address: <span>{{userDetails.useraddress}}</span>  </p>
                 </div>
                 <div class="btns">
-                    <a href="{% url 'usersPortal:updateAccountProfile' %}" class="btn btn-primary btn-md"> Edit </a>
-                    <a href="{% url 'usersPortal:changepassword' %}" class="btn btn-primary btn-md"> Change Password </a>
-                    <a href="{% url 'usersPortal:resetpassword' %}" class="btn btn-primary btn-md"> Reset Password </a>
+                    <a href="{% url 'usersPortal:updateAccountProfile' %}" class="btn btn-outline-dark" style="transition: 0.3s ease;"> Edit </a>
+                    <a href="{% url 'usersPortal:changepassword' %}" class="btn btn-outline-dark" style="transition: 0.3s ease;"> Change Password </a>
+                    <a href="{% url 'usersPortal:resetpassword' %}" class="btn btn-outline-dark" style="transition: 0.3s ease;"> Reset Password </a>
                 </div>
             </div>
 
