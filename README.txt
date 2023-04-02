@@ -112,3 +112,54 @@ Step 10: Login using admin account.
 Step 11: Add strand to any available tracks.
 Step 12: Return to vs code terminal, and enter make_admissions()
 Step 13: Report any errors
+
+
+--- STEPS TO INSTALL CELERY ---
+* COMMANDS IN RabbitMQ shell:
+	rabbitmq-server.bat : starts the broker as an application.
+	rabbitmq-service.bat : manages the service and starts the broker (The server should not be run as a service and application simultaneously).
+	rabbitmqctl.bat : manages a running broker.
+	rabbitmq-server.bat -detached : starts the broker at the background.
+	rabbitmqctl.bat stop : stop the broker.
+	rabbitmqctl.bat status : check node status
+	rabbitmq-service.bat stop : stop the rabbitmq service from running
+
+Step 1: Install erlang (run as administrator) using the administrator account.
+Step 2: Install RabbitMQ (run as administrator) using the administrator account.
+Step 3: Open the environment variables.
+	Step 3.1: Add new system variable, variable_name = RABBITMQ_SERVER,  variable_value = C:\Program Files\RabbitMQ Server\rabbitmq_server-3.11.10
+	Step 3.2: Open the system variable Path and add C:\Program Files\RabbitMQ Server\rabbitmq_server-3.11.10\sbin
+	Step 3.3: Save and Close.
+Step 4: Open the RabbitMQ command prompt (sbin dir) or any cmd.
+	Step 4.1: Type rabbitmq-plugins enable rabbitmq_management and hit Enter. (Required to enable the plugins)
+	Step 4.2: Type rabbitmq-server.bat or rabbitmq-server.bat -detached and hit Enter. (to start the broker)
+	Step 4.3: Type rabbitmq-service.bat install and hit Enter. (will install the service, for first time only)
+	Step 4.4: Type rabbitmq-service.bat start and hit Enter. (will start the broker as a service)
+
+
+--- STEPS TO ENABLE CELERY IN DJANGO PROJECT ---
+	--- For initialization only ---
+	Step 1: Go to rabbitmq management.
+	Step 2: Login using guest account.
+	Step 3: Create a user.
+	Step 4: Create a vhost.
+	Step 5: Assign vhost to the user.
+
+Step 1: Open cmd, type rabbitmq-service.bat stop and hit Enter.
+Step 2: Type rabbitmq-server.bat or rabbitmq-server.bat -detached and hit Enter.
+Step 3: Open cmd and cd to the django project directory.
+	Step 3.1: Activate environment using Scripts\activate and hit Enter.
+	Step 3.2: cd to the studentportal_4ng1.
+	Step 3.3: Type celery -A studentportal_4ng1 worker -l info --pool=solo
+
+
+--- INSTALL NODE JS and NPM ---
+Step 1: Download the node js installer and install it.
+Step 2: Open cmd, type npm install -g npm and hit Enter.
+
+
+--- SETUP DJANGO with REACTJS ---
+Step 1: Open the django project with vscode.
+Step 2: Open a new terminal.
+Step 3: type cd enrollmentapp and hit Enter.
+Step 4: Type npm install and hit Enter.

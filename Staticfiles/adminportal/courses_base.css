@@ -26,11 +26,13 @@ body{
     color: #fff;
 }
 
-.main{
+.main {
     background: #D7E5D8;
-    min-height: 91vh;
+    min-height: 100vh;
     height: 100%;
 }
+
+
 .main .track_parent{
     box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 }

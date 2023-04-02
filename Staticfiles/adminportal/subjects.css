@@ -33,7 +33,7 @@ body{
 
 .main{
     background: #D7E5D8;
-    min-height: 91vh;
+    min-height: 100vh;
     height: 100%;
 }
 .main .track_parent{
@@ -42,3 +42,19 @@ body{
 .color {
     background-color: royalblue;
 }
+table {
+    border-collapse: collapse;
+    width: 50px;
+  }
+  
+  thead, td {
+    text-align: left;
+    padding: 8px;
+  }
+  
+  tr:nth-child(even) {background-color: #f2f2f2;}
+  
+  thead {
+    background-color: #044b31;
+    color: rgb(255, 255, 255);
+  }

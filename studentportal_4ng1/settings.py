@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
-
     'studentportal.apps.StudentportalConfig',
     'adminportal.apps.AdminportalConfig',
     'usersPortal.apps.UsersportalConfig',
@@ -74,6 +73,14 @@ WSGI_APPLICATION = 'studentportal_4ng1.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+CELERY_IMPORTS = {
+    'registrarportal.tasks',
+    'studentportal.tasks',
+    'usersPortal.tasks',
+}
+CELERY_BROKER_URL = 'amqp://djangoapp:djangoapp@localhost:5672/'
+CELERY_RESULT_BACKEND = 'rpc://'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -110,23 +117,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-# Remove this in production
-LOGGING = {
-    'version': 1,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'DEBUG',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-    }
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -170,11 +160,3 @@ ENROLLMENT_TOKEN_TIMEOUT = 604800  # 7 Days
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOW_METHODS = [
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-#     "PUT",
-# ]

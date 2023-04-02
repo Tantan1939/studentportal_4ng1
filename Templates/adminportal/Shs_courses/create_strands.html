@@ -4,20 +4,20 @@
 {% include 'adminportal/messages/messages.html' %}
 
 
-<div class="container py-3 d-flex justify-content-end">
-    
-</div>
 
+<div class="container pt-5">
+    <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
+  </div>
 <form id="postForm" class="px-2" method="post">
     {% csrf_token %}
     <!-- List of errors from forms.py -->
     {{ form.non_field_errors }}
 
-    <div class="container col-md-8 mt-4 p-3 bg-light">
+    <div class="container col-md-8 mt-4 p-3 bg-light border rounded">
         <h4> 
             <i class="fa fa-pencil" aria-hidden="true"></i>
         <i>Add Strand </i>
-           
+           <hr>
         </h4>
         
         <div class="form-outline mb-4">
