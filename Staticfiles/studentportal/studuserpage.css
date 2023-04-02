@@ -1,19 +1,19 @@
 /* profile details */
 .content_wrapper p{
-    color: rgb(133, 21, 21);
-    border-bottom: 2px solid rgb(133, 21, 21);
+    color: #868686 !important;
+    border-bottom: 1px solid #999;
     padding: 10px 10px;
-
+    font-size: 20px !important;
 }
 .content_wrapper p span{
     color: black;
+    font-size: 20px !important;
 }
 .l_img img{
     height: auto;
     width: 100%;
     max-width: 190px;
 }
-
 /* profileupdate */
 .edit_img img{
     height: auto;
