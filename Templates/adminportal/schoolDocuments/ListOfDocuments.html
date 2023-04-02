@@ -2,12 +2,15 @@
 {% block content %}
 {% include 'adminportal/messages/messages.html' %}
 
-<div class="container pt-5 d-flex flex-column">
+<div class="container pt-5">
+    <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
     <a href="{% url 'adminportal:addEditDocument' %}" class="add_docu btn btn-success btn-md">
         <i class="bi bi-plus lg">
         </i>
         Add Document
     </a>
+    </div>
+
 
 
 

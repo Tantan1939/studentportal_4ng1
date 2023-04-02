@@ -4,20 +4,25 @@
 {% include 'adminportal/messages/messages.html' %}
 
 
-<div class="container py-3 d-flex justify-content-end"></div>
 
-<div class="container col-md-12">
-    <form id="postForm" method="post" enctype="multipart/form-data">
+<div class="container pt-5">
+    <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
+ 
+  </div>
+
+  <div class="container col-md-8 mt-4 p-3 bg-white box_shadow border rounded">
+    <form id="postForm" class="p-3"method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <!-- List of errors from forms.py -->
         {{ form.non_field_errors }}
-        <div class="container col-md-8 mt-4 p-3 bg-white box_shadow border rounded">
+     
             <h4 class="py-2">
-                <i class="fa fa-pencil me-2"></i>
+                <i class="fa fa-pencil" aria-hidden="true"></i>
                 <i>
                     Details
                 </i>
             </h4>
+            <hr>
 
 
 
@@ -39,8 +44,8 @@
             {{ form.start_time|addclass:"form-control"}} <!-- Input Field -->
             {{ form.start_time.errors }} <!-- Field errors -->
         </div>
-        <a href="{% url 'adminportal:get_sections' %}" class="btn btn-secondary"> Back </a>
-        <input type="submit" value="Generate" class="btn btn-success">
+        <a href="{% url 'adminportal:get_sections' %}" class="btn btn-secondary btn-md"> Back </a>
+        <input type="submit" value="Generate" class="btn btn-success btn-md">
     </form>
 
 

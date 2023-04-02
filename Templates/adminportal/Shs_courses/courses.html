@@ -4,8 +4,14 @@
 {% include 'adminportal/messages/messages.html' %}
 
 
-<div class="container pt-5 d-flex flex-column">
-    <a href="{% url 'adminportal:add_track' %}" class="add_track btn-success"><i class="bi bi-plus-lg"></i> Add Track </a>
+
+<div class="container pt-5">
+  <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
+
+    <a href="{% url 'adminportal:add_track' %}" class="add_track btn-success">
+      <i class="bi bi-plus-lg"></i> Add Track </a>
+      </div>
+
     {% for track in courses %}
         <div class="track_parent p-3 mt-3 mb-2 bg-white text-dark border rounded">
             <div class="track d-flex justify-content-between">

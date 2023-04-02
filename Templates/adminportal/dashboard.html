@@ -14,7 +14,7 @@
   {% endif %}
   <link rel="stylesheet" href="{% static 'adminportal/base1.css' %}">
   <link rel="stylesheet" href="{% static 'adminportal/dash.css' %}">
-  <!-- <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"> -->
+ 
 
 
 
@@ -45,191 +45,121 @@
 </head>
 
 <body>
-
-  {% include 'adminportal/messages/messages.html' %}
-
-  <nav class="navbar py-3 navbar-expand-lg navbar-light">
+  <nav class="navbar fixed-top d-flex py-3 align-items-center navbar-scrolled navbar-custom">
     <div class="container">
-      <a class="navbar-brand" href="#">Dashboard</a>
+      <a class="navbar-brand" href="#">Leandro Locsin Integrated School</a>
+      <div class="hex">
+        <i class="bi bi-ticket">
+        </i>
+      </div>
 
-      <ul class="navbar-nav ">
-        <li class="nav-item ms-auto">
-          <a href="{% url 'usersPortal:logout' %}" class="btn btn-outline-danger"> Logout </a>
-        </li>
-      </ul>
+
     </div>
+
+    {% include 'adminportal/messages/messages.html' %}
   </nav>
 
 
+    
+  <aside id="sidebar" class="sidebar">
+   
 
 
-  <div class="color">
-    <section id="featured-services" class="featured-services">
-      <div class="container aos-init aos-animate" data-aos="fade-up">
-        <div class="row">
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'adminportal:view_courses' %}" class="icon-box" style="text-decoration: none; color:black">
-              <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="300">
-                <div class="icon">
-                  <i class="fa-solid fa-ticket"></i>
-                </div>
-                <h4 class="title">
-                  Courses
-                </h4>
-                <!-- <p class="description">The process of accepting people into a university, school, etc. as students, or the part of a university, school, etc.</p> -->
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-6 col-lg-3  mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="#" class="icon-box" style="text-decoration: none; color:black">
-              <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="300">
-                <div class="icon">
-                  <i class="fa-solid fa-ticket"></i>
-                </div>
-                <h4 class="title">
-                  Admission and Enrollment
-                </h4>
-                <!-- <p class="description">The process of accepting people into a university, school, etc. as students, or the part of a university, school, etc.</p> -->
-              </div>
-            </a>
-          </div>
-
-
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'usersPortal:create_adminAccount' %}" class="icon-box" style="text-decoration: none; color:black">
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
-              <div class="icon">
-                <i class="fa-solid fa-user-shield"></i>
-              </div>
-              <h4 class="title">
-                Create admin
-              </h4>
-              <!-- <p class="description">A person who is in charge of the operation of a network of computers, a website, a group of computer users, etc.,</p> -->
-            </div>
-            </a>
-          </div>
-          
-
-
-
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'usersPortal:create_registrarAccount' %}" class="icon-box" style="text-decoration: none; color:black">
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
-              <div class="icon">
-                <i class="fa-sharp fa-solid fa-user"></i>
-              </div>
-              <h4 class="title">
-                Create Registrar
-              </h4>
-              <!-- <p class="description">Registrar maintains student records and course data, which can include helping students schedule or register for classes.</p> -->
-            </div>
+    <ul class="sidebar-nav" id="sidebar-nav">
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:view_courses' %}">
+          <i class="bi bi-ticket"></i>
+          <span>Courses</span>
         </a>
-        </div>
-        
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'usersPortal:create_adminAccount' %}">
+          <i class="bi bi-lock"></i>
+          <span>Create admin</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'usersPortal:create_registrarAccount' %}">
+          <i class="bi bi-person-workspace""></i>
+          <span>Create Registrar</span>
+        </a>
+      </li>
+
+   
+      
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:schoolDocuments' %}">
+          <i class="bi bi-file"></i>
+          <span>School Documents</span>
+        </a>
+      </li>
+
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:get_ongoingSchoolEvents' %}">
+          <i class="bi bi-calendar"></i>
+          <span>Events</span>
+        </a>
+      </li>
 
 
 
- 
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'adminportal:schoolDocuments' %}" class="icon-box" style="text-decoration: none; color:black">
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
-              <div class="icon">
-                <i class="fa-sharp fa-solid fa-file"></i>
-              </div>
-              <h4 class="title">
-               School Documents
-              </h4>
-              <!-- <p class="description"> File containing information about each student in a school, college, etc, such as demographic information and information about grades, etc.</p> -->
-            </div>
-            </a>
-          </div>
-
-
-
-
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'adminportal:get_ongoingSchoolEvents' %}" class="icon-box" style="text-decoration: none; color:black">  
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
-              <div class="icon">
-                <i class="fa-sharp fa-solid fa-calendar-days"></i>
-              </div>
-              <h4 class="title">
-               Events
-              </h4>
-              <!-- <p class="description"> An activity that is planned for a special purpose and usually involves a lot of people</p> -->
-            </div>
-          </a>
-          </div>
-
-
-
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'adminportal:view_curriculum' %}" class="icon-box" style="text-decoration: none; color:black"> 
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
-              <div class="icon">
-                <i class="fa-solid fa-graduation-cap"></i>
-              </div>
-              <h4 class="title">
-              Curriculum
-              </h4>
-              <!-- <p class="description">Lessons and academic content taught in a school or in a specific course or program.</p> -->
-            </div>
-            </a>
-          </div>
-
-
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'adminportal:getSubjects' %}" class="icon-box" style="text-decoration: none; color:black"> 
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
-              <div class="icon">
-                <i class="fa-sharp fa-solid fa-list"></i>
-                </i>
-              </div>
-              <h4 class="title">
-              Subjects
-              </h4>
-              <!-- <p class="description">A school subject constitutes an organizing framework that gives meaning and shape to curriculum content, teaching, and learning activities</p> -->
-            </div>
-          </a>
-          </div>
-
-     
-          
-       
-          <div class="col-md-6 col-lg-3 mt-5 d-flex align-items-stretch mb-5 mb-lg-0">
-            <a href="{% url 'adminportal:get_sections' %}" class="icon-box" style="text-decoration: none; color:black"> 
-            <div class="aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
-              <div class="icon">
-                <i class="fa-sharp fa-solid fa-list"></i>
-                </i>
-              </div>
-              <h4 class="title">
-                Sections
-              </h4>
-              <!-- <p class="description">A school subject constitutes an organizing framework that gives meaning and shape to curriculum content, teaching, and learning activities</p> -->
-            </div>
-            </a>
-          </div>
-
-
-
-
-
-          
-
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:view_curriculum' %}">
+          <i class="bi bi-view-list"></i>
+          <span>Curriculum</span>
+        </a>
+      </li>
 
 
    
 
+      
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:getSubjects' %}">
+          <i class="bi bi-card-list"></i>
+          <span>Subjects</span>
+        </a>
+      </li>
 
-      </div>
-  </div>
-  </section>
-  </div>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:get_sections' %}">
+          <i class="bi bi-filter"></i>
+          <span>Sections</span>
+        </a>
+      </li>
+
+
+      
+      
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{% url 'usersPortal:logout' %}"> 
+          <i class="bi bi-box-arrow-left"></i>
+          <span> Sign Out </span>
+          </a>
+        </li>
+    
+
+    </ul>
+
+  </aside>
+  
 
 
 
+
+ 
+
+<script>
+  const hex = document.querySelector('.hex')
+  const sidebar = document.querySelector('.sidebar')
+  hex.addEventListener('click', () => {
+        sidebar.classList.toggle('active')
+      })
+</script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
