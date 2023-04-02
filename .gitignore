@@ -20,3 +20,5 @@ usersPortal/migrations/__pycache__/*
 usersPortal/templatetags/__pycache__/*
 
 email_assets.txt
+
+Media/*
