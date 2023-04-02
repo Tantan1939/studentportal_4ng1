@@ -12,8 +12,10 @@
   {% else %}
   <title> Events </title>
   {% endif %}
-  <link rel="stylesheet" href="{% static 'adminportal/base1.css' %}">
+  <link rel="stylesheet" href="{% static 'adminportal/dash.css' %}">
   <link rel="stylesheet" href="{% static 'adminportal/events.css' %}">
+
+ 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
@@ -29,48 +31,14 @@
 
 <body>
 
-  <nav class="navbar navbar-expand-lg navbar-light py-3">
-    <div class="container">
-      <a class="navbar-brand">Events</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav w-100 mb-2 mb-lg-0 d-flex">
-          <li class="nav-item ms-auto">
-
-            <a href="{% url 'adminportal:index' %}" class="btn btn-outline-primary me-3"> Dashboard </a>
-
-          </li>
-          <li class="nav-item">
-
-            <a href="{% url 'usersPortal:logout' %}" class="btn btn-outline-danger"> Logout </a>
-
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-
-    
-
-
-
-
+  {% include 'adminportal/dashboard.html' %}
 
   <div class="main">
 
    
     
 
-    <div class="container pt-5 d-flex flex-column">
-    <a href="{% url 'adminportal:add_schoolEvent' %}" class="add_track btn-success">
-      <i class="bi bi-plus">
 
-      </i> Add Event </a>
-    </div>
     {% block content %}{% endblock content %}
   </div>
 

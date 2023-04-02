@@ -35,30 +35,11 @@
      crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
+    
+    {% include 'adminportal/dashboard.html' %}
+  
 
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav w-100 mb-2 mb-lg-0 d-flex">
-                    <li class="nav-item ms-auto">
-                        <a href="{% url 'adminportal:index' %}" class="btn btn-outline-primary me-2"> Dashboard </a>
-                    </li>         
-                    <li class="nav-item">
-                        <a href="{% url 'adminportal:get_sections' year=11 %}" class="btn btn-outline-primary me-2"> Sections </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'adminportal:generate_classSchedule' %}" class="btn btn-outline-primary me-2"> Generate Schedule </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'usersPortal:logout' %}" class="btn btn-outline-danger "> Logout </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+
 
 <div class="main">
     {% block content %}{% endblock content %}
