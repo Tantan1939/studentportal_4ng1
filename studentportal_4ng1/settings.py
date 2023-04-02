@@ -76,6 +76,7 @@ WSGI_APPLICATION = 'studentportal_4ng1.wsgi.application'
 CELERY_IMPORTS = {
     'registrarportal.tasks',
     'studentportal.tasks',
+    'usersPortal.tasks',
 }
 CELERY_BROKER_URL = 'amqp://djangoapp:djangoapp@localhost:5672/'
 CELERY_RESULT_BACKEND = 'rpc://'
