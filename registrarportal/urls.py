@@ -11,7 +11,6 @@ urlpatterns = [
 
     path("schoolyear/", include([
         path("", view_schoolYears.as_view(), name="schoolyear"),
-        path("Add/", add_schoolYear.as_view(), name="addSchoolYear"),
         path("Update/<pk>/", update_schoolYear.as_view(), name="updateSchoolYear"),
     ])),
 
@@ -36,10 +35,6 @@ urlpatterns = [
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
 
-        # re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
-        #         get_enrollment_batches_v0.as_view(), name="get_enrollment_batches"),
-
-        # For enrollment DRF Api
         path("Api/", include([
             path("Get/", get_enrollment_batches.as_view()),
             path("Denied/", denied_enrollee.as_view()),

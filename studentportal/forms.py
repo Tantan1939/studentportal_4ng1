@@ -291,12 +291,6 @@ class makeDocumentRequestForm(forms.Form):
                                      validate_schedule], widget=forms.DateInput(attrs={'type': 'date'}))
 
 
-class makeDocumentRequestForm(forms.Form):
-    documents = forms.CharField(max_length=50, disabled=True)
-    scheduled_date = forms.DateField(label="Schedule", validators=[
-                                     validate_schedule], widget=forms.DateInput(attrs={'type': 'date'}))
-
-
 class enrollment_form2(forms.Form):
     def __init__(self, *args, **kwargs):
         strand_choices = ((strand.assignedStrand.id, f"{strand.assignedStrand.track.track_name}: {strand.assignedStrand.strand_name}")

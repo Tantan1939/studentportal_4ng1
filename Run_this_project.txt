@@ -1,0 +1,12 @@
+---- Instructions to run this project ----
+
+1: Open project directory, open cmd, then Scripts\activate.
+2: cd to studentportal_4ng1
+3: Do it again.
+4: Open new cmd, type rabbitmq-service.bat stop and hit Enter.
+5: Type rabbitmq-server.bat -detached and hit Enter.
+6: Open the cmd of studentportal_4ng1, type python manage.py runserver and hit Enter.
+7: Open the other cmd of studentportal_4ng1, type celery -A studentportal_4ng1 worker -l info --pool=solo and hit Enter.
+8: Open the project using vs code, open a new terminal, cd to enrollmentapp.
+9: Type npm run build and hit Enter.
+10: Open the project to the localhost and hit F5 for every npm run build.

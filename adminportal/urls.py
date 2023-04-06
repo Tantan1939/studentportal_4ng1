@@ -57,4 +57,9 @@ urlpatterns = [
              name="generate_classSchedule"),
     ])),
 
+    path("Schoolyears/", include([
+        path("", school_year_index.as_view(), name="schoolyear"),
+        path("Add/", add_schoolYear.as_view(), name="add_schoolyear"),
+    ])),
+
 ]

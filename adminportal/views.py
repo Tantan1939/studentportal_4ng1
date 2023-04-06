@@ -18,39 +18,19 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from formtools.wizard.views import SessionWizardView
 from string import ascii_uppercase
-from registrarportal.models import schoolYear
+from registrarportal.models import schoolYear, enrollment_admission_setup
 
 
 def superuser_only(user):
     return user.is_superuser
 
 
-def add_school_year(start_year, year):
+def validate_latestSchoolYear(sy):
+    # Return true if school year is ongoing/latest
     try:
-        return start_year.replace(year=start_year.year + year)
-    except ValueError:
-        return start_year.replace(year=start_year.year + year, day=28)
-
-
-def compute_schoolyear(year):
-    date_now = date.today()
-    future_date = add_school_year(date_now, year)
-    sy = " ".join(
-        map(str, [date_now.strftime("%Y"), "-", future_date.strftime("%Y")]))
-    return sy
-
-
-# validate the latest school year
-def validate_enrollmentSetup(request, sy):
-    try:
-        dt1 = date.today()
-        dt2 = sy.date_created.date()
-        dt3 = dt1 - dt2
-
-        if dt3.days < 209:
-            return True
-        return False
-    except:
+        return date.today() <= sy.until
+    except Exception as e:
+        print(e)
         return False
 
 
@@ -939,6 +919,8 @@ class make_section(FormView):
     def check_for_sections(self, sy, yl):
         self.latest_section = schoolSections.latestSections.filter(
             sy=sy, assignedStrand=self.this_curriculum.strand, yearLevel=yl).first()
+        self.count_latest_section = schoolSections.latestSections.filter(
+            sy=sy, assignedStrand=self.this_curriculum.strand, yearLevel=yl).count()
         if self.latest_section:
             return self.latest_section.name[-1]
         else:
@@ -955,8 +937,6 @@ class make_section(FormView):
             numberOfSection = int(form.cleaned_data["numberOfSection"])
             self.this_curriculum = curriculum.objects.filter(
                 strand__id=int(form.cleaned_data['strand'])).first()
-            self.sy = schoolYear.objects.filter(
-                until__gte=date.today()).first()
             yearLevel = str(form.cleaned_data["yearLevel"])
 
             if self.check_for_sections(self.sy, yearLevel):
@@ -965,38 +945,50 @@ class make_section(FormView):
             else:
                 asp = ascii_uppercase
 
-            for a, b in zip(asp, range(1, numberOfSection+1)):
-                new_section = schoolSections()
-                new_section.name = f"{form.cleaned_data['yearLevel']}-{self.get_strand(int(form.cleaned_data['strand']))}-{a}"
-                new_section.yearLevel = form.cleaned_data['yearLevel']
-                new_section.sy = self.sy
-                new_section.assignedStrand = self.this_curriculum.strand
-                new_section.allowedPopulation = int(
-                    form.cleaned_data['allowedPopulation'])
-                new_section.save()
-                new_section.refresh_from_db()
+            if len(asp) >= numberOfSection:
+                for a, b in zip(asp, range(1, numberOfSection+1)):
+                    new_section = schoolSections()
+                    new_section.name = f"{form.cleaned_data['yearLevel']}-{self.get_strand(int(form.cleaned_data['strand']))}-{a}"
+                    new_section.yearLevel = form.cleaned_data['yearLevel']
+                    new_section.sy = self.sy
+                    new_section.assignedStrand = self.this_curriculum.strand
+                    new_section.allowedPopulation = int(
+                        form.cleaned_data['allowedPopulation'])
+                    new_section.save()
+                    new_section.refresh_from_db()
 
-                # new_section.first_sem_subjects.add(*self.get_curriculumSubjects(self.this_curriculum))
-                # new_section.second_sem_subjects.add(*self.get_curriculumSubjects(self.this_curriculum))
+                    # new_section.first_sem_subjects.add(*self.get_curriculumSubjects(self.this_curriculum))
+                    # new_section.second_sem_subjects.add(*self.get_curriculumSubjects(self.this_curriculum))
 
-                if str(form.cleaned_data["yearLevel"]) == "11":
-                    new_section.first_sem_subjects.add(
-                        *self.this_curriculum.g11_firstSem_subjects.all())
-                    new_section.second_sem_subjects.add(
-                        *self.this_curriculum.g11_secondSem_subjects.all())
+                    if str(form.cleaned_data["yearLevel"]) == "11":
+                        new_section.first_sem_subjects.add(
+                            *self.this_curriculum.g11_firstSem_subjects.all())
+                        new_section.second_sem_subjects.add(
+                            *self.this_curriculum.g11_secondSem_subjects.all())
+                    else:
+                        new_section.first_sem_subjects.add(
+                            *self.this_curriculum.g12_firstSem_subjects.all())
+                        new_section.second_sem_subjects.add(
+                            *self.this_curriculum.g12_secondSem_subjects.all())
+
+                    new_section.save()
+
+                messages.success(
+                    self.request, "Sections created successfully.")
+                if self.create_schedule(yearLevel, self.this_curriculum.strand.id):
+                    return super().form_valid(form)
                 else:
-                    new_section.first_sem_subjects.add(
-                        *self.this_curriculum.g12_firstSem_subjects.all())
-                    new_section.second_sem_subjects.add(
-                        *self.this_curriculum.g12_secondSem_subjects.all())
-
-                new_section.save()
-
-            messages.success(self.request, "Sections created successfully.")
-            if self.create_schedule(yearLevel, self.this_curriculum.strand.id):
-                return super().form_valid(form)
+                    return HttpResponseRedirect(reverse("adminportal:generate_classSchedule"))
             else:
-                return HttpResponseRedirect(reverse("adminportal:generate_classSchedule"))
+                if asp:
+                    messages.warning(
+                        self.request, f"There are {self.count_latest_section} sections already created from this strand and year level. Only 26 sections are allowed.")
+                else:
+                    messages.warning(
+                        self.request, f"You have reached the maximum allowed sections of up to 26 per year level and strand.")
+
+                return self.form_invalid(form)
+
         except IntegrityError:
             messages.error(self.request, "Section already exist.")
             return self.form_invalid(form)
@@ -1067,11 +1059,13 @@ class make_section(FormView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        if schoolYear.objects.filter(until__gte=date.today()).exists():
+        self.sy = schoolYear.objects.first()
+        if self.sy.until >= date.today():
             # Must have an ongoing school year
             return super().dispatch(request, *args, **kwargs)
-        messages.warning(request, "Must have school year to create sections.")
-        return HttpResponseRedirect(reverse("adminportal:index"))
+        messages.warning(
+            request, "Must have an ongoing school year to create sections.")
+        return HttpResponseRedirect(reverse("adminportal:add_schoolyear"))
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
@@ -1237,9 +1231,119 @@ class generate_classSchedule(FormView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        if schoolSections.latestSections.all():
+        this_sy = schoolYear.objects.first()
+        if schoolSections.latestSections.filter(sy=this_sy):
             return super().dispatch(request, *args, **kwargs)
         else:
             messages.warning(
                 request, "Must have sections from latest school year.")
             return HttpResponseRedirect(reverse("adminportal:new_section"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
+class school_year_index(TemplateView):
+    template_name = "adminportal/SchoolYears/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "School Year"
+
+        this_sy = schoolYear.objects.first()
+        context["school_year"] = this_sy.display_sy(
+        ) if this_sy.until >= date.today() else False
+
+        return context
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
+class add_schoolYear(SessionWizardView):
+    templates = {
+        "add_schoolyear_form": "adminportal/SchoolYears/addSchoolYear.html",
+        "ea_setup_form": "adminportal/SchoolYears/admissionScheduling.html",
+    }
+
+    form_list = [
+        ("add_schoolyear_form", add_schoolyear_form),
+        ("ea_setup_form", ea_setup_form),
+    ]
+
+    def get_template_names(self):
+        return [self.templates[self.steps.current]]
+
+    def done(self, form_list, **kwargs):
+        try:
+            sy = self.get_cleaned_data_for_step("add_schoolyear_form")
+            ea = self.get_cleaned_data_for_step("ea_setup_form")
+
+            if ea["start_date"] >= ea["end_date"]:
+                messages.warning(
+                    self.request, "Invalid dates to start the admission.")
+                return HttpResponseRedirect(reverse("adminportal:add_schoolyear"))
+            self.create_schoolyear(sy)
+            self.start_admission(ea)
+            messages.success(
+                self.request, f"SY: {self.new_sy.display_sy()} is created.")
+            return HttpResponseRedirect(reverse("adminportal:schoolyear"))
+        except Exception as e:
+            return HttpResponseRedirect(reverse("adminportal:add_schoolyear"))
+
+    def render_next_step(self, form, **kwargs):
+        get_data = self.get_cleaned_data_for_step(self.storage.current_step)
+        if self.storage.current_step == "add_schoolyear_form" and get_data["start_on"] >= get_data["until"]:
+            messages.warning(
+                self.request, "Invalid dates for creating a school year.")
+            return self.render_goto_step(self.storage.current_step, **kwargs)
+        else:
+            next_step = self.steps.next
+            new_form = self.get_form(
+                next_step,
+                data=self.storage.get_step_data(next_step),
+                files=self.storage.get_step_files(next_step),
+            )
+            # change the stored current step
+            self.storage.current_step = next_step
+            return self.render(new_form, **kwargs)
+
+    def render_goto_step(self, goto_step, **kwargs):
+        form = self.get_form(data=self.request.POST, files=self.request.FILES)
+        if form.is_valid():
+            self.storage.set_step_data(
+                self.steps.current, self.process_step(form))
+            self.storage.set_step_files(
+                self.steps.current, self.process_step_files(form))
+        return super().render_goto_step(goto_step, **kwargs)
+
+    def create_schoolyear(self, form):
+        try:
+            self.new_sy = schoolYear.objects.create(
+                start_on=form["start_on"], until=form["until"])
+        except Exception as e:
+            pass
+
+    def start_admission(self, form):
+        try:
+            enrollment_admission_setup.objects.create(
+                ea_setup_sy=self.new_sy, start_date=form["start_date"], end_date=form["end_date"], students_perBatch=form["students_perBatch"])
+        except Exception as e:
+            pass
+
+    def dispatch(self, request, *args, **kwargs):
+        self.get_sy = schoolYear.objects.first()
+        if ((self.get_sy and not validate_latestSchoolYear(self.get_sy)) or not self.get_sy) and curriculum.objects.all():
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            if validate_latestSchoolYear(self.get_sy):
+                messages.warning(
+                    self.request, "Current school year is still ongoing.")
+            else:
+                messages.warning(
+                    request, "Must have a curriculum to start the admission.")
+            return HttpResponseRedirect(reverse("adminportal:schoolyear"))
+
+    def return_sectionCount(self):
+        return schoolSections.latestSections.alias(count1Subjects=Count("first_sem_subjects"), count2Subjects=Count("second_sem_subjects"), sem1Scheds=Count("firstSemSched", filter=Q(firstSemSched__time_in__isnull=False, firstSemSched__time_out__isnull=False)), sem2Scheds=Count("secondSemSched", filter=Q(secondSemSched__time_in__isnull=False, secondSemSched__time_out__isnull=False))).exclude(Q(count1Subjects=F('sem1Scheds')), Q(count2Subjects=F('sem2Scheds'))).count()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "School Year"
+        return context

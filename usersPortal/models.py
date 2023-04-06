@@ -38,15 +38,6 @@ class AccountManager(BaseUserManager):
         user.save(using=self.db)
         return user
 
-    def create_accountValidator(self, email, display_name, password):
-        user = self.model(
-            email=email, display_name=display_name, password=password)
-        user.is_active = True
-        user.validator_account = True
-        user.set_password(password)
-        user.save(using=self.db)
-        return user
-
     def get_by_natural_key(self, email_):
         print(email_)
         return self.get(email=email_)
@@ -61,7 +52,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_student = models.BooleanField(default=False)
     is_registrar = models.BooleanField(default=False)
-    validator_account = models.BooleanField(default=False)
     last_user_token_request = models.DateTimeField(default=timezone.now)
     last_password_changed_date = models.DateTimeField(auto_now=True)
 
@@ -69,12 +59,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['display_name']
 
     objects = AccountManager()
-
-    class Meta:
-        permissions = [
-            ('can_validate_enrollment_admission',
-             'Can validate enrollment and admission'),
-        ]
 
     def get_short_name(self):
         return self.display_name
@@ -84,38 +68,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-    def clean(self):
-        try:
-            validate_email(self.email)
-
-            # if self.is_student and not (self.is_staff or self.is_superuser or self.is_registrar or self.validator_account):
-            #     pass
-            # elif self.is_staff and not (self.is_student or self.is_registrar or self.validator_account):
-            #     pass
-            # elif self.is_superuser and not (self.is_student or self.is_registrar or self.validator_account):
-            #     pass
-            # elif self.is_registrar and not (self.is_staff or self.is_superuser or self.is_student or self.validator_account):
-            #     pass
-            # elif self.validator_account and not (self.is_staff or self.is_superuser or self.is_student or self.is_registrar):
-            #     pass
-            # else:
-            #     raise ValidationError(
-            #         {'invalid_usertype': _(
-            #             'You are not allowed to have this kind of user type.')}
-            #     )
-        except EmailNotValidError as e:
-            raise ValidationError(
-                {'invalid_email': _('Email is invalid. Try again.')}
-            )
-        except Exception as e:
-            raise ValidationError(
-                {'email_exception_error': _(e)}
-            )
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
 
     @classmethod
     def update_lastUserTokenRequest(cls, userInstance):
@@ -182,22 +134,6 @@ class user_photo(models.Model):
 
     def __str__(self):
         return self.photo_of.first_name
-
-    # def clean(self):
-    #     try:
-    #         if self.image.size > 2*1024*1024:
-    #             raise ValidationError(
-    #                 {'photo_tooBig': _(
-    #                     "File size is too large. 2mb is the maximum allowed size.")}
-    #             )
-    #     except Exception as e:
-    #         raise ValidationError(
-    #             {'photo_validationError_failed': _(e)}
-    #         )
-
-    # def save(self, *args, **kwargs):
-    #     self.full_clean()
-    #     return super().save(*args, **kwargs)
 
 
 class user_profile(models.Model):
