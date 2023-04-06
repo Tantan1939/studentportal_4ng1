@@ -542,7 +542,9 @@ class get_admissions(APIView):
                          Prefetch("softCopy_admissionRequirements_dualCitizen", queryset=dual_citizen_documents.objects.all())),
                      ))
         serializer = BatchAdmissionSerializer(applicant_lists, many=True)
-        return Response(serializer.data)
+        csrf_token = csrf.get_token(request)
+
+        return Response({"X_CSRFToken": csrf_token, "batch_lists": serializer.data})
 
 
 class denied_admission(APIView):
@@ -820,3 +822,10 @@ class swap_batches_v2(APIView):
                 return False
         else:
             return True
+
+
+class get_schoolYears(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, key=None, format=None):
+        pass

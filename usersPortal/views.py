@@ -133,8 +133,6 @@ class login(FormView):
             return "/School_admin/"
         elif self.request.user.is_registrar:
             return "/Registrar/"
-        elif self.request.user.validator_account:
-            return super().get_success_url()
         else:
             return super().get_success_url()
 
@@ -443,19 +441,8 @@ class updateAccountProfile(FormView):
 @method_decorator(login_required(login_url="usersPortal:login"), name="dispatch")
 class userChangePassword(FormView):
     template_name = "usersPortal/profile/changePassword.html"
-    success_url = "/users/Profile/"
+    success_url = "/users/login/"
     form_class = changePasswordForm
-
-    def get_success_url(self):
-        # Custom redirection according to user type
-        if self.request.user.is_superuser:
-            return "/School_admin/"
-        elif self.request.user.is_registrar:
-            return "/Registrar/"
-        elif self.request.user.validator_account:
-            return super().get_success_url()
-        else:
-            return super().get_success_url()
 
     def form_valid(self, form):
         try:
@@ -502,7 +489,7 @@ class authenticatedUser_resetPassword(TemplateView):
                     request, "Reset Password has failed! Please try again.")
                 return HttpResponseRedirect(reverse("usersPortal:resetpassword"))
             self.request.user.refresh_from_db()
-            # forgotPassword_resetLink(self.request, user)
+            forgotPassword_resetLink(self.request, self.request.user)
             return HttpResponseRedirect(reverse("usersPortal:logout"))
         except Exception as e:
             messages.error(
