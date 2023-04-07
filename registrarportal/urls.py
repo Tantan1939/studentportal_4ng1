@@ -13,7 +13,10 @@ urlpatterns = [
         # path("", view_schoolYears.as_view(), name="schoolyear"),
         # path("Update/<pk>/", update_schoolYear.as_view(), name="updateSchoolYear"),
 
-        path("View/", get_react_app.as_view(), name="view_schoolyears"),
+        path("View/", include([
+            path("", get_react_app.as_view(), name="view_schoolyears"),
+            path("YearLevel/", get_react_app.as_view()),
+        ])),
 
         path("Api/", include([
             path("", get_schoolYears.as_view()),

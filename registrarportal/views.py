@@ -9,9 +9,10 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView, CreateView, DeletionMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.urls import reverse
 from django.db import IntegrityError, transaction
-from django.db.models import Prefetch, Count, Q, Case, When, Value, F
+from django.db.models import Prefetch, Count, Q, Case, When, Value, F, OuterRef, Subquery
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.exceptions import ObjectDoesNotExist
@@ -828,4 +829,54 @@ class get_schoolYears(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def get(self, request, key=None, format=None):
-        pass
+        my_list = list()
+        my_dict = dict()
+        get_data = self.get_sys()
+
+        for index, value in enumerate(get_data):
+            my_list.append({})
+            my_list[index]["id"] = value["id"]
+            my_list[index]["sy_name"] = schoolYear.objects.get(
+                id=value['id']).display_sy()
+            my_list[index]["can_update"] = value['can_update']
+
+            if all([value["sexs"], value["yearLevels"], value["strands"]]):
+                distinct_elements = list()
+                distinct_elements.append(list(set(value['sexs'])))
+                distinct_elements.append(list(set(value['yearLevels'])))
+                distinct_elements.append(list(set(value['strands'])))
+
+                my_list[index]['sexs'] = [
+                    [sex, value['sexs'].count(sex)] for sex in distinct_elements[0]]
+                my_list[index]['sexs'].insert(0, ['Def', 'Sexes'])
+
+                my_list[index]['yearLevels'] = [
+                    [ylvl, value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
+                my_list[index]['yearLevels'].insert(0, ['Def', 'Year Levels'])
+
+                my_list[index]['strands'] = [
+                    [strnds, value['strands'].count(strnds)] for strnds in distinct_elements[2]]
+                my_list[index]['strands'].insert(0, ['Def', 'Strand'])
+
+            else:
+                my_list[index]['sexs'] = []
+                my_list[index]['yearLevels'] = []
+                my_list[index]['strands'] = []
+
+        return Response(my_list)
+
+    def get_sys(self):
+        sys = schoolYear.objects.annotate(sexs=Subquery(student_enrollment_details.validatedObjects.filter(enrolled_school_year__id=OuterRef('id')).values(
+            'enrolled_school_year__id').annotate(ss=ArrayAgg('admission__sex')).values('ss')),
+            yearLevels=Subquery(student_enrollment_details.validatedObjects.filter(enrolled_school_year__id=OuterRef('id')).values(
+                'enrolled_school_year__id').annotate(yl=ArrayAgg('year_level')).values('yl')),
+            strands=Subquery(student_enrollment_details.validatedObjects.filter(enrolled_school_year__id=OuterRef('id')).values(
+                'enrolled_school_year__id').annotate(std=ArrayAgg('strand__strand_name')).values('std')),
+            can_update=Case(When(id=self.get_sy.id, until__gte=date.today(), then=Value(True)), default=Value(False))).values(
+            'id', 'can_update', 'sexs', 'yearLevels', 'strands')
+
+        return sys
+
+    def dispatch(self, request, *args, **kwargs):
+        self.get_sy = schoolYear.objects.first()
+        return super().dispatch(request, *args, **kwargs)
