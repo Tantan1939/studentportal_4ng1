@@ -10,12 +10,8 @@ urlpatterns = [
          name="requestedDocuments"),
 
     path("schoolyear/", include([
-        # path("", view_schoolYears.as_view(), name="schoolyear"),
-        # path("Update/<pk>/", update_schoolYear.as_view(), name="updateSchoolYear"),
-
         path("View/", include([
             path("", get_react_app.as_view(), name="view_schoolyears"),
-            path("YearLevel/", get_react_app.as_view()),
         ])),
 
         path("Api/", include([
@@ -28,10 +24,6 @@ urlpatterns = [
 
     path("Admission/", include([
         path("", get_react_app.as_view(), name="view_admissions"),
-        path("enrollment_generate/", enrollment_invitation_oldStudents.as_view(),
-             name="enrollment_invitation_oldStudents"),
-        path("Update_schedule/", update_admission_schedule.as_view(),
-             name="update_admission_schedule"),
         re_path(r"admitted_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_admitted_students.as_view(), name="get_admitted_students"),
 
@@ -44,6 +36,8 @@ urlpatterns = [
 
     path("Enrollment/", include([
         path("", get_react_app.as_view(), name="validate_enrollment"),
+        path("Re_enroll/", enrollment_invitation_oldStudents.as_view(),
+             name="re_enroll"),
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
 

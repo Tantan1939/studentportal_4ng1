@@ -97,7 +97,7 @@ export default function ScheduleModal({open, close}) {
             {updateThisSetup ? (
               <div>
                 <form onSubmit={handleFormSubmit}>
-                  <h4> {formData.ea_setup_sy} Period </h4>
+                  <h4> {formData.ea_setup_sy} Admission/Enrollment Period </h4>
 
                   {startOnEditable && (
                     <label>

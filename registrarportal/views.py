@@ -106,140 +106,6 @@ class getList_documentRequest(ListView, DeletionMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class view_schoolYears(ListView):
-    allow_empty = True
-    context_object_name = "listOfSchoolYear"
-    http_method_names = ["get"]
-    paginate_by = 1
-    template_name = "registrarPortal/schoolyear/listOfSchoolYear.html"
-
-    def get_queryset(self):
-        return schoolYear.objects.annotate(
-            can_update=Case(When(until__gte=date.today(),
-                            then=Value(True)), default=Value(False)),
-            male_population=Case(
-                When(pk__in=[3, 4], then=Value(100)), default=Value(50)),
-            female_population=Case(
-                When(pk__in=[3, 4], then=Value(100)), default=Value(50)),
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "School Years"
-        return context
-
-
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class update_schoolYear(FormView):
-    form_class = add_schoolyear_form
-    http_method_names = ["get", "post"]
-    template_name = "registrarportal/schoolyear/updateSchoolYear.html"
-    success_url = "/Registrar/schoolyear/"
-
-    def form_valid(self, form):
-        if form.has_changed():
-            try:
-                self.sy.refresh_from_db()
-                start_on = form.cleaned_data["start_on"]
-                until = form.cleaned_data["until"]
-
-                if "start_on" in form.changed_data and self.sy.start_on <= date.today():
-                    messages.warning(
-                        self.request, f"SY {self.sy.display_sy()} has already started. It's start date can no longer be edited.")
-                    return self.form_invalid(form)
-
-                elif ("start_on" in form.changed_data and self.sy.start_on > date.today()) or ("start_on" not in form.changed_data):
-                    if start_on < until:
-                        self.update_sy(form.changed_data, form)
-                        messages.success(
-                            self.request, f"SY {self.sy.display_sy()} is updated successfully.")
-                        return super().form_valid(form)
-                    messages.warning(self.request, "Invalid dates. Try again.")
-                    return self.form_invalid(form)
-
-                else:
-                    return super().form_valid(form)
-
-            except Exception as e:
-                return self.form_invalid(form)
-        return super().form_valid(form)
-
-    def update_sy(self, fields, form):
-        for field in fields:
-            setattr(self.sy, field, form.cleaned_data[field])
-        self.sy.save()
-        self.sy.refresh_from_db()
-
-    def get_initial(self):
-        initial = super().get_initial()
-        initial["start_on"] = self.sy.start_on
-        initial["until"] = self.sy.until
-        return initial
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Update School Year"
-        context["sy"] = self.sy.display_sy()
-        return context
-
-    def dispatch(self, request, *args, **kwargs):
-        self.sy = schoolYear.objects.filter(id=int(self.kwargs["pk"])).first()
-        if self.sy and validate_latestSchoolYear(self.sy):
-            return super().dispatch(request, *args, **kwargs)
-        messages.warning(
-            request, "Invalid Primary Key or object can no longer be edited.")
-        return HttpResponseRedirect(reverse("registrarportal:schoolyear"))
-
-
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class get_admissions_firstV(ListView, DeletionMixin):
-    allow_empty = True
-    context_object_name = "batches"
-    paginate_by = 1
-    template_name = "registrarportal/admission/getRequests.html"
-    http_method_names = ["get", "post"]
-    success_url = "/Registrar/Admission/"
-
-    def delete(self, request, *args, **kwargs):
-        if "decPk" in request.POST:
-            self.denied_this_admission.is_denied = True
-            self.denied_this_admission.save()
-
-        if "batchId" in request.POST:
-            if schoolSections.latestSections.filter(sy=self.get_batch.sy, yearLevel="11").exists() and schoolSections.latestSections.filter(sy=self.get_batch.sy, yearLevel="12").exists():
-                student_admission_details.admit_this_students(request, student_admission_details.objects.filter(
-                    admission_batch_member__id=self.get_batch.id, is_accepted=False).exclude(is_denied=True).values_list('id', flat=True))
-            else:
-                messages.warning(
-                    request, "School must have new sections for grade 11 admission.")
-
-        return HttpResponseRedirect(self.success_url + f"?page={request.POST.get('page')}")
-
-    def get_queryset(self):
-        try:
-            qs = admission_batch.new_batches.alias(count_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(count_applicants__gte=1).prefetch_related(Prefetch("members", queryset=student_admission_details.objects.filter(is_accepted=False, is_denied=False).prefetch_related(Prefetch(
-                "softCopy_admissionRequirements_phBorn", queryset=ph_born.objects.all(), to_attr="phborn"), Prefetch("softCopy_admissionRequirements_foreigner", queryset=foreign_citizen_documents.objects.all(), to_attr="foreign"), Prefetch("softCopy_admissionRequirements_dualCitizen", queryset=dual_citizen_documents.objects.all(), to_attr="dualcitizen")), to_attr="applicants"))
-        except Exception as e:
-            qs = admission_batch.new_batches.none()
-        return qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Admission"
-        return context
-
-    def dispatch(self, request, *args, **kwargs):
-        if ("decPk" in request.POST) and request.method == "POST":
-            self.denied_this_admission = student_admission_details.objects.filter(
-                id=int(request.POST["decPk"])).first()
-
-        if ("batchId" in request.POST) and request.method == "POST":
-            self.get_batch = admission_batch.new_batches.filter(
-                id=int(request.POST["batchId"])).first()
-        return super().dispatch(request, *args, **kwargs)
-
-
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index"), user_passes_test(check_admissionSched, login_url="registrarportal:dashboard")], name="dispatch")
 class enrollment_invitation_oldStudents(View):
     http_method_names = ['get']
@@ -248,7 +114,7 @@ class enrollment_invitation_oldStudents(View):
         lst = [enrollment_invitations.objects.create(
             invitation_to=obj) for obj in self.diff]
         enrollment_invitation_emails(request, lst)
-        return HttpResponseRedirect(reverse("registrarportal:dashboard"))
+        return HttpResponseRedirect(reverse("registrarportal:get_enrolled_students"))
 
     def dispatch(self, request, *args, **kwargs):
         adm_objs = student_admission_details.oldStudents.all()
@@ -260,67 +126,7 @@ class enrollment_invitation_oldStudents(View):
             return super().dispatch(request, *args, **kwargs)
         else:
             messages.warning(request, "No token receipents.")
-            return HttpResponseRedirect(reverse("registrarportal:dashboard"))
-
-
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class update_admission_schedule(FormView):
-    template_name = "registrarportal/admission/rescheduling.html"
-    form_class = ea_setup_form
-    success_url = "/Registrar/Admission/"
-
-    def form_valid(self, form):
-        try:
-            if form.has_changed():
-
-                if "start_date" in form.changed_data and form.cleaned_data["start_date"] >= form.cleaned_data["end_date"]:
-                    messages.error(
-                        self.request, "Incorrect set of dates. Try again.")
-                    return self.form_invalid(form)
-
-                for field in form.changed_data:
-                    setattr(self.get_sched, field, form.cleaned_data[field])
-
-                self.get_sched.save()
-                return super().form_valid(form)
-            else:
-                return super().form_valid(form)
-        except Exception as e:
-            return self.form_invalid(form)
-
-    def get_initial(self):
-        initial = super().get_initial()
-        if self.get_sched.start_date > date.today():
-            initial["start_date"] = self.get_sched.start_date
-
-        initial["end_date"] = self.get_sched.end_date
-        initial["students_perBatch"] = self.get_sched.students_perBatch
-        return initial
-
-    def get_form_class(self):
-        if self.get_sched.start_date <= date.today():
-            return ea_setup_form2
-        return super().get_form_class()
-
-    def dispatch(self, request, *args, **kwargs):
-        self.sy = schoolYear.objects.first()
-        if self.sy and self.sy.until >= date.today():
-            self.get_sched = enrollment_admission_setup.objects.filter(
-                ea_setup_sy=self.sy).first()
-            if self.get_sched:
-                return super().dispatch(request, *args, **kwargs)
-            else:
-                messages.warning(request, "No schedule found.")
-                return HttpResponseRedirect(reverse("registrarportal:schoolyear"))
-        messages.warning(request, "Add school year first.")
-        return HttpResponseRedirect(reverse("registrarportal:schoolyear"))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Reschedule"
-        context["start_date"] = self.get_sched.start_date
-        context["end_date"] = self.get_sched.end_date
-        return context
+            return HttpResponseRedirect(reverse("registrarportal:get_enrolled_students"))
 
 
 def enrollment_not_existing_kwarg(request, qs, val):
@@ -828,9 +634,160 @@ class swap_batches_v2(APIView):
 class get_schoolYears(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
+    this_sample_data = [
+        {
+            "id": 1,
+            "sy_name": "2023 - 2024",
+            "can_update": True,
+            "sexs": [
+                [
+                    "Def",
+                    "Sexes"
+                ],
+                [
+                    "Female",
+                    4
+                ],
+                [
+                    "Male",
+                    2
+                ]
+            ],
+            "yearLevels": [
+                [
+                    "Def",
+                    "Year Levels"
+                ],
+                [
+                    "Grade 11",
+                    6
+                ]
+            ],
+            "strands": [
+                [
+                    "Def",
+                    "Strand"
+                ],
+                [
+                    "ICT",
+                    5
+                ],
+                [
+                    "STEM",
+                    1
+                ]
+            ]
+        },
+        {
+            "id": 2,
+            "sy_name": "2022 - 2023",
+            "can_update": False,
+            "sexs": [
+                [
+                    "Def",
+                    "Sexes"
+                ],
+                [
+                    "Female",
+                    20
+                ],
+                [
+                    "Male",
+                    100
+                ]
+            ],
+            "yearLevels": [
+                [
+                    "Def",
+                    "Year Levels"
+                ],
+                [
+                    "Grade 11",
+                    55
+                ],
+                [
+                    "Grade 12",
+                    65
+                ]
+            ],
+            "strands": [
+                [
+                    "Def",
+                    "Strand"
+                ],
+                [
+                    "ICT",
+                    55
+                ],
+                [
+                    "STEM",
+                    15
+                ],
+                [
+                    "ABM",
+                    50
+                ]
+            ]
+        },
+        {
+            "id": 3,
+            "sy_name": "2021 - 2022",
+            "can_update": False,
+            "sexs": [
+                [
+                    "Def",
+                    "Sexes"
+                ],
+                [
+                    "Female",
+                    50
+                ],
+                [
+                    "Male",
+                    55
+                ]
+            ],
+            "yearLevels": [
+                [
+                    "Def",
+                    "Year Levels"
+                ],
+                [
+                    "Grade 11",
+                    40
+                ],
+                [
+                    "Grade 12",
+                    65
+                ],
+            ],
+            "strands": [
+                [
+                    "Def",
+                    "Strand"
+                ],
+                [
+                    "ICT",
+                    27
+                ],
+                [
+                    "STEM",
+                    25
+                ],
+                [
+                    "ABM",
+                    35
+                ],
+                [
+                    "GAS",
+                    18
+                ]
+            ]
+        }
+    ]
+
     def get(self, request, format=None):
         my_list = list()
-        my_dict = dict()
         get_data = self.get_sys()
 
         for index, value in enumerate(get_data):
@@ -947,7 +904,6 @@ class get_update_admission_schedule(APIView):
                 data["start_date"], "%Y-%m-%d").date() if "start_date" in data else None
             end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
 
-            print(start_date, end_date)
             if end_date > date.today():
                 this_setup.end_date = end_date
                 if start_date:
