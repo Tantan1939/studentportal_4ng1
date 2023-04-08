@@ -828,7 +828,7 @@ class swap_batches_v2(APIView):
 class get_schoolYears(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
-    def get(self, request, key=None, format=None):
+    def get(self, request, format=None):
         my_list = list()
         my_dict = dict()
         get_data = self.get_sys()
@@ -847,11 +847,11 @@ class get_schoolYears(APIView):
                 distinct_elements.append(list(set(value['strands'])))
 
                 my_list[index]['sexs'] = [
-                    [sex, value['sexs'].count(sex)] for sex in distinct_elements[0]]
+                    [self.get_sex_readableValue(sex), value['sexs'].count(sex)] for sex in distinct_elements[0]]
                 my_list[index]['sexs'].insert(0, ['Def', 'Sexes'])
 
                 my_list[index]['yearLevels'] = [
-                    [ylvl, value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
+                    [f"Grade {ylvl}", value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
                 my_list[index]['yearLevels'].insert(0, ['Def', 'Year Levels'])
 
                 my_list[index]['strands'] = [
@@ -864,6 +864,11 @@ class get_schoolYears(APIView):
                 my_list[index]['strands'] = []
 
         return Response(my_list)
+
+    def get_sex_readableValue(self, val):
+        for choice in student_admission_details.SexChoices.choices:
+            if val == choice[0]:
+                return choice[1]
 
     def get_sys(self):
         sys = schoolYear.objects.annotate(sexs=Subquery(student_enrollment_details.validatedObjects.filter(enrolled_school_year__id=OuterRef('id')).values(
@@ -880,3 +885,79 @@ class get_schoolYears(APIView):
     def dispatch(self, request, *args, **kwargs):
         self.get_sy = schoolYear.objects.first()
         return super().dispatch(request, *args, **kwargs)
+
+
+class get_update_schoolyear_details(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, format=None):
+        self.this_sy = schoolYear.objects.annotate(can_update_startdate=Case(
+            When(start_on__gt=date.today(), then=Value(True)),
+            default=Value(False))).first()
+        serializer = schoolyear_serializer(self.this_sy, many=False)
+        csrf_token = csrf.get_token(request)
+        return Response({"csrf_token": csrf_token, "schoolyear_details": serializer.data})
+
+    def post(self, request, format=None):
+        data = request.data
+        this_sy = schoolYear.objects.first()
+        try:
+            start_on = datetime.strptime(
+                data["start_on"], "%Y-%m-%d").date() if "start_on" in data else None
+            until = datetime.strptime(data["until"], "%Y-%m-%d").date()
+
+            if until > date.today():
+                this_sy.until = until
+                if start_on:
+                    this_sy.start_on = start_on
+
+                this_sy.save()
+                return Response({})
+            else:
+                return Response({"Not Ok": "Until date must be greater than date today."})
+
+        except Exception as e:
+            print(e)
+            return Response({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class get_update_admission_schedule(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, format=None):
+        this_sy = schoolYear.objects.first()
+        this_setup = enrollment_admission_setup.objects.annotate(can_update_startdate=Case(
+            When(start_date__gt=date.today(), then=Value(True)),
+            default=Value(False)), can_update_this_setup=Case(
+                When(ea_setup_sy__until__gte=date.today(), then=Value(True)),
+                default=Value(False))).filter(ea_setup_sy=this_sy).first()
+
+        serializer = ea_setup_serializer(this_setup, many=False)
+        csrf_token = csrf.get_token(request)
+        return Response({"csrf_token": csrf_token, "setupDetails": serializer.data})
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            this_sy = schoolYear.objects.first()
+            this_setup = enrollment_admission_setup.objects.get(
+                ea_setup_sy=this_sy)
+
+            start_date = datetime.strptime(
+                data["start_date"], "%Y-%m-%d").date() if "start_date" in data else None
+            end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+
+            print(start_date, end_date)
+            if end_date > date.today():
+                this_setup.end_date = end_date
+                if start_date:
+                    this_setup.start_date = start_date
+
+                this_setup.save()
+                return Response({})
+            else:
+                return Response({"Not Ok": "End date must be greater than date today."})
+
+        except Exception as e:
+            print(e)
+            return Response({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -20,6 +20,8 @@ urlpatterns = [
 
         path("Api/", include([
             path("", get_schoolYears.as_view()),
+            path("get_schoolyear/", get_update_schoolyear_details.as_view()),
+            path("admission_schedule/", get_update_admission_schedule.as_view()),
         ])),
 
     ])),

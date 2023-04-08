@@ -83,9 +83,9 @@ class displayCourseSerializer(serializers.RelatedField):
         return f"{value.track.track_name}: {value.strand_name}"
 
 
-# class SchoolYearRelationSerializer(serializers.RelatedField):
-#     def to_representation(self, value):
-#         return " ".join(map(str, [value.start_on.strftime("%Y"), "-", (add_school_year(value.start_on, 1)).strftime("%Y")]))
+class SchoolYearRelationSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return " ".join(map(str, [value.start_on.strftime("%Y"), "-", (add_school_year(value.start_on, 1)).strftime("%Y")]))
 
 
 class ReportCardSerializer(serializers.ModelSerializer):
@@ -161,3 +161,26 @@ class batchSerializer(serializers.ModelSerializer):
         model = enrollment_batch
         fields = ['id', 'section', 'is_full', 'members',
                   'allowed_students', 'count_members']
+
+
+class schoolyear_serializer(serializers.ModelSerializer):
+    start_on = serializers.DateField()
+    until = serializers.DateField()
+    can_update_startdate = serializers.BooleanField()
+
+    class Meta:
+        model = schoolYear
+        fields = ['id', 'start_on', 'until', 'can_update_startdate']
+
+
+class ea_setup_serializer(serializers.ModelSerializer):
+    can_update_startdate = serializers.BooleanField()
+    can_update_this_setup = serializers.BooleanField()
+    ea_setup_sy = SchoolYearRelationSerializer(many=False, read_only=True)
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+
+    class Meta:
+        model = enrollment_admission_setup
+        fields = ['id', 'can_update_startdate', 'can_update_this_setup',
+                  'ea_setup_sy', 'start_date', 'end_date']
