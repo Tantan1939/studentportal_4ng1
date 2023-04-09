@@ -12,13 +12,13 @@ const CHART_ACTIONS = {
   REFRESH_PAGE : 'refresh-page',
 };
 
-const INIT_ACTIONS = {
+export const INIT_ACTIONS = {
   LOADING : 'loading',
   ERROR_AFTER_LOADING : 'error-after-loading',
   SUCCESS_LOADING : 'success-loading',
-}
+};
 
-function initReducer(initForce, action) {
+export function initReducer(initForce, action) {
   switch (action.type) {
     case INIT_ACTIONS.LOADING:
       return {...initForce, is_loading : true}

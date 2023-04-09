@@ -19,7 +19,6 @@ urlpatterns = [
             path("get_schoolyear/", get_update_schoolyear_details.as_view()),
             path("admission_schedule/", get_update_admission_schedule.as_view()),
         ])),
-
     ])),
 
     path("Admission/", include([
@@ -49,6 +48,15 @@ urlpatterns = [
             path("Swap_v1/", swap_batches_v1.as_view()),
             path("Swap_v2/", swap_batches_v2.as_view()),
             path("Batchesv2/<batchId>/", get_available_batches_v2.as_view()),
+        ])),
+    ])),
+
+    path("Classlist/", include([
+        path("", get_react_app.as_view(), name="view_classlists"),
+        path("Print/<pk>/", print_sections.as_view(), name="printing"),
+
+        path("Api/", include([
+            path("Get/", get_classLists.as_view()),
         ])),
     ])),
 

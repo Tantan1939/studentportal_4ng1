@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from . models import *
+from adminportal.models import schoolSections
 
 
 def add_school_year(start_year, year):
@@ -184,3 +185,33 @@ class ea_setup_serializer(serializers.ModelSerializer):
         model = enrollment_admission_setup
         fields = ['id', 'can_update_startdate', 'can_update_this_setup',
                   'ea_setup_sy', 'start_date', 'end_date']
+
+
+class student_serializer(serializers.ModelSerializer):
+    full_name = serializers.CharField()
+    age = serializers.IntegerField()
+    admission = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field='sex')
+
+    class Meta:
+        model = student_enrollment_details
+        fields = ['id', 'full_name', 'age', 'admission']
+
+
+class section_serializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    students = student_serializer(many=True, read_only=True)
+    count_students = serializers.IntegerField()
+
+    class Meta:
+        model = schoolSections
+        fields = ['id', 'name', 'count_students', 'students']
+
+
+class classList_serializer(serializers.ModelSerializer):
+    sy_section = section_serializer(many=True, read_only=True, required=False)
+    display_sy = serializers.CharField()
+
+    class Meta:
+        model = schoolYear
+        fields = ['id', 'display_sy', 'sy_section']

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.base import TemplateView, RedirectView, View
 from django.views.generic import ListView, DetailView
@@ -30,6 +30,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
+from openpyxl import Workbook
+from openpyxl.styles import Border, Side, Alignment, Font
 from . drf_permissions import EnrollmentValidationPermissions
 from . serializers import *
 from . notes import *
@@ -917,3 +919,133 @@ class get_update_admission_schedule(APIView):
         except Exception as e:
             print(e)
             return Response({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def excel_report(request):
+
+    data = subjects.objects.all()
+
+    workbook = Workbook()
+    worksheet = workbook.active
+
+    # Add column names to the worksheet and format the first row
+    column_names = ['Subject Code', 'Title',
+                    'Created On', 'Last Modified', 'Is_remove']
+    worksheet.append(column_names)
+    worksheet.row_dimensions[1].height = 24
+
+    # Center column names
+    for key, name in enumerate(column_names):
+        cell = worksheet.cell(1, key+1)
+        cell.border = Border(top=Side(border_style='medium'), right=Side(
+            border_style='medium'), left=Side(border_style='medium'), bottom=Side(border_style='medium'))
+        cell.font = Font(name='Arial Rounded MT Bold', size=12, bold=True)
+        cell.alignment = Alignment(horizontal='center')
+
+    for row_num, row_data in enumerate(data, start=1):
+        row = [row_data.code, row_data.title, row_data.created_on,
+               row_data.last_modified, row_data.is_remove]
+        worksheet.append(row)
+
+    # Format the worksheet as desired
+    worksheet.column_dimensions['A'].width = 25
+    worksheet.column_dimensions['B'].width = 70
+    worksheet.column_dimensions['C'].width = 25
+    worksheet.column_dimensions['D'].width = 25
+    worksheet.column_dimensions['E'].width = 25
+
+    # Freeze the header row
+    worksheet.freeze_panes = 'A2'
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="mydata.xlsx"'
+    workbook.save(response)
+    return response
+
+
+class get_classLists(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get(self, request, format=None):
+        data = schoolYear.objects.prefetch_related(Prefetch("sy_section", queryset=schoolSections.objects.annotate(count_students=Count(
+            'students', filter=Q(students__is_accepted=True, students__is_denied=False))).filter(count_students__gte=1).prefetch_related(Prefetch(
+                "students", queryset=student_enrollment_details.validatedObjects.all()))))
+
+        serializer = classList_serializer(data, many=True)
+        return Response(serializer.data)
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
+class print_sections(TemplateView):
+    template_name = "registrarportal/classList/printing.html"
+
+    def post(self, request, *args, **kwargs):
+        selected_options = request.POST.getlist('options')
+
+        if selected_options:
+            data = self.sections.filter(pk__in=selected_options).prefetch_related(
+                Prefetch("students", queryset=student_enrollment_details.validatedObjects.all(), to_attr='student_list')).order_by('name')
+
+            workbook = Workbook()
+            worksheet = workbook.active
+            column_names = ['School Year', 'Section',
+                            'Student Name (full name)', 'Age', 'Sex']
+            worksheet.append(column_names)
+            worksheet.row_dimensions[1].height = 24
+
+            # Center column names
+            for key, name in enumerate(column_names):
+                cell = worksheet.cell(1, key+1)
+                cell.border = Border(top=Side(border_style='medium'), right=Side(
+                    border_style='medium'), left=Side(border_style='medium'), bottom=Side(border_style='medium'))
+                cell.font = Font(name='Arial Rounded MT Bold',
+                                 size=12, bold=True)
+                cell.alignment = Alignment(horizontal='center')
+
+            for section in data:
+                for student in section.student_list:
+                    row = [self.get_sy_name(
+                        section.sy.id), section.name, student.full_name, student.age, student.admission.sex]
+                    worksheet.append(row)
+
+            # Format the worksheet as desired
+            worksheet.column_dimensions['A'].width = 35
+            worksheet.column_dimensions['B'].width = 25
+            worksheet.column_dimensions['C'].width = 70
+            worksheet.column_dimensions['D'].width = 15
+            worksheet.column_dimensions['E'].width = 15
+            worksheet.freeze_panes = 'A2'
+
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="sections.xlsx"'
+            workbook.save(response)
+            return response
+
+        messages.warning(request, "Select a section to print.")
+        return HttpResponseRedirect(reverse("registrarportal:printing", kwargs={"pk": kwargs["pk"]}))
+
+    def get_sy_name(self, id):
+        return schoolYear.objects.get(id=int(id)).display_sy()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Printing"
+        context["sections"] = self.sections
+
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            pk = int(kwargs["pk"])
+            sy = schoolYear.objects.get(id=pk)
+            self.sections = schoolSections.objects.filter(sy=sy).alias(count_students=Count('students', filter=Q(
+                students__is_accepted=True, students__is_denied=False))).exclude(count_students__lt=1)
+            return super().dispatch(request, *args, **kwargs)
+        except ObjectDoesNotExist:
+            print("Object Does not exist.")
+            return HttpResponseRedirect(reverse("registrarportal:view_classlists"))
+        except Exception as e:
+            print(e)
+            return HttpResponseRedirect(reverse("registrarportal:view_classlists"))
