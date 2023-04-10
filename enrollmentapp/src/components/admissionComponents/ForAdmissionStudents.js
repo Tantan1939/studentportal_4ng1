@@ -1,13 +1,16 @@
 import React, {useState, useEffect} from 'react'
 import StudentsPerBatch from './StudentsPerBatch'
 
+
 export default function ForAdmissionStudents() {
   let [batchList, setBatchList] = useState([]);
   let [CSRFToken, setCSRFToken] = useState('');
 
+
   useEffect(()=>{
     getBatches();
   }, []);
+
 
   let getBatches = async () => {
     try {
@@ -50,6 +53,7 @@ export default function ForAdmissionStudents() {
     admit(pks);
   };
 
+
   function DeniedHandler(pk){
     let denied = async (pk) => {
       fetch('/Registrar/Admission/Api/denied/', {
@@ -70,15 +74,37 @@ export default function ForAdmissionStudents() {
     denied(pk);
   };
 
+
   return batchList.length ? (
-    <div>
-      <button onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+    <div class="container pt-3">
+    <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
+      <button class="btn btn-primary btn-md" onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+      </div>
+      
       {renderBatches}
-    </div>
+  
+      </div>
   ) : (
-    <div>
-      <button onClick={() => window.location.href = '/Registrar/'}> Exit </button>
-      <h3> No Admission... </h3>
-    </div>
+
+    <div class="container pt-5">
+
+
+
+
+<div class="card text-center">
+  <div class="card-header">
+    ADMISSION
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">No Admission...</h5>
+    <button class="btn btn-primary btn-lg mt-3"onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+    <p class="card-text"></p>
+
+  </div>
+  <div class="card-footer text-muted">
+  </div>
+</div>
+  </div>
+    
   )
 }

@@ -1,0 +1,5 @@
+admin curri
+html *
+migrations files dont delete
+
+setting.py remove pass when merging

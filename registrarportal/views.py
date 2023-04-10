@@ -340,6 +340,7 @@ class get_react_app(TemplateView):
 class get_admissions(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
+
     def get(self, request, format=None):
         applicant_lists = admission_batch.new_batches.annotate(number_of_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_applicants__gte=1).prefetch_related(
             Prefetch("members",

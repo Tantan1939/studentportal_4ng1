@@ -17,7 +17,7 @@ export default function RenderStudentImage({image}) {
 
   return (
     <div>
-      <img src={studentImage} width="100" height="100" />
+      <img className='mx-3' style={{width:'70px',height:'70px', borderRadius:'100px'}} src={studentImage} width="100" height="100" />
     </div>
   )
 }
