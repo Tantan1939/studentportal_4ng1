@@ -461,7 +461,7 @@ class schoolSections(models.Model):
         subjects, through="secondSemSchedule", related_name="secondSemSubjects")
     students = models.ManyToManyField(
         "registrarportal.student_enrollment_details", through="class_student", related_name="enrolled_section")
-    # Model.m2mfield.through.objects.all()
+    # Model.m2mfield.through.objects.filter(section=section)
     allowedPopulation = models.IntegerField()
     is_active = models.BooleanField(default=True)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -534,7 +534,6 @@ class secondSemSchedule(models.Model):
     subject = models.ForeignKey(
         subjects, on_delete=models.RESTRICT, related_name="secondSemSubjectSchedule")
     time_in = models.TimeField(null=True)
-    namo = models.CharField(max_length=20, null=True)
     time_out = models.TimeField(null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -548,7 +547,6 @@ class secondSemSchedule(models.Model):
             for subject, schedule in zip(secondSemSubjects, secondSemSchedules):
                 with transaction.atomic():
                     update_sched = cls.objects.select_for_update().get(pk=subject.id)
-                    update_sched.namo = "Hi"
                     update_sched.time_in = schedule[0]
                     update_sched.time_out = schedule[1]
                     update_sched.save()

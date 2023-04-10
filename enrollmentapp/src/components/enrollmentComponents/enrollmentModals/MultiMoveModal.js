@@ -31,7 +31,7 @@ export default function MultiMoveModal({open, closeModalFunc, selectedPKs, batch
 
     let render_batchs = batchs.map((details, index) => (
         <div key={index}>
-            <h4 onClick={() => {
+            <h4 className='hover px-4 py-2' style={{cursor:'pointer',transition:'0.3s ease'}} onClick={() => {
                 setBatchMembers(<RenderBatchMembersWithSelect open={open} members={details.members} setIsNextClose={()=> setIsNext(false)} closeModalFunc={closeModalFunc} move_multiple_enrollees={move_multiple_enrollees} targetBatch={details.id} currentBatch={batchID} selectedPKs={selectedPKs} />);
                 setIsNext(true);
             }}>

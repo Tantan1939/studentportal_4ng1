@@ -1,0 +1,22 @@
+{% extends 'registrarportal/classList/base1.html' %}
+{% block content %}
+{% include 'registrarportal/messages/messages.html' %}
+
+{% if sections %}
+    <form method="post">
+        {% csrf_token %}
+        {% for section in sections %}
+            <label>
+                <input type="checkbox" name="options" value="{{ section.id }}">
+                {{ section.name }}
+            </label>
+            <br>
+        {% endfor %}
+        <button type="submit"> Print </button>
+    </form>
+{% else %}
+    <p> No sections found... </p>
+{% endif %}
+
+
+{% endblock content %}

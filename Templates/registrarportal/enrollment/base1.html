@@ -44,7 +44,8 @@
 <body>
 
     <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Dashboard </a>
-    <a href="{% url 'registrarportal:get_enrolled_students' %}" class="btn btn-primary"> Enrolled Students </a>
+    <a href="{% url 'registrarportal:validate_enrollment' %}" class="btn btn-primary"> Enrollees </a>
+    <a href="{% url 'registrarportal:re_enroll' %}" class="btn btn-primary"> Re-enroll (Prev Students) </a>
     <a href="{% url 'usersPortal:logout' %}" class="btn btn-primary"> Logout </a>
 
     {% block content %}{% endblock content %}

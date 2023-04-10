@@ -1,8 +1,8 @@
-{% extends 'registrarportal/schoolyear/base1.html' %}
+{% extends 'adminportal/SchoolYears/base1.html' %}
 {% block content %}
-{% load registrar_Tags %}
+{% load adminportal_tags %}
 {% load i18n %}
-{% include 'registrarportal/messages/messages.html' %}
+{% include 'adminportal/messages/messages.html' %}
 
 
 <div class="container col-md-8">
@@ -18,6 +18,8 @@
                 {{ form }}
             {% endfor %}
         {% else %}
+
+        <h4> New Admission Schedule </h4>
 
             {{ wizard.form.start_date.errors }} <!-- Field errors -->
             <label for="{{ wizard.form.start_date.id_for_label }}" class="form-label"> {{ wizard.form.start_date.label }} </label>

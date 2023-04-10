@@ -1,0 +1,13 @@
+{% extends 'adminportal/SchoolYears/base1.html' %}
+{% block content %}
+{% include 'adminportal/messages/messages.html' %}
+
+<div>
+    {% if school_year %}
+        <p> {{school_year}} </p>
+    {% else %}
+        <a href="{% url 'adminportal:add_schoolyear' %}" class="btn btn-primary btn-sm"> Add + </a>
+    {% endif %}
+</div>
+
+{% endblock content %}

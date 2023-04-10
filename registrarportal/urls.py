@@ -10,17 +10,19 @@ urlpatterns = [
          name="requestedDocuments"),
 
     path("schoolyear/", include([
-        path("", view_schoolYears.as_view(), name="schoolyear"),
-        path("Add/", add_schoolYear.as_view(), name="addSchoolYear"),
-        path("Update/<pk>/", update_schoolYear.as_view(), name="updateSchoolYear"),
+        path("View/", include([
+            path("", get_react_app.as_view(), name="view_schoolyears"),
+        ])),
+
+        path("Api/", include([
+            path("", get_schoolYears.as_view()),
+            path("get_schoolyear/", get_update_schoolyear_details.as_view()),
+            path("admission_schedule/", get_update_admission_schedule.as_view()),
+        ])),
     ])),
 
     path("Admission/", include([
         path("", get_react_app.as_view(), name="view_admissions"),
-        path("enrollment_generate/", enrollment_invitation_oldStudents.as_view(),
-             name="enrollment_invitation_oldStudents"),
-        path("Update_schedule/", update_admission_schedule.as_view(),
-             name="update_admission_schedule"),
         re_path(r"admitted_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_admitted_students.as_view(), name="get_admitted_students"),
 
@@ -33,13 +35,11 @@ urlpatterns = [
 
     path("Enrollment/", include([
         path("", get_react_app.as_view(), name="validate_enrollment"),
+        path("Re_enroll/", enrollment_invitation_oldStudents.as_view(),
+             name="re_enroll"),
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
 
-        # re_path(r"applicants/(?:(?P<pk>[a-zA-Z\d\s]+)/)?$",
-        #         get_enrollment_batches_v0.as_view(), name="get_enrollment_batches"),
-
-        # For enrollment DRF Api
         path("Api/", include([
             path("Get/", get_enrollment_batches.as_view()),
             path("Denied/", denied_enrollee.as_view()),
@@ -48,6 +48,15 @@ urlpatterns = [
             path("Swap_v1/", swap_batches_v1.as_view()),
             path("Swap_v2/", swap_batches_v2.as_view()),
             path("Batchesv2/<batchId>/", get_available_batches_v2.as_view()),
+        ])),
+    ])),
+
+    path("Classlist/", include([
+        path("", get_react_app.as_view(), name="view_classlists"),
+        path("Print/<pk>/", print_sections.as_view(), name="printing"),
+
+        path("Api/", include([
+            path("Get/", get_classLists.as_view()),
         ])),
     ])),
 

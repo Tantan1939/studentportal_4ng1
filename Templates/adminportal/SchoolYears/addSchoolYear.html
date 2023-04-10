@@ -1,8 +1,8 @@
-{% extends 'registrarportal/schoolyear/base1.html' %}
+{% extends 'adminportal/SchoolYears/base1.html' %}
 {% block content %}
-{% load registrar_Tags %}
+{% load adminportal_tags %}
 {% load i18n %}
-{% include 'registrarportal/messages/messages.html' %}
+{% include 'adminportal/messages/messages.html' %}
 
 
 <div class="container col-md-8">
@@ -38,7 +38,7 @@
 </div>
 
 <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
-<a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Back </a>
+<a href="{% url 'adminportal:index' %}" class="btn btn-primary"> Back </a>
 
 
 {% endblock content %}
