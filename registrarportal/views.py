@@ -340,7 +340,6 @@ class get_react_app(TemplateView):
 class get_admissions(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
-
     def get(self, request, format=None):
         applicant_lists = admission_batch.new_batches.annotate(number_of_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_applicants__gte=1).prefetch_related(
             Prefetch("members",
@@ -791,39 +790,43 @@ class get_schoolYears(APIView):
 
     def get(self, request, format=None):
         my_list = list()
-        get_data = self.get_sys()
 
-        for index, value in enumerate(get_data):
-            my_list.append({})
-            my_list[index]["id"] = value["id"]
-            my_list[index]["sy_name"] = schoolYear.objects.get(
-                id=value['id']).display_sy()
-            my_list[index]["can_update"] = value['can_update']
+        try:
+            get_data = self.get_sys()
+            for index, value in enumerate(get_data):
+                my_list.append({})
+                my_list[index]["id"] = value["id"]
+                my_list[index]["sy_name"] = schoolYear.objects.get(
+                    id=value['id']).display_sy()
+                my_list[index]["can_update"] = value['can_update']
 
-            if all([value["sexs"], value["yearLevels"], value["strands"]]):
-                distinct_elements = list()
-                distinct_elements.append(list(set(value['sexs'])))
-                distinct_elements.append(list(set(value['yearLevels'])))
-                distinct_elements.append(list(set(value['strands'])))
+                if all([value["sexs"], value["yearLevels"], value["strands"]]):
+                    distinct_elements = list()
+                    distinct_elements.append(list(set(value['sexs'])))
+                    distinct_elements.append(list(set(value['yearLevels'])))
+                    distinct_elements.append(list(set(value['strands'])))
 
-                my_list[index]['sexs'] = [
-                    [self.get_sex_readableValue(sex), value['sexs'].count(sex)] for sex in distinct_elements[0]]
-                my_list[index]['sexs'].insert(0, ['Def', 'Sexes'])
+                    my_list[index]['sexs'] = [
+                        [self.get_sex_readableValue(sex), value['sexs'].count(sex)] for sex in distinct_elements[0]]
+                    my_list[index]['sexs'].insert(0, ['Def', 'Sexes'])
 
-                my_list[index]['yearLevels'] = [
-                    [f"Grade {ylvl}", value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
-                my_list[index]['yearLevels'].insert(0, ['Def', 'Year Levels'])
+                    my_list[index]['yearLevels'] = [
+                        [f"Grade {ylvl}", value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
+                    my_list[index]['yearLevels'].insert(
+                        0, ['Def', 'Year Levels'])
 
-                my_list[index]['strands'] = [
-                    [strnds, value['strands'].count(strnds)] for strnds in distinct_elements[2]]
-                my_list[index]['strands'].insert(0, ['Def', 'Strand'])
+                    my_list[index]['strands'] = [
+                        [strnds, value['strands'].count(strnds)] for strnds in distinct_elements[2]]
+                    my_list[index]['strands'].insert(0, ['Def', 'Strand'])
 
-            else:
-                my_list[index]['sexs'] = []
-                my_list[index]['yearLevels'] = []
-                my_list[index]['strands'] = []
+                else:
+                    my_list[index]['sexs'] = []
+                    my_list[index]['yearLevels'] = []
+                    my_list[index]['strands'] = []
 
-        return Response(my_list)
+            return Response(my_list)
+        except Exception as e:
+            return Response([])
 
     def get_sex_readableValue(self, val):
         for choice in student_admission_details.SexChoices.choices:
