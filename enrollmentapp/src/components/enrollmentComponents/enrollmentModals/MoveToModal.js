@@ -47,7 +47,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
 
   let renderBatch = batchs.map((details, index) => (
     <div key={index}>
-      <h4 onClick={() => {
+      <h4 className='hover px-4 py-2' style={{cursor:'pointer',transition:'0.3s ease'}} onClick={() => {
         setBatchMembers(details.members);
         setIsNext(true);
         setIsFull(() => details.count_members >= details.allowed_students);
@@ -115,8 +115,8 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
 
                 {renderBatchMembers}
 
-                <div className='btnContainer'>
-                    <button className='btnOutline'>
+                <div className='btnContainer moveone'>
+                    <button className='btnOutline m-0'>
                         <span className='bold' onClick={() => {
                           setSelectedPk(null);
                           setIsFull(false);
@@ -128,14 +128,14 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                     {batchMembers.length ? (
                       <div>
                         {selectedPk && <div>
-                            <button className='btnOutline'>
+                            <button className='btnOutline m-0'>
                                 <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                             </button>
                           </div>}
 
                         {!selectedPk && <div>
                             {!isFull && <div>
-                                  <button className='btnOutline'>
+                                  <button className='btnOutline m-0'>
                                     <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                                   </button>
                               </div>}
@@ -143,13 +143,13 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                       </div>
                     ) : (
                       <div>
-                        <button className='btnOutline'>
+                        <button className='btnOutline m-0'>
                             <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                         </button>
                       </div>
                     )}
 
-                    <button className='btnOutline'>
+                    <button className='btnOutline m-0'>
                         <span className='bold' onClick={() => onOut_func()}> Cancel, exit </span>
                     </button>
                 </div>

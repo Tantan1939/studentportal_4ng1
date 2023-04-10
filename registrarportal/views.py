@@ -625,6 +625,7 @@ class get_react_app(TemplateView):
 class get_admissions(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
+
     def get(self, request, format=None):
         applicant_lists = admission_batch.new_batches.annotate(number_of_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_applicants__gte=1).prefetch_related(
             Prefetch("members",
@@ -636,7 +637,10 @@ class get_admissions(APIView):
                          Prefetch("softCopy_admissionRequirements_dualCitizen", queryset=dual_citizen_documents.objects.all())),
                      ))
         serializer = BatchAdmissionSerializer(applicant_lists, many=True)
-        return Response(serializer.data)
+        csrf_token = csrf.get_token(request)
+
+
+        return Response({"X_CSRFToken": csrf_token, "batch_lists": serializer.data})
 
 
 class denied_admission(APIView):

@@ -3,7 +3,7 @@ import StudentDetailsModal from './enrollmentModals/StudentDetailsModal'
 import ImageModal from './enrollmentModals/ImageModal'
 import DeniedConfirmationModal from './enrollmentModals/DeniedConfirmationModal';
 import MoveToModal from './enrollmentModals/MoveToModal';
-
+import './enrollment.css'
 
 export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, batchID, move_function}) {
   let [reportCard, setReportCard] = useState('');
@@ -39,22 +39,36 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, bat
     setEnrollmentID(enrollment.id);
   }, [enrollment]);
 
+  const imgStyle = {
+    height: '60px',
+    width: '60px',
+    borderRadius: '100px'
+  }
+  const span ={
+    fontSize:'17px',
+    fontWeight:'500'
+    
+  }
   return (
-    <div className='container'>
-      <img src={studentPicture} style={{ width: "20%", height: "20%" }} onMouseMove={() => setStudPictModal(true)} onMouseOut={() => setStudPictModal(false)}/>
+    <div className='student w-100'>
+      <img src={studentPicture} style={imgStyle} onMouseMove={() => setStudPictModal(true)} onMouseOut={() => setStudPictModal(false)}/>
       <ImageModal isHovering={studPictModal} img={studentPicture}/>
 
-      <h5 onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}> #{enrollmentID} - {enrollment.applicant}: {enrollment.full_name} - {enrollment.age} </h5>
+      
+      <div className='namestud d-flex align-items-center' style={span} onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}><p className='m-0'> <span style={{color:'#999'}}>#{enrollmentID} - {enrollment.applicant}: </span>  {enrollment.full_name} - {enrollment.age}</p> </div>
       <StudentDetailsModal isHovering={studDetailModal} studDetail={enrollment} studpict={studentPicture}/>
       
-      <h5 onMouseMove={() => setReportCardModal(true)} onMouseOut={() => setReportCardModal(false)}> Report Card </h5>
+      <span style={span} className='d-flex align-items-center' onMouseMove={() => setReportCardModal(true)} onMouseOut={() => setReportCardModal(false)}> Report Card </span>
       <ImageModal isHovering={studCardModal} img={reportCard}/>
 
-      <button onClick={() => setDeniedConfirmationModal(true)}> Denied </button>
-      <DeniedConfirmationModal open={deniedConfirmationModal} closeModalFunc={() => setDeniedConfirmationModal(false)}  DeniedEnrollee_Handler={DeniedEnrollee_Handler} enrollment={enrollment} studentPicture={studentPicture}/>
+      <div className='stud_btn d-flex align-items-center justify-content-center ms-auto'>
+        <button className='btn btn-danger me-2' onClick={() => setDeniedConfirmationModal(true)}> Denied </button>
+        <DeniedConfirmationModal open={deniedConfirmationModal} closeModalFunc={() => setDeniedConfirmationModal(false)}  DeniedEnrollee_Handler={DeniedEnrollee_Handler} enrollment={enrollment} studentPicture={studentPicture}/>
 
-      <button onClick={() => setMoveToModal(true)}> Move To </button>
-      <MoveToModal open={moveToModal} closeModalFunc={() => setMoveToModal(false)} batchID={batchID} enrollmentID={enrollmentID} move_function={move_function}/>
+        <button className='btn btn-success' onClick={() => setMoveToModal(true)}> Move To </button>
+        <MoveToModal open={moveToModal} closeModalFunc={() => setMoveToModal(false)} batchID={batchID} enrollmentID={enrollmentID} move_function={move_function}/>
+
+      </div>
     </div>
   )
 }
