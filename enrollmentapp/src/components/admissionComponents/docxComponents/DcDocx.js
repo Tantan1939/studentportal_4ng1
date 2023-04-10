@@ -73,23 +73,23 @@ export default function DcDocx(props) {
   }, [props])
 
   return (
-    <div>
-      <p onMouseMove={() => setOpenGoodMoralModal(true)} onMouseOut={() => setOpenGoodMoralModal(false)}> Good Moral </p>
+    <div class="d-flex">
+      <h6 class="px-2" onMouseMove={() => setOpenGoodMoralModal(true)} onMouseOut={() => setOpenGoodMoralModal(false)}> Good Moral </h6>
       <GoodMoralModal isHovering={openGoodMoralModal} goodmoral={good_moral}/>
 
-      <p onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </p>
+      <h6 class="px-2" onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </h6>
       <ReportCardModal isHovering={openReportCardModal} reportcard={report_card}/>
 
-      <p onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </p>
+      <h6 class="px-2" onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </h6>
       <PsaModal isHovering={openPsaModal} psa={psa}/>
 
-      <p onMouseMove={() => setOpenDCModal(true)} onMouseOut={() => setOpenDCModal(false)}> Dual Citizenship </p>
+      <h6 class="px-2" onMouseMove={() => setOpenDCModal(true)} onMouseOut={() => setOpenDCModal(false)}> Dual Citizenship </h6>
       <DualCitizenshipModal isHovering={openDCModal} dc={dual_citizenship}/>
 
-      <p onMouseMove={() => setOpenPPModal(true)} onMouseOut={() => setOpenPPModal(false)}> Philippine Passport </p>
+      <h6 class="px-2" onMouseMove={() => setOpenPPModal(true)} onMouseOut={() => setOpenPPModal(false)}> Philippine Passport </h6>
       <PhilippinePassportModal isHovering={openPPModal} ppm={philippine_passport}/>
 
-      <p onMouseMove={() => setOpenF137Modal(true)} onMouseOut={() => setOpenF137Modal(false)}> F137 </p>
+      <h6 class="px-2" onMouseMove={() => setOpenF137Modal(true)} onMouseOut={() => setOpenF137Modal(false)}> F137 </h6>
       <F137Modal isHovering={openF137} f137={f137}/>
 
     </div>

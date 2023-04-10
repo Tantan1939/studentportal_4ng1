@@ -17,15 +17,50 @@ export default function StudentsPerBatch({admissionBatch, AdmitHandler, DeniedHa
     return obj.id
   }
 
+
+ 
+ const fontSize = {
+  fontSize:'20px', 
+  fontWeight: '600'
+
+ }
+
   return admitAllPks.length ? (
-    <div>
-      <h3> Batch ID #{admissionBatch.id} - {admissionBatch.number_of_applicants} Applicant/s </h3>
-      <button onClick={() => AdmitHandler(admitAllPks)}> Admit All </button>
-      {renderAdmissionApplicants}
+
+<div className='container p-3 mt-3 border rounded border shadow'>
+      
+        <div className="accordion border rounded border shadow" id="accordionExample">
+          <div className="accordion-item transition">
+              <div className="accordion-header" id="headingOne">
+                <button btn className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${admissionBatch.id}`} aria-expanded="true" aria-controls={`collapse${admissionBatch.id}`}>
+                <span className='me-4'style={fontSize}>Batch ID #{admissionBatch.id}</span>
+                <span className='me-4'style={fontSize}>{admissionBatch.number_of_applicants} Applicant/s</span>
+            
+                </button>
+           
+           
+
+                </div>
+
+        <div style={{transition:"0.5s ease"}} id={`collapse${admissionBatch.id}`} class="  accordion-collapse pt-4 px-2 pb-2 collapse" 
+        aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="action d-flex justify-content-end align-items-start me-4">
+         <button class="btn btn-success" onClick={() => AdmitHandler(admitAllPks)}> Admit All </button>
+         </div>
+                <div class="accordion-body">
+                {renderAdmissionApplicants}
+                  
+                  </div>          
+          </div>
     </div>
-  ) : (
-    <div>
-      <h3> No Applicants... </h3>
-    </div>
-  )
+</div>
+</div>
+
+) : (
+  <div>
+    <h3> No Applicants... </h3>
+  </div>
+)
 }
+
+

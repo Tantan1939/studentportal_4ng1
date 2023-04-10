@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='enrollment_batch',
-            name='section'
+            name='section',
             field=models.OneToOneField(on_delete=django.db.models.deletion.RESTRICT, related_name='section_batch', to='adminportal.schoolsections'),
         ),
         migrations.AddField(
