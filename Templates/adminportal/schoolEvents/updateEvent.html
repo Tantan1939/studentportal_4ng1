@@ -11,7 +11,7 @@
 
 
  <div class="container col-md-8 mt-4 p-3 bg-white box_shadow border rounded">
-<form id="postForm" class="p-3 method="post" enctype="multipart/form-data">
+<form id="postForm" class="p-3" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <!-- List of errors from forms.py -->
     {{ form.non_field_errors }}

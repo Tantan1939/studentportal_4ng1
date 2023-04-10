@@ -24,17 +24,15 @@ export default function ForAdmissionStudents() {
     };
   };
 
-
   function spreadDatas(datas){
     setCSRFToken(datas.X_CSRFToken);
     setBatchList(datas.batch_lists);
   };
 
-
   let renderBatches = batchList.map((admissionBatch, index) => (
     <StudentsPerBatch key={index} admissionBatch={admissionBatch} AdmitHandler={AdmitAllHandler} DeniedHandler={DeniedHandler}/>
   ));
- 
+  
   function AdmitAllHandler(pks){
     let admit = async (pks) => {
       fetch('/Registrar/Admission/Api/admit/', {

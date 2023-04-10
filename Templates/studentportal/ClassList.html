@@ -1,0 +1,23 @@
+{% extends 'studentportal/base1.html' %}
+{% block content %}
+{% include 'studentportal/messages/messages.html' %}
+
+{% for class in classes %}
+
+    <h5> {{class.section_name}} </h5>
+    <p> First Semester </p>
+    {% for key, value in class.First_sem_subjects.items %}
+        <h6> {{key}}: {{value}} </h6>
+    {% endfor %}
+
+    <br>
+    <p> Second Semester </p>
+    {% for key, value in class.Second_sem_subjects.items %}
+        <h6> {{key}}: {{value}} </h6>
+    {% endfor %}
+<hr>
+{% empty %}
+    <p> No classes found... </p>
+{% endfor %}
+
+{% endblock content %}

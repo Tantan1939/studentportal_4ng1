@@ -865,3 +865,32 @@ class resend_enrollment(FormView):
             return super().dispatch(request, *args, **kwargs)
         else:
             return HttpResponseRedirect(reverse("studentportal:get_submitted_enrollments"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class view_classes(TemplateView):
+    template_name = "studentportal/ClassList.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Class"
+        context["classes"] = list()
+
+        this_classes = schoolSections.objects.filter(
+            classmate__enrollment__applicant__id=self.request.user.id)
+
+        for key, section in enumerate(this_classes):
+            context["classes"].append({})
+            context["classes"][key]["section_name"] = section.name
+            context["classes"][key]["First_sem_subjects"] = dict()
+
+            for index, subject_details in enumerate(section.first_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
+                context["classes"][key]["First_sem_subjects"][
+                    subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+
+            context["classes"][key]["Second_sem_subjects"] = dict()
+            for index, subject_details in enumerate(section.second_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
+                context["classes"][key]["Second_sem_subjects"][
+                    subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+
+        return context

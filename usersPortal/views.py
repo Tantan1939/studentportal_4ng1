@@ -26,6 +26,8 @@ from . models import *
 from adminportal.views import superuser_only
 from registrarportal.views import registrar_only
 from django.core.exceptions import ObjectDoesNotExist
+from email_validator import validate_email, EmailUndeliverableError
+from django.utils.translation import gettext_lazy as _
 
 
 User = get_user_model()
@@ -63,6 +65,7 @@ class create_useraccount(FormView):
         confirmpassword = form.cleaned_data["confirmpassword"]
 
         try:
+            validate_email(email)
             if password == confirmpassword:
                 user = User.objects.create_user(
                     email=email,
@@ -75,19 +78,13 @@ class create_useraccount(FormView):
                 messages.warning(
                     self.request, "Password and Confirm Password did not match.")
                 return self.form_invalid(form)
-        except ValidationError as e:
-            match list(e.message_dict.keys())[0]:
-                case ("invalid_email" | "emailToken_failed") as get_error_message:
-                    messages.error(
-                        self.request, e.message_dict[get_error_message][0])
-                    return self.form_invalid(form)
-                case _:
-                    messages.error(
-                        self.request, "An error has occurred. Please try again.")
-                    return self.form_invalid(form)
+        except EmailUndeliverableError:
+            messages.error(
+                self.request, f"{email} is invalid. Please use a valid email address.")
+            return self.form_invalid(form)
         except Exception as e:
             messages.warning(
-                self.request, "An error has occurred while submitting your data. Try again.")
+                self.request, e)
             # messages.error(self.request, e)
             return self.form_invalid(form)
 
@@ -136,8 +133,6 @@ class login(FormView):
             return "/School_admin/"
         elif self.request.user.is_registrar:
             return "/Registrar/"
-        elif self.request.user.validator_account:
-            return super().get_success_url()
         else:
             return super().get_success_url()
 
@@ -446,19 +441,8 @@ class updateAccountProfile(FormView):
 @method_decorator(login_required(login_url="usersPortal:login"), name="dispatch")
 class userChangePassword(FormView):
     template_name = "usersPortal/profile/changePassword.html"
-    success_url = "/users/Profile/"
+    success_url = "/users/login/"
     form_class = changePasswordForm
-
-    def get_success_url(self):
-        # Custom redirection according to user type
-        if self.request.user.is_superuser:
-            return "/School_admin/"
-        elif self.request.user.is_registrar:
-            return "/Registrar/"
-        elif self.request.user.validator_account:
-            return super().get_success_url()
-        else:
-            return super().get_success_url()
 
     def form_valid(self, form):
         try:
@@ -505,7 +489,7 @@ class authenticatedUser_resetPassword(TemplateView):
                     request, "Reset Password has failed! Please try again.")
                 return HttpResponseRedirect(reverse("usersPortal:resetpassword"))
             self.request.user.refresh_from_db()
-            # forgotPassword_resetLink(self.request, user)
+            forgotPassword_resetLink(self.request, self.request.user)
             return HttpResponseRedirect(reverse("usersPortal:logout"))
         except Exception as e:
             messages.error(
@@ -531,6 +515,8 @@ class create_adminAccount(FormView):
             password = form.cleaned_data["password"]
             confirmpassword = form.cleaned_data["confirmpassword"]
 
+            validate_email(email)
+
             if password == confirmpassword:
                 admin_user = User.objects.create_superuser(
                     email=email,
@@ -544,16 +530,10 @@ class create_adminAccount(FormView):
                 messages.warning(
                     self.request, "Password and Confirm Password did not match.")
                 return self.form_invalid(form)
-        except ValidationError as e:
-            match list(e.message_dict.keys())[0]:
-                case ("invalid_email") as get_error_message:
-                    messages.error(
-                        self.request, e.message_dict[get_error_message][0])
-                    return self.form_invalid(form)
-                case _:
-                    messages.error(
-                        self.request, "An error has occurred. Please try again.")
-                    return self.form_invalid(form)
+        except EmailUndeliverableError:
+            messages.error(
+                self.request, f"{email} is invalid. Please use a valid email address.")
+            return self.form_invalid(form)
         except Exception as e:
             messages.warning(
                 self.request, "An error has occurred while submitting your data. Try again.")
@@ -582,6 +562,8 @@ class create_registrarAccount(FormView):
             password = form.cleaned_data["password"]
             confirmpassword = form.cleaned_data["confirmpassword"]
 
+            validate_email(email)
+
             if password == confirmpassword:
                 admin_user = User.objects.create_registrarAccount(
                     email=email,
@@ -595,16 +577,10 @@ class create_registrarAccount(FormView):
                 messages.warning(
                     self.request, "Password and Confirm Password did not match.")
                 return self.form_invalid(form)
-        except ValidationError as e:
-            match list(e.message_dict.keys())[0]:
-                case ("invalid_email") as get_error_message:
-                    messages.error(
-                        self.request, e.message_dict[get_error_message][0])
-                    return self.form_invalid(form)
-                case _:
-                    messages.error(
-                        self.request, "An error has occurred. Please try again.")
-                    return self.form_invalid(form)
+        except EmailUndeliverableError:
+            messages.error(
+                self.request, f"{email} is invalid. Please use a valid email address.")
+            return self.form_invalid(form)
         except Exception as e:
             messages.warning(
                 self.request, "An error has occurred while submitting your data. Try again.")
@@ -617,55 +593,4 @@ class create_registrarAccount(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Create Registrar Account"
-        return context
-
-
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class create_validatorAccount(FormView):
-    template_name = "usersPortal/accountRegistration.html"
-    success_url = "/users/create_validatorAccount/"
-    form_class = accountRegistrationForm
-
-    def form_valid(self, form):
-        try:
-            email = form.cleaned_data["email"]
-            display_name = form.cleaned_data["display_name"]
-            password = form.cleaned_data["password"]
-            confirmpassword = form.cleaned_data["confirmpassword"]
-
-            if password == confirmpassword:
-                admin_user = User.objects.create_accountValidator(
-                    email=email,
-                    display_name=display_name,
-                    password=password
-                )
-                messages.success(
-                    self.request, f"{email} is successfully created.")
-                return super().form_valid(form)
-            else:
-                messages.warning(
-                    self.request, "Password and Confirm Password did not match.")
-                return self.form_invalid(form)
-        except ValidationError as e:
-            match list(e.message_dict.keys())[0]:
-                case ("invalid_email") as get_error_message:
-                    messages.error(
-                        self.request, e.message_dict[get_error_message][0])
-                    return self.form_invalid(form)
-                case _:
-                    messages.error(
-                        self.request, "An error has occurred. Please try again.")
-                    return self.form_invalid(form)
-        except Exception as e:
-            messages.warning(
-                self.request, "An error has occurred while submitting your data. Try again.")
-            # messages.error(self.request, e)
-            return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return super().form_invalid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Create Validator Account"
         return context
