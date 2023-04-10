@@ -1049,3 +1049,61 @@ class print_sections(TemplateView):
         except Exception as e:
             print(e)
             return HttpResponseRedirect(reverse("registrarportal:view_classlists"))
+
+
+# class get_grades(APIView):
+#     permission_classes = [EnrollmentValidationPermissions]
+
+#     def get(self, request, section_id, format=None):
+#         try:
+#             section = schoolSections.objects.filter(id=int(section_id)).prefetch_related(Prefetch(
+#                 "students", queryset=student_enrollment_details.validatedObjects.all(), to_attr="student_list"), Prefetch(
+#                     "first_sem_subjects", queryset=subjects.objects.all(), to_attr="First_sem_subjects"), Prefetch(
+#                         "second_sem_subjects", queryset=subjects.objects.all(), to_attr="Second_sem_subjects")).first()
+
+#             if section:
+#                 class_list = list()
+
+#                 if section.student_list:
+#                     quarters = student_grades.quarter_choices.choices
+#                     for student_index, student in enumerate(section.student_list):
+#                         class_list.append({})
+#                         class_list[student_index]["id"] = student.applicant.id
+#                         class_list[student_index]["Name"] = student.full_name
+#                         class_list[student_index]["Year_level"] = student.year_level
+#                         class_list[student_index][quarters[0][0]] = self.get_quarter_details(
+#                             section.First_sem_subjects, quarters[0][0], student.year_level, student.applicant.id)
+#                         class_list[student_index][quarters[1][0]] = self.get_quarter_details(
+#                             section.First_sem_subjects, quarters[1][0], student.year_level, student.applicant.id)
+#                         class_list[student_index][quarters[2][0]] = self.get_quarter_details(
+#                             section.Second_sem_subjects, quarters[2][0], student.year_level, student.applicant.id)
+#                         class_list[student_index][quarters[3][0]] = self.get_quarter_details(
+#                             section.Second_sem_subjects, quarters[3][0], student.year_level, student.applicant.id)
+
+#                     csrf_token = csrf.get_token(request)
+#                     return Response([csrf_token, quarters, class_list])
+
+#                 else:
+#                     return Response([])
+
+#             return Response([])
+
+#         except Exception as e:
+#             print(e)
+#             return Response([], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     def get_quarter_details(self, q_subjects, quarter, yearLevel, stud_id):
+#         my_dict = {}
+#         for index_subj, subject in enumerate(q_subjects):
+#             my_dict[subject.code] = self.get_subject_grade(
+#                 quarter, yearLevel, stud_id, subject.id)
+
+#         return my_dict
+
+#     def get_subject_grade(self, quarter, yearLevel, stud_id, subject_id):
+#         try:
+#             this_subject_grade = student_grades.objects.get(student__id=int(
+#                 stud_id), subject__id=int(subject_id), quarter=quarter, yearLevel=yearLevel)
+#             return this_subject_grade.grade
+#         except ObjectDoesNotExist:
+#             return None
