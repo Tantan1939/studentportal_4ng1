@@ -9,6 +9,18 @@ from registrarportal.forms import validate_startDate
 User = get_user_model()
 
 
+def validate_startDate(date):
+    if date < date.today():
+        raise ValidationError(
+            "Invalid Date! Do not select the previous date.")
+
+
+def validate_endDate(date):
+    if date <= date.today():
+        raise ValidationError(
+            "Invalid Date! Do not select the previous or current date.")
+
+
 def validate_newStrand(strand):
     obj = shs_strand.objects.filter(strand_name=strand).first()
     if obj:
@@ -33,7 +45,7 @@ def validate_sectionPopulation(population):
 
 
 def validate_sectionCount(count):
-    if int(count) < 1 or int(count) > 10:
+    if int(count) < 1 or int(count) > 26:
         raise ValidationError("Invalid amount.")
 
 
@@ -56,11 +68,6 @@ class edit_strand_form(forms.Form):
         label="Strand", max_length=5)
     strand_details = forms.CharField(
         label="Complete Strand Name", max_length=50)
-
-
-# class extend_enrollment(forms.Form):
-#     end_date = forms.DateField(label="End Date", validators=[
-#                                setup_form_DateValidation], widget=forms.DateInput(attrs={'type': 'date'}))
 
 
 class makeDocument(forms.Form):
@@ -169,3 +176,19 @@ class generate_schedule(forms.Form):
         label="Number of class hours", widget=forms.NumberInput)
     start_time = forms.TimeField(
         label="Start time", widget=forms.TimeInput(attrs={'type': 'time'}))
+
+
+class add_schoolyear_form(forms.Form):
+    start_on = forms.DateField(label="S.Y - Start Date", validators=[
+                               validate_startDate], widget=forms.DateInput(attrs={'type': 'date'}))
+    until = forms.DateField(label="S.Y - End Date", validators=[
+                            validate_endDate], widget=forms.DateInput(attrs={'type': 'date'}))
+
+
+class ea_setup_form(forms.Form):
+    start_date = forms.DateField(label="Admission Start Date", validators=[
+                                 setup_form_DateValidation], widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label="Admission End Date", validators=[
+                               setup_form_DateValidation], widget=forms.DateInput(attrs={'type': 'date'}))
+    students_perBatch = forms.CharField(
+        label="Number of applicants per admission batch", widget=forms.NumberInput, max_length=2)

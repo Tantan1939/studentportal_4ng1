@@ -392,3 +392,28 @@ class note(models.Model):
 
     def __str__(self):
         return self.body[0:50]
+
+
+# class student_grades(models.Model):
+#     class year_levels(models.TextChoices):
+#         grade_11 = '11', _('Grade 11')
+#         grade_12 = '12', _('Grade 12')
+
+#     class quarter_choices(models.TextChoices):
+#         first_quarter = '1_Q', _('First Quarter')
+#         second_quarter = '2_Q', _('Second Quarter')
+#         third_quarter = '3_Q', _('Third Quarter')
+#         fourth_quarter = '4_Q', _('Fourth Quarter')
+
+#     student = models.ForeignKey(
+#         settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="grades")
+#     subject = models.ForeignKey(
+#         "adminportal.subjects", on_delete=models.RESTRICT, related_name="subject_grades")
+#     quarter = models.CharField(max_length=3, choices=quarter_choices.choices)
+#     yearLevel = models.CharField(max_length=2, choices=year_levels.choices)
+#     grade = models.IntegerField(null=True, blank=True)
+#     modified_on = models.DateTimeField(auto_now=True)
+#     created_on = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.student.email} - {self.subject.code} - {self.get_yearLevel_display()} {self.get_quarter_display()}: {self.grade}"

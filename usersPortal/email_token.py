@@ -12,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import date, datetime
 from django.conf import settings
 from usersPortal.tasks import email_account_activation_link, email_account_reset_link
+import json
 
 
 def createAccount_activationLink(request, user_instance):

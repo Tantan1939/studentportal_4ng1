@@ -63,9 +63,15 @@
     
   <aside id="sidebar" class="sidebar">
    
-
-
     <ul class="sidebar-nav" id="sidebar-nav">
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:schoolyear' %}">
+          <i class="bi bi-ticket"></i>
+          <span>School Years</span>
+        </a>
+      </li>
+
+
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:view_courses' %}">
           <i class="bi bi-ticket"></i>
@@ -73,12 +79,14 @@
         </a>
       </li>
 
+
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'usersPortal:create_adminAccount' %}">
           <i class="bi bi-lock"></i>
           <span>Create admin</span>
         </a>
       </li>
+
 
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'usersPortal:create_registrarAccount' %}">
@@ -88,7 +96,6 @@
       </li>
 
    
-      
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:schoolDocuments' %}">
           <i class="bi bi-file"></i>
@@ -105,17 +112,13 @@
       </li>
 
 
-
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:view_curriculum' %}">
           <i class="bi bi-view-list"></i>
           <span>Curriculum</span>
         </a>
       </li>
-
-
    
-
       
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:getSubjects' %}">
@@ -131,18 +134,14 @@
           <span>Sections</span>
         </a>
       </li>
-
-
       
       
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="{% url 'usersPortal:logout' %}"> 
-          <i class="bi bi-box-arrow-left"></i>
-          <span> Sign Out </span>
-          </a>
-        </li>
-    
-
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'usersPortal:logout' %}"> 
+        <i class="bi bi-box-arrow-left"></i>
+        <span> Sign Out </span>
+        </a>
+      </li>
     </ul>
 
   </aside>
