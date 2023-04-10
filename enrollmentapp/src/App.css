@@ -65,7 +65,7 @@ a {
 .app {
   width: 100%;
   max-width: 480px;
-  height: 88vh;
+  height: auto;
   margin: 0 auto;
   background-color: var(--color-white);
   box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.05);
@@ -247,3 +247,4 @@ a {
 .note textarea::-webkit-scrollbar {
   display: none;
 }
+

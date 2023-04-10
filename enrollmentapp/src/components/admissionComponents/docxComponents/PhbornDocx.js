@@ -40,14 +40,14 @@ export default function PhbornDocx(props) {
   }, [props]);
 
   return (
-    <div>
-      <p onMouseMove={() => setOpenGoodMoralModal(true)} onMouseOut={() => setOpenGoodMoralModal(false)}> Good Moral </p>
+    <div class="d-flex justify-content-center">
+      <h6 class="px-3" onMouseMove={() => setOpenGoodMoralModal(true)} onMouseOut={() => setOpenGoodMoralModal(false)}> Good Moral </h6>
       <GoodMoralModal isHovering={openGoodMoralModal} goodmoral={good_moral}/> 
 
-      <p onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </p>
+      <h6 class="px-3" onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </h6>
       <ReportCardModal isHovering={openReportCardModal} reportcard={report_card}/>
 
-      <p onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </p>
+      <h6 class="px-3" onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </h6>
       <PsaModal isHovering={openPsaModal} psa={psa}/>
     </div>
   )

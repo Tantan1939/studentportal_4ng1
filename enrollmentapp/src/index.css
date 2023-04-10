@@ -75,12 +75,13 @@ code {
 }
 .content .details span{
   color: #5a5a5a;
+
 }
 .modalContainer {
   max-width: 600px;
   width: 100%;
   position: fixed;
-  top: 50%;
+  top: 53%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -165,3 +166,6 @@ img {
     margin: 1rem;
   }
 }
+
+
+
