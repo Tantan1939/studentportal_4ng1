@@ -1,0 +1,39 @@
+
+.accordion-button.collapsed {
+    border: none;
+    box-shadow: none !important;
+}
+.accordion-button:focus{
+    box-shadow: none !important;
+    border: 1px solid #800000 !important;
+}
+.accordion-button{
+    background: none !important;
+    color: #000 !important;
+    transition: 0.3s ease;
+    box-shadow: none !important;
+    border: 1px solid #800000;
+}
+.student{
+    display: flex;
+    /* align-items: center; */
+    gap: 15px;
+}
+.accordion-collapse{
+    transition: 0.3s ease !important;
+}
+.student .namestud:nth-child(2){
+    width: 100%;
+    max-width: 550px;
+    min-width: 400px;
+    height: 100%;
+}
+.student .namestud{
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.hover:hover{
+    background: #800000;
+    color: #fff;
+}

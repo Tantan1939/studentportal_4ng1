@@ -10,7 +10,7 @@ import EnrollmentBatch from "./components/enrollmentComponents/EnrollmentBatch";
 function App() {
   return (
     <Router>
-      <div className="container">
+      <div className="container pt-4">
         <div className="App">
           <Route path="/Registrar/Admission/" exact component={ForAdmissionStudents} />
           <Route path="/Registrar/Enrollment/" exact component={EnrollmentBatch} />
