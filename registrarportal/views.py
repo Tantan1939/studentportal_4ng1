@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.base import TemplateView, RedirectView, View
 from django.views.generic import ListView, DetailView
@@ -14,7 +15,7 @@ from django.urls import reverse
 from django.db import IntegrityError, transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value, F, OuterRef, Subquery
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.utils.encoding import force_bytes
 from django.core.exceptions import ObjectDoesNotExist
 from ratelimit.decorators import ratelimit
 from adminportal.models import *
@@ -25,6 +26,7 @@ from django.middleware import csrf
 from studentportal.models import documentRequest
 from formtools.wizard.views import SessionWizardView
 from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule, class_student
+from registrarportal.tasks import email_tokenized_enrollment_link
 from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -33,11 +35,15 @@ from rest_framework import status
 from openpyxl import Workbook
 from openpyxl.styles import Border, Side, Alignment, Font
 from . drf_permissions import EnrollmentValidationPermissions
+from . tokenGenerators import generate_enrollment_token
 from . serializers import *
 from . notes import *
 from . models import *
 from . forms import *
 import re
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 
 
 User = get_user_model()
@@ -925,49 +931,6 @@ class get_update_admission_schedule(APIView):
             return Response({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def excel_report(request):
-
-    data = subjects.objects.all()
-
-    workbook = Workbook()
-    worksheet = workbook.active
-
-    # Add column names to the worksheet and format the first row
-    column_names = ['Subject Code', 'Title',
-                    'Created On', 'Last Modified', 'Is_remove']
-    worksheet.append(column_names)
-    worksheet.row_dimensions[1].height = 24
-
-    # Center column names
-    for key, name in enumerate(column_names):
-        cell = worksheet.cell(1, key+1)
-        cell.border = Border(top=Side(border_style='medium'), right=Side(
-            border_style='medium'), left=Side(border_style='medium'), bottom=Side(border_style='medium'))
-        cell.font = Font(name='Arial Rounded MT Bold', size=12, bold=True)
-        cell.alignment = Alignment(horizontal='center')
-
-    for row_num, row_data in enumerate(data, start=1):
-        row = [row_data.code, row_data.title, row_data.created_on,
-               row_data.last_modified, row_data.is_remove]
-        worksheet.append(row)
-
-    # Format the worksheet as desired
-    worksheet.column_dimensions['A'].width = 25
-    worksheet.column_dimensions['B'].width = 70
-    worksheet.column_dimensions['C'].width = 25
-    worksheet.column_dimensions['D'].width = 25
-    worksheet.column_dimensions['E'].width = 25
-
-    # Freeze the header row
-    worksheet.freeze_panes = 'A2'
-
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="mydata.xlsx"'
-    workbook.save(response)
-    return response
-
-
 class get_classLists(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
@@ -1111,3 +1074,40 @@ class print_sections(TemplateView):
 #             return this_subject_grade.grade
 #         except ObjectDoesNotExist:
 #             return None
+
+
+class get_admission_with_pending_token_enrollment_v1(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    # For new students
+    def get(self, request, format=None):
+        this_admissions = student_admission_details.objects.filter(is_accepted=True, is_denied=False).exclude(
+            with_enrollment=True).select_related("admission_owner").only("id", "admission_owner")
+
+        serializer = re_token_enrollment_Serializer(this_admissions, many=True)
+        csrf_token = csrf.get_token(request)
+        return Response([csrf_token, serializer.data])
+
+    def post(self, request, format=None):
+        data = request.data
+
+        try:
+            re_token_admission = student_admission_details.objects.filter(
+                pk__in=data['keys']).exclude(with_enrollment=True, is_accepted=True, is_denied=False)
+
+            if re_token_admission:
+                for re_token in re_token_admission:
+                    email_tokenized_enrollment_link.delay({
+                        "username": re_token.admission_owner.display_name,
+                        "domain": get_current_site(request).domain,
+                        "uid": urlsafe_base64_encode(force_bytes(re_token.pk)),
+                        "token": generate_enrollment_token.make_token(re_token),
+                        "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p")},
+                        send_to=re_token.admission_owner.email)
+                return Response({"Done": "Re_token Student/s."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"Done": "No errors but no admission to re_token found."})
+
+        except Exception as e:
+            print(e)
+            return Response([])

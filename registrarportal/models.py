@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 from registrarportal.tasks import email_tokenized_enrollment_link
 from django.contrib.sites.shortcuts import get_current_site
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
 from . tokenGenerators import generate_enrollment_token
 from django.utils import timezone

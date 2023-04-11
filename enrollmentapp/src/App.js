@@ -8,6 +8,8 @@ import ForAdmissionStudents from "./components/admissionComponents/ForAdmissionS
 import EnrollmentBatch from "./components/enrollmentComponents/EnrollmentBatch";
 import RenderSchoolYears from "./components/schoolYears/RenderSchoolYears";
 import ClassLists from "./components/classListComponents/ClassLists";
+import ReToken from "./components/enrollmentComponents/ReToken";
+
 
 function App() {
   return (
@@ -18,6 +20,7 @@ function App() {
           <Route path="/Registrar/Enrollment/" exact component={EnrollmentBatch} />
           <Route path="/Registrar/schoolyear/View/" exact component={RenderSchoolYears} />
           <Route path="/Registrar/Classlist/" exact component={ClassLists} />
+          <Route path="/Registrar/Enrollment/Re_token/" exact component={ReToken} />
         </div>
       </div>
     </Router>

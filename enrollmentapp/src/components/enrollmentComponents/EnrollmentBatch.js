@@ -142,6 +142,7 @@ export default function EnrollmentBatch() {
     <div className='pb-3'>
       <div className='d-flex justify-content-end'> 
         <button onClick={() => window.location.href = '/Registrar/'} className='btn btn-primary'> Exit </button> 
+        <button onClick={() => window.location.href = '/Registrar/Enrollment/Re_token/'} className='btn btn-primary'> Re_Token </button>
       </div>
 
       <div>
