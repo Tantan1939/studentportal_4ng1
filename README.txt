@@ -164,3 +164,9 @@ Step 1: Open the django project with vscode.
 Step 2: Open a new terminal.
 Step 3: type cd enrollmentapp and hit Enter.
 Step 4: Type npm install and hit Enter.
+
+
+-----
+1: pip install virtualenv
+2: virtualenv --python python3 .
+3: 
