@@ -57,9 +57,13 @@ urlpatterns = [
     path("Classlist/", include([
         path("", get_react_app.as_view(), name="view_classlists"),
         path("Print/<pk>/", print_sections.as_view(), name="printing"),
+        path("Grades/<section_id>/", get_react_app.as_view(), name="view_grades"),
 
         path("Api/", include([
             path("Get/", get_classLists.as_view()),
+            path("Grades/", include([
+                path("Get/<section_id>/", get_grades.as_view()),
+            ])),
         ])),
     ])),
 
