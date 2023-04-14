@@ -43,12 +43,15 @@ export default function RenderClassListGrades({match}) {
     const [formData, setFormData] = useState([]);
     const [initForce, initDispatch] = useReducer(initReducer, {});
     const [quarters, setQuarters] = useState([]);
-    const [newGrades, setNewGrades] = useState({});
     let [CSRFToken, setToken] = useState('');
 
     useEffect(()=> {
         get_classgrades();
     }, []);
+
+    useEffect(()=> {
+        setFormData(prevFormData => prevFormData.filter(data => data.subjects.length > 0));
+    }, [formData]);
 
     let get_classgrades = async () => {
         initDispatch({ type : INIT_ACTIONS.LOADING });
@@ -77,6 +80,7 @@ export default function RenderClassListGrades({match}) {
         initDispatch({ type : INIT_ACTIONS.ERROR_AFTER_LOADING, payload : { errorMessage : error } });
         setClassSheet({ type : CLASS_SHEET_ACTIONS.HAS_ERROR });
         setToken('');
+        setFormData([]);
         console.error(error);
     };
 
@@ -86,21 +90,27 @@ export default function RenderClassListGrades({match}) {
         setFormData(prevList => {
             const prevSubjects = prevList[index] ? [...prevList[index].subjects] : []
             const updatedSubjects = [name, value];
-            prevSubjects[index_1] = updatedSubjects
+
+            if (!prevSubjects[index_1]) {
+                prevSubjects[index_1] = []
+            }
+
+            prevSubjects[index_1] = updatedSubjects;
 
             prevList[index] = {
                 student_id : id,
                 kwarter : classSheet.quarter_id,
                 ylvl : classSheet.year_level,
-                subjects : value ? prevSubjects : prevSubjects.filter((sub, sub_index) => sub_index !== index_1)
+                subjects : prevSubjects
             }
             return prevList;
+
         });
     };
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        console.log(formData);
+        save_grades();
     };
 
     let render_classlists = classSheet.student_datas.map((std, index) => (
@@ -119,10 +129,36 @@ export default function RenderClassListGrades({match}) {
     ));
 
     let render_quarter_buttons = quarters.map((quarter, index) => (
-        <button key={index} onClick={()=> setClassSheet({ type : CLASS_SHEET_ACTIONS.SELECT_Q, payload : { quarter_id : quarter[0], quarter_name : quarter[1] } })}>
+        <button key={index} onClick={()=> {
+            setClassSheet({ type : CLASS_SHEET_ACTIONS.SELECT_Q, payload : { quarter_id : quarter[0], quarter_name : quarter[1] } });
+            setFormData([]);
+        }}>
             {quarter[1]}
         </button>
     ));
+
+    function save_grades (){
+        let save_me = async () => {
+            initDispatch({ type : INIT_ACTIONS.LOADING });
+            try {
+                let post_grades = await fetch('/Registrar/Classlist/Api/Grades/Post/', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": CSRFToken
+                    },
+                    body: JSON.stringify({
+                        grades: formData})
+                });
+                let response = await post_grades.json();
+                console.log(response);
+                get_classgrades();                
+            } catch (error) {
+                errorHandler(error);
+            };
+        }
+        save_me();
+    };
 
   return (
     <div>

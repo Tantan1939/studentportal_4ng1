@@ -25,7 +25,6 @@ from django.db import IntegrityError
 from django.middleware import csrf
 from studentportal.models import documentRequest
 from formtools.wizard.views import SessionWizardView
-from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule, class_student
 from registrarportal.tasks import email_tokenized_enrollment_link
 from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email
 from rest_framework.views import APIView
@@ -1074,6 +1073,41 @@ class get_grades(APIView):
             return this_subject_grade.grade
         except ObjectDoesNotExist:
             return None
+
+
+class post_grades(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            grades = data["grades"]
+
+            for index, grade in enumerate(grades):
+                student_id = int(grade["student_id"])
+                quarter = grade["kwarter"]
+                year_level = grade["ylvl"]
+                sbjcts = grade["subjects"]
+
+                for sub_index, sub in enumerate(sbjcts):
+                    if sub[1]:
+                        get_sg = student_grades.objects.filter(
+                            student__id=student_id, subject__code=sub[0], quarter=quarter, yearLevel=year_level).first()
+                        if get_sg:
+                            student_grades.update_grade(get_sg.id, int(sub[1]))
+                        else:
+                            student_grades.objects.create(
+                                student=User.objects.get(id=student_id),
+                                subject=subjects.objects.get(code=sub[0]),
+                                quarter=quarter,
+                                yearLevel=year_level,
+                                grade=int(sub[1])
+                            )
+
+            return Response({"Done": "Save grades successfully."})
+        except Exception as e:
+            print(e)
+            return Response([])
 
 
 class get_admission_with_pending_token_enrollment_v1(APIView):

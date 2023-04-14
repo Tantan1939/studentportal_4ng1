@@ -417,3 +417,10 @@ class student_grades(models.Model):
 
     def __str__(self):
         return f"{self.student.email} - {self.subject.code} - {self.get_yearLevel_display()} {self.get_quarter_display()}: {self.grade}"
+
+    @classmethod
+    def update_grade(cls, id, grade):
+        with transaction.atomic():
+            this_obj = cls.objects.select_for_update().get(pk=id)
+            this_obj.grade = grade
+            this_obj.save()

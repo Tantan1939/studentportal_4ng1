@@ -63,6 +63,7 @@ urlpatterns = [
             path("Get/", get_classLists.as_view()),
             path("Grades/", include([
                 path("Get/<section_id>/", get_grades.as_view()),
+                path("Post/", post_grades.as_view()),
             ])),
         ])),
     ])),
