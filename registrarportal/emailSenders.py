@@ -10,12 +10,11 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 import numpy as np
-from .tasks import enrollment_acceptance, failed_enrollment, failed_admission
+from .tasks import enrollment_acceptance, failed_enrollment, failed_admission, email_enrollment_invitation
 from adminportal.models import firstSemSchedule, secondSemSchedule
 
 
 def loop_enrollment_invitation(request, invitation):
-    mail_subject = "Enrollment"
     message = render_to_string("registrarportal/emailTemplates/oldStudents_enrollmentEmail.html", {
         "user_name": invitation.invitation_to.admission_owner.display_name,
         "domain": get_current_site(request).domain,
@@ -23,17 +22,13 @@ def loop_enrollment_invitation(request, invitation):
         "token": new_enrollment_token_for_old_students.make_token(invitation),
         "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p"),
     })
-    email = EmailMessage(mail_subject, message, to=[
-                         invitation.invitation_to.admission_owner.email])
-    try:
-        email.send()
-        return True
-    except Exception as e:
-        # messages.error(request, e)
-        return False
+    email_enrollment_invitation.delay(
+        message, invitation.invitation_to.admission_owner.email)
+    return True
 
 
 def enrollment_invitation_emails(request, invitations):
+    # Loop through email invitation
     try:
         loop_requests = [request for item in invitations]
         emails = list(map(loop_enrollment_invitation,
@@ -66,13 +61,15 @@ def enrollment_acceptance_email(request, recipient, name, classDetails):
 
 def denied_enrollment_email(request, recipient, name):
     mail = render_to_string("registrarportal/emailTemplates/deniedEnrollmentEmail.html", {
-        "account_name": name
+        "account_name": name,
+        "domain": get_current_site(request).domain,
     })
     failed_enrollment.delay(mail, recipient)
 
 
 def denied_admission_email(request, recipient, name):
     mail = render_to_string("registrarportal/emailTemplates/deniedAdmissionEmail.html", {
-        "account_name": name
+        "account_name": name,
+        "domain": get_current_site(request).domain,
     })
     failed_admission.delay(mail, recipient)

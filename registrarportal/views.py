@@ -71,6 +71,33 @@ def check_admissionSched(user):
     return False
 
 
+def getSchoolYear():
+    sy = schoolYear.objects.first()
+    if sy:
+        if sy.until > date.today():
+            return sy
+        return False
+    return False
+
+
+def admissionCount():
+    # Pending admission
+    if getSchoolYear():
+        sy = getSchoolYear()
+        return student_admission_details.objects.filter(admission_sy=sy, is_accepted=False, is_denied=False).exclude(with_enrollment=True).count()
+    else:
+        return 0
+
+
+def enrollmentCount():
+    # Pending admission
+    if getSchoolYear():
+        sy = getSchoolYear()
+        return student_enrollment_details.objects.filter(enrolled_school_year=sy, is_accepted=False, is_denied=False).count()
+    else:
+        return 0
+
+
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
 class registrarDashboard(TemplateView):
     template_name = "registrarportal/dashboard.html"
@@ -78,6 +105,8 @@ class registrarDashboard(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Dashboard"
+        context["CountAdmission"] = admissionCount()
+        context["CountEnrollment"] = enrollmentCount()
         return context
 
 
@@ -124,7 +153,11 @@ class enrollment_invitation_oldStudents(View):
         return HttpResponseRedirect(reverse("registrarportal:get_enrolled_students"))
 
     def dispatch(self, request, *args, **kwargs):
+
+        # Get previous students
         adm_objs = student_admission_details.oldStudents.all()
+
+        # Get admission details with invitations
         adm_objs_with_inv = student_admission_details.objects.alias(
             count_inv=Count("invitation")).exclude(count_inv=0)
         self.diff = adm_objs.difference(adm_objs_with_inv)

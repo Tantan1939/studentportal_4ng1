@@ -39,7 +39,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from studentportal.tasks import admission_batching, enrollment_batching
 
 
-# pytesseract.pytesseract.tesseract_cmd = 'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
 User = get_user_model()
 
 
@@ -89,14 +88,9 @@ class index(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Newfangled Senior High School"
 
-        context["courses"] = shs_track.objects.filter(is_deleted=False).prefetch_related(Prefetch(
-            "track_strand", queryset=shs_strand.objects.filter(is_deleted=False).order_by("strand_name"), to_attr="strands")).order_by("track_name")
-
-        context["contacts"] = school_contact_number.objects.filter(
-            is_deleted=False).first()
-
-        context["emails"] = school_email.objects.filter(
-            is_deleted=False).first()
+        context["courses"] = shs_track.objects.filter(is_deleted=False).alias(count_strands=Count(
+            "track_strand", filter=Q(track_strand__is_deleted=False))).exclude(count_strands__lt=1).prefetch_related(Prefetch(
+                "track_strand", queryset=shs_strand.objects.filter(is_deleted=False).order_by("strand_name"), to_attr="strands")).order_by("track_name")
 
         getEvents = school_events.ongoingEvents.all()
         if getEvents:
@@ -112,16 +106,31 @@ class index(TemplateView):
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
 
+        context["enroll_now"] = self.check_enrollment()
+
         return context
+
+    def check_enrollment(self):
+        if not self.request.user.is_authenticated:
+            return True
+        else:
+            if user_no_admission(self.request.user) and check_for_admission_availability(self.request.user):
+                return True
+            return False
 
 
 def user_no_admission(user):
-    # Return False if the user has validated admission or to_validate admission
+    # Return False if the user has validated admission or to_validate admission, the exclude will remove the denied admission from the result
     return not student_admission_details.objects.filter(admission_owner=user).exclude(is_accepted=False, is_denied=True).exists()
 
 
 def check_for_admission_availability(user):
-    return enrollment_admission_setup.objects.filter(ea_setup_sy__until__gt=date.today(), end_date__gte=date.today()).exists()
+    sy = schoolYear.objects.first()
+    if sy:
+        if sy.until > date.today():
+            return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gt=date.today()).exists()
+        return False
+    return False
 
 
 admission_decorators = [login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index"), user_passes_test(
@@ -274,42 +283,6 @@ class admission(SessionWizardView):
 
     def get_template_names(self):
         return [self.templates[self.steps.current]]
-
-    # def rescale_frame(self, frame, scale=0.25):
-    #     width = int(frame.shape[1] * scale)
-    #     height = int(frame.shape[0] * scale)
-    #     dimension = (width, height)
-    #     return cv2.resize(frame, dimension, interpolation=cv2.INTER_AREA)
-
-    # def render_next_step(self, form, **kwargs):
-    #     get_reqs = self.get_cleaned_data_for_step(self.storage.current_step)
-    #     t_methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
-    #                  cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
-
-    #     if self.storage.current_step == "admissionRequirementsForm":
-    #         with Image.open(get_reqs["good_moral"]) as goodMoral:
-    #             depedSeal = cv2.imread("Media/Seals/DepedSeal.png")
-    #             testSeal = cv2.imread("Media/Seals/sampleSeals.jpg")
-    #             depedSeal_h, depedSeal_w, _ = depedSeal.shape
-    #         # with Image.open(get_imgs["good_moral"]) as img:
-    #         #     txt = pytesseract.image_to_string(img)
-
-    #         result = cv2.matchTemplate(
-    #             testSeal, self.rescale_frame(depedSeal), cv2.TM_CCOEFF)
-    #         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-    #         messages.success(self.request, (min_loc, max_loc))
-
-    #         return self.render_goto_step(self.storage.current_step, **kwargs)
-    #     else:
-    #         next_step = self.steps.next
-    #         new_form = self.get_form(
-    #             next_step,
-    #             data=self.storage.get_step_data(next_step),
-    #             files=self.storage.get_step_files(next_step),
-    #         )
-    #         # change the stored current step
-    #         self.storage.current_step = next_step
-    #         return self.render(new_form, **kwargs)
 
     def render_goto_step(self, goto_step, **kwargs):
         form = self.get_form(data=self.request.POST, files=self.request.FILES)

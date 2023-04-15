@@ -83,34 +83,6 @@ class shs_strand(models.Model):
         }
 
 
-class school_contact_number(models.Model):
-    contactnum_owner = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="contact_number")
-    cp_number_regex = RegexValidator(regex=r"^(09)([0-9]{9})$")
-    cellphone_number = models.CharField(
-        max_length=11, unique=True, validators=[cp_number_regex])
-    date_created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
-
-    is_deleted = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.cellphone_number
-
-
-class school_email(models.Model):
-    email_from = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="contact_email")
-    email = models.EmailField(max_length=50)
-    date_created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
-
-    is_deleted = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.email
-
-
 class manager_ongoingSchoolEvents(models.Manager):
     # Return ongoing school events.
     def get_queryset(self):

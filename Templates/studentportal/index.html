@@ -19,17 +19,8 @@
     <div class="container-fluid" style="background:#f7f7f7; border-top: 3px solid #800000;">
         <div class="track_and_strand_wrapper container py-5 position-relative">
             <div class="tracks_strand_date"  style="background: #f7f7f7;">
-                <h3> School Year {% firstof sy %} </h3>
-                {% if enroll_now == "postpone" %}
-                    <p> Enrollment and Admission are currently postponed. </p>
-        
-                {% elif enroll_now == "enroll" %}
-                    <p> Enrollment and Admission will end on {{end_date_enrollment.end_date|date:"l, M d, o"}}. </p>
-                    <a href="{% url 'studentportal:admission_application' %}" class="btn btn-primary btn-sm"> {% firstof sy %} Apply Now </a> <!-- Button to apply for admission and enrollment -->
-        
-                {% elif enroll_now == "start_soon" %}
-                    <p> Enrollment and Admission will start on {{start_date_enrollment.start_date|date:"l, M d, o"}}. </p>
-        
+                {% if enroll_now %}
+                    <a href="{% url 'studentportal:select_type' %}"> Apply Now </a>
                 {% endif %}
             </div>
             <!-- #b93535 -->
@@ -150,11 +141,11 @@
                     </li>
 
                     <li class="list-group-item">
-                        <span class="fw-bold"> Contact: </span> {{contacts.cellphone_number}}
+                        <span class="fw-bold"> Contact: </span> 09123-456-789
                     </li>
 
                     <li class="list-group-item">
-                        <span class="fw-bold"> Email: </span>  {{emails.email}}
+                        <span class="fw-bold"> Email: </span>  EmailMe@gmail.com
                     </li>
                 </ul>
             </div>
