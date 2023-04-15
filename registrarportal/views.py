@@ -1090,7 +1090,7 @@ class post_grades(APIView):
                 sbjcts = grade["subjects"]
 
                 for sub_index, sub in enumerate(sbjcts):
-                    if sub[1]:
+                    if sub and sub[1]:
                         get_sg = student_grades.objects.filter(
                             student__id=student_id, subject__code=sub[0], quarter=quarter, yearLevel=year_level).first()
                         if get_sg:

@@ -27,7 +27,6 @@ from smtplib import SMTPException
 from usersPortal.models import user_photo
 from . models import *
 from . email_token import *
-from adminportal.models import *
 from collections import OrderedDict
 from django.core.files.storage import DefaultStorage
 from registrarportal.models import student_admission_details
@@ -892,5 +891,44 @@ class view_classes(TemplateView):
             for index, subject_details in enumerate(section.second_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
                 context["classes"][key]["Second_sem_subjects"][
                     subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+
+        return context
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class view_grades(TemplateView):
+    template_name = "studentportal/Grades.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Grades"
+
+        try:
+            dct = dict()
+            this_student_grades = student_grades.objects.filter(
+                student__id=self.request.user.id).select_related("subject").order_by("quarter")
+
+            for std_grds_indx, std_grds in enumerate(this_student_grades):
+                if std_grds.get_yearLevel_display() not in dct:
+                    dct[std_grds.get_yearLevel_display()] = dict()
+                    dct[std_grds.get_yearLevel_display(
+                    )][std_grds.get_quarter_display()] = dict()
+                    dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                    )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+
+                else:
+                    if std_grds.get_quarter_display() not in dct[std_grds.get_yearLevel_display()]:
+                        dct[std_grds.get_yearLevel_display(
+                        )][std_grds.get_quarter_display()] = dict()
+                        dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                        )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+                    else:
+                        dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                        )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+
+        except Exception as e:
+            dct = dict()
+
+        context["grade_levels"] = dct
 
         return context

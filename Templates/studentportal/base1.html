@@ -79,6 +79,7 @@
                                 {% if user.is_authenticated and user.is_student %}
                                     <!--  -->
                                     <a href="{% url 'studentportal:classes' %}" class="nav-link"> Classes </a>
+                                    <a href="{% url 'studentportal:grades' %}" class="nav-link"> Grades </a>
                                     <a href="{% url 'studentportal:get_submitted_admission' %}" class="nav-link"> Applications </a>
                                     <a href="{% url 'studentportal:view_myDocumentRequest' %}" class="nav-link"> Documents </a>
                                     <a href="{% url 'usersPortal:logout' %}" class="nav-link"> Logout </a> 

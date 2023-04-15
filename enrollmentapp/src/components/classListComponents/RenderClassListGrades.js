@@ -69,7 +69,13 @@ export default function RenderClassListGrades({match}) {
         if (datas.length > 0){
             setToken(datas[0]);
             setQuarters(datas[1]);
-            setClassSheet({ type : CLASS_SHEET_ACTIONS.FRESH_DISPLAY, payload : { data : datas[2], quarter_id : datas[1][0][0], quarter_name : datas[1][0][1] } });
+
+            if (classSheet.student_datas.length > 0) {
+                setClassSheet({ type : CLASS_SHEET_ACTIONS.FRESH_DISPLAY, payload : { data : datas[2], quarter_id : classSheet.quarter_id, quarter_name : classSheet.quarter_name } });
+            } else {
+                setClassSheet({ type : CLASS_SHEET_ACTIONS.FRESH_DISPLAY, payload : { data : datas[2], quarter_id : datas[1][0][0], quarter_name : datas[1][0][1] } });
+            }
+            
         } else {
             setToken('');
             setClassSheet({ type : CLASS_SHEET_ACTIONS.HAS_ERROR });
