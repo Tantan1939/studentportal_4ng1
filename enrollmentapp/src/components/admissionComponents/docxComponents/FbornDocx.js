@@ -73,24 +73,66 @@ export default function FbornDocx(props) {
   }, [props])
 
   return (
-    <div>
-      <p onMouseMove={() => setOpenGoodMoralModal(true)} onMouseOut={() => setOpenGoodMoralModal(false)}> Good Moral </p>
+    <div class="d-flex">
+       <h6 class="px-2" onMouseEnter={() => setOpenGoodMoralModal(true)} onMouseLeave={() => setOpenGoodMoralModal(false)}> Good Moral </h6>
       <GoodMoralModal isHovering={openGoodMoralModal} goodmoral={good_moral}/> 
 
-      <p onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </p>
+      {setOpenGoodMoralModal && (
+    <div>
+    <GoodMoralModal isHovering={openGoodMoralModal} goodmoral={good_moral}/> 
+    </div>
+  )}
+
+      <h6 class="px-2"onMouseMove={() => setOpenReportCardModal(true)} onMouseOut={() => setOpenReportCardModal(false)}> Report Card </h6>
       <ReportCardModal isHovering={openReportCardModal} reportcard={report_card}/>
 
-      <p onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </p>
+      {setOpenReportCardModal && (
+    <div>
+    <ReportCardModal isHovering={openReportCardModal} reportcard={report_card}/>
+    </div>
+  )}
+
+
+      <h6 class="px-2" onMouseOver={() => setOpenPsaModal(true)} onMouseOut={() => setOpenPsaModal(false)}> PSA </h6>
       <PsaModal isHovering={openPsaModal} psa={psa}/>
 
-      <p onMouseMove={() => setOpenCorModal(true)} onMouseOut={() => setOpenCorModal(false)}> Alien Certificate of Registration </p>
+        
+      {setOpenPsaModal && (
+    <div>
+    <PsaModal isHovering={openPsaModal} psa={psa}/>
+    </div>
+  )}
+
+      <h6 class="px-2" onMouseMove={() => setOpenCorModal(true)} onMouseOut={() => setOpenCorModal(false)}> Alien Certificate of Registration </h6>
       <AlienCertModal isHovering={openCor} acr={alien_certificate_of_registration}/>
 
-      <p onMouseMove={() => setOpenStudyPermitModal(true)} onMouseOut={() => setOpenStudyPermitModal(false)}> Study Permit </p>
+      {setOpenCorModal && (
+    <div>
+    <AlienCertModal isHovering={openCor} acr={alien_certificate_of_registration}/>
+    </div>
+  )}
+
+      <h6 class="px-2" onMouseMove={() => setOpenStudyPermitModal(true)} onMouseOut={() => setOpenStudyPermitModal(false)}> Study Permit </h6>
       <StudyPermitModal isHovering={openStudyPermit} studypermit={study_permit}/>
 
-      <p onMouseMove={() => setOpenF137Modal(true)} onMouseOut={() => setOpenF137Modal(false)}> F137 </p>
+      {setOpenStudyPermitModal && (
+    <div>
+    <StudyPermitModal isHovering={openStudyPermit} studypermit={study_permit}/>
+    </div>
+  )}
+
+
+      <h6 class="px-2" onMouseMove={() => setOpenF137Modal(true)} onMouseOut={() => setOpenF137Modal(false)}> F137 </h6>
       <F137Modal isHovering={openF137} f137={f137}/>
+      
+      {setOpenF137Modal && (
+    <div>
+    <F137Modal isHovering={openF137} f137={f137}/>
+    </div>
+  )}
+
+
+
     </div>
   )
 }
