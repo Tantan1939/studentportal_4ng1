@@ -39,6 +39,7 @@ urlpatterns = [
              name="re_enroll"),
         re_path(r"Enrolled_students/(?:(?P<key>[a-zA-Z\d\s]+)/)?$",
                 get_enrolled_students.as_view(), name="get_enrolled_students"),
+        path("Re_token/", get_react_app.as_view(), name="re-token"),
 
         path("Api/", include([
             path("Get/", get_enrollment_batches.as_view()),
@@ -48,15 +49,22 @@ urlpatterns = [
             path("Swap_v1/", swap_batches_v1.as_view()),
             path("Swap_v2/", swap_batches_v2.as_view()),
             path("Batchesv2/<batchId>/", get_available_batches_v2.as_view()),
+            path("Admission_with_pending_enrollment_token_v1/",
+                 get_admission_with_pending_token_enrollment_v1.as_view()),
         ])),
     ])),
 
     path("Classlist/", include([
         path("", get_react_app.as_view(), name="view_classlists"),
         path("Print/<pk>/", print_sections.as_view(), name="printing"),
+        path("Grades/<section_id>/", get_react_app.as_view(), name="view_grades"),
 
         path("Api/", include([
             path("Get/", get_classLists.as_view()),
+            path("Grades/", include([
+                path("Get/<section_id>/", get_grades.as_view()),
+                path("Post/", post_grades.as_view()),
+            ])),
         ])),
     ])),
 

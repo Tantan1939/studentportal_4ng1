@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useReducer} from 'react';
 import { INIT_ACTIONS, initReducer } from '../schoolYears/RenderSchoolYears';
 import RenderStudents from './RenderStudents';
+import { Link } from 'react-router-dom';
 
 
 const CLASS_ACTIONS = {
@@ -51,6 +52,7 @@ export default function ClassLists() {
     let render_classlists = class_lists.sy_sections.map((section, index) => (
         <div>
             <h4> {section.name} - {section.count_students} Student/s </h4>
+            <button onClick={()=> window.location.href = `/Registrar/Classlist/Grades/${section.id}/`}> Grades </button>
             <RenderStudents key={index} students={section.students} />
         </div>
     ));
@@ -79,7 +81,9 @@ export default function ClassLists() {
                             <h4> {class_lists.display_sy} </h4>
                             {class_lists.sy_sections.length ? (
                                 <div>
-                                    <button onClick={() => window.location.href = `/Registrar/Classlist/Print/${class_lists.id}`}> Print </button>
+                                    <Link to={`/Registrar/Classlist/Print/${class_lists.id}`}>
+                                        <button> Print </button>
+                                    </Link>
                                     {render_classlists}
                                 </div>
                             ) : (

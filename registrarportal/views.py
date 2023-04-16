@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.base import TemplateView, RedirectView, View
 from django.views.generic import ListView, DetailView
@@ -14,7 +15,7 @@ from django.urls import reverse
 from django.db import IntegrityError, transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value, F, OuterRef, Subquery
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.utils.encoding import force_bytes
 from django.core.exceptions import ObjectDoesNotExist
 from ratelimit.decorators import ratelimit
 from adminportal.models import *
@@ -24,7 +25,7 @@ from django.db import IntegrityError
 from django.middleware import csrf
 from studentportal.models import documentRequest
 from formtools.wizard.views import SessionWizardView
-from adminportal.models import curriculum, schoolSections, firstSemSchedule, secondSemSchedule, class_student
+from registrarportal.tasks import email_tokenized_enrollment_link
 from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -33,11 +34,15 @@ from rest_framework import status
 from openpyxl import Workbook
 from openpyxl.styles import Border, Side, Alignment, Font
 from . drf_permissions import EnrollmentValidationPermissions
+from . tokenGenerators import generate_enrollment_token
 from . serializers import *
 from . notes import *
 from . models import *
 from . forms import *
 import re
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 
 
 User = get_user_model()
@@ -66,6 +71,37 @@ def check_admissionSched(user):
     return False
 
 
+def getSchoolYear():
+    sy = schoolYear.objects.first()
+    if sy:
+        if sy.until > date.today():
+            return sy
+        return False
+    return False
+
+
+def admissionCount():
+    # Pending admission
+    if getSchoolYear():
+        sy = getSchoolYear()
+        return student_admission_details.objects.filter(admission_sy=sy, is_accepted=False, is_denied=False).exclude(with_enrollment=True).count()
+    else:
+        return 0
+
+
+def enrollmentCount():
+    # Pending admission
+    if getSchoolYear():
+        sy = getSchoolYear()
+        return student_enrollment_details.objects.filter(enrolled_school_year=sy, is_accepted=False, is_denied=False).count()
+    else:
+        return 0
+
+
+def countDocumentRequests():
+    return documentRequest.registrarObjects.count()
+
+
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
 class registrarDashboard(TemplateView):
     template_name = "registrarportal/dashboard.html"
@@ -73,6 +109,9 @@ class registrarDashboard(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Dashboard"
+        context["CountAdmission"] = admissionCount()
+        context["CountEnrollment"] = enrollmentCount()
+        context["CountDocumentRequests"] = countDocumentRequests()
         return context
 
 
@@ -119,7 +158,11 @@ class enrollment_invitation_oldStudents(View):
         return HttpResponseRedirect(reverse("registrarportal:get_enrolled_students"))
 
     def dispatch(self, request, *args, **kwargs):
+
+        # Get previous students
         adm_objs = student_admission_details.oldStudents.all()
+
+        # Get admission details with invitations
         adm_objs_with_inv = student_admission_details.objects.alias(
             count_inv=Count("invitation")).exclude(count_inv=0)
         self.diff = adm_objs.difference(adm_objs_with_inv)
@@ -339,7 +382,6 @@ class get_react_app(TemplateView):
 
 class get_admissions(APIView):
     permission_classes = [EnrollmentValidationPermissions]
-
 
     def get(self, request, format=None):
         applicant_lists = admission_batch.new_batches.annotate(number_of_applicants=Count("members", filter=Q(members__is_accepted=False, members__is_denied=False))).filter(number_of_applicants__gte=1).prefetch_related(
@@ -791,39 +833,43 @@ class get_schoolYears(APIView):
 
     def get(self, request, format=None):
         my_list = list()
-        get_data = self.get_sys()
 
-        for index, value in enumerate(get_data):
-            my_list.append({})
-            my_list[index]["id"] = value["id"]
-            my_list[index]["sy_name"] = schoolYear.objects.get(
-                id=value['id']).display_sy()
-            my_list[index]["can_update"] = value['can_update']
+        try:
+            get_data = self.get_sys()
+            for index, value in enumerate(get_data):
+                my_list.append({})
+                my_list[index]["id"] = value["id"]
+                my_list[index]["sy_name"] = schoolYear.objects.get(
+                    id=value['id']).display_sy()
+                my_list[index]["can_update"] = value['can_update']
 
-            if all([value["sexs"], value["yearLevels"], value["strands"]]):
-                distinct_elements = list()
-                distinct_elements.append(list(set(value['sexs'])))
-                distinct_elements.append(list(set(value['yearLevels'])))
-                distinct_elements.append(list(set(value['strands'])))
+                if all([value["sexs"], value["yearLevels"], value["strands"]]):
+                    distinct_elements = list()
+                    distinct_elements.append(list(set(value['sexs'])))
+                    distinct_elements.append(list(set(value['yearLevels'])))
+                    distinct_elements.append(list(set(value['strands'])))
 
-                my_list[index]['sexs'] = [
-                    [self.get_sex_readableValue(sex), value['sexs'].count(sex)] for sex in distinct_elements[0]]
-                my_list[index]['sexs'].insert(0, ['Def', 'Sexes'])
+                    my_list[index]['sexs'] = [
+                        [self.get_sex_readableValue(sex), value['sexs'].count(sex)] for sex in distinct_elements[0]]
+                    my_list[index]['sexs'].insert(0, ['Def', 'Sexes'])
 
-                my_list[index]['yearLevels'] = [
-                    [f"Grade {ylvl}", value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
-                my_list[index]['yearLevels'].insert(0, ['Def', 'Year Levels'])
+                    my_list[index]['yearLevels'] = [
+                        [f"Grade {ylvl}", value['yearLevels'].count(ylvl)] for ylvl in distinct_elements[1]]
+                    my_list[index]['yearLevels'].insert(
+                        0, ['Def', 'Year Levels'])
 
-                my_list[index]['strands'] = [
-                    [strnds, value['strands'].count(strnds)] for strnds in distinct_elements[2]]
-                my_list[index]['strands'].insert(0, ['Def', 'Strand'])
+                    my_list[index]['strands'] = [
+                        [strnds, value['strands'].count(strnds)] for strnds in distinct_elements[2]]
+                    my_list[index]['strands'].insert(0, ['Def', 'Strand'])
 
-            else:
-                my_list[index]['sexs'] = []
-                my_list[index]['yearLevels'] = []
-                my_list[index]['strands'] = []
+                else:
+                    my_list[index]['sexs'] = []
+                    my_list[index]['yearLevels'] = []
+                    my_list[index]['strands'] = []
 
-        return Response(my_list)
+            return Response(my_list)
+        except Exception as e:
+            return Response([])
 
     def get_sex_readableValue(self, val):
         for choice in student_admission_details.SexChoices.choices:
@@ -922,49 +968,6 @@ class get_update_admission_schedule(APIView):
             return Response({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def excel_report(request):
-
-    data = subjects.objects.all()
-
-    workbook = Workbook()
-    worksheet = workbook.active
-
-    # Add column names to the worksheet and format the first row
-    column_names = ['Subject Code', 'Title',
-                    'Created On', 'Last Modified', 'Is_remove']
-    worksheet.append(column_names)
-    worksheet.row_dimensions[1].height = 24
-
-    # Center column names
-    for key, name in enumerate(column_names):
-        cell = worksheet.cell(1, key+1)
-        cell.border = Border(top=Side(border_style='medium'), right=Side(
-            border_style='medium'), left=Side(border_style='medium'), bottom=Side(border_style='medium'))
-        cell.font = Font(name='Arial Rounded MT Bold', size=12, bold=True)
-        cell.alignment = Alignment(horizontal='center')
-
-    for row_num, row_data in enumerate(data, start=1):
-        row = [row_data.code, row_data.title, row_data.created_on,
-               row_data.last_modified, row_data.is_remove]
-        worksheet.append(row)
-
-    # Format the worksheet as desired
-    worksheet.column_dimensions['A'].width = 25
-    worksheet.column_dimensions['B'].width = 70
-    worksheet.column_dimensions['C'].width = 25
-    worksheet.column_dimensions['D'].width = 25
-    worksheet.column_dimensions['E'].width = 25
-
-    # Freeze the header row
-    worksheet.freeze_panes = 'A2'
-
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="mydata.xlsx"'
-    workbook.save(response)
-    return response
-
-
 class get_classLists(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
@@ -1052,59 +1055,131 @@ class print_sections(TemplateView):
             return HttpResponseRedirect(reverse("registrarportal:view_classlists"))
 
 
-# class get_grades(APIView):
-#     permission_classes = [EnrollmentValidationPermissions]
+class get_grades(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
 
-#     def get(self, request, section_id, format=None):
-#         try:
-#             section = schoolSections.objects.filter(id=int(section_id)).prefetch_related(Prefetch(
-#                 "students", queryset=student_enrollment_details.validatedObjects.all(), to_attr="student_list"), Prefetch(
-#                     "first_sem_subjects", queryset=subjects.objects.all(), to_attr="First_sem_subjects"), Prefetch(
-#                         "second_sem_subjects", queryset=subjects.objects.all(), to_attr="Second_sem_subjects")).first()
+    def get(self, request, section_id, format=None):
+        try:
+            section = schoolSections.objects.filter(id=int(section_id)).prefetch_related(Prefetch(
+                "students", queryset=student_enrollment_details.validatedObjects.all(), to_attr="student_list"), Prefetch(
+                    "first_sem_subjects", queryset=subjects.objects.all(), to_attr="First_sem_subjects"), Prefetch(
+                        "second_sem_subjects", queryset=subjects.objects.all(), to_attr="Second_sem_subjects")).first()
 
-#             if section:
-#                 class_list = list()
+            if section:
+                class_list = list()
 
-#                 if section.student_list:
-#                     quarters = student_grades.quarter_choices.choices
-#                     for student_index, student in enumerate(section.student_list):
-#                         class_list.append({})
-#                         class_list[student_index]["id"] = student.applicant.id
-#                         class_list[student_index]["Name"] = student.full_name
-#                         class_list[student_index]["Year_level"] = student.year_level
-#                         class_list[student_index][quarters[0][0]] = self.get_quarter_details(
-#                             section.First_sem_subjects, quarters[0][0], student.year_level, student.applicant.id)
-#                         class_list[student_index][quarters[1][0]] = self.get_quarter_details(
-#                             section.First_sem_subjects, quarters[1][0], student.year_level, student.applicant.id)
-#                         class_list[student_index][quarters[2][0]] = self.get_quarter_details(
-#                             section.Second_sem_subjects, quarters[2][0], student.year_level, student.applicant.id)
-#                         class_list[student_index][quarters[3][0]] = self.get_quarter_details(
-#                             section.Second_sem_subjects, quarters[3][0], student.year_level, student.applicant.id)
+                if section.student_list:
+                    quarters = student_grades.quarter_choices.choices
+                    for student_index, student in enumerate(section.student_list):
+                        class_list.append({})
+                        class_list[student_index]["id"] = student.applicant.id
+                        class_list[student_index]["Name"] = student.full_name
+                        class_list[student_index]["Year_level"] = student.year_level
+                        class_list[student_index][quarters[0][0]] = self.get_quarter_details(
+                            section.First_sem_subjects, quarters[0][0], student.year_level, student.applicant.id)
+                        class_list[student_index][quarters[1][0]] = self.get_quarter_details(
+                            section.First_sem_subjects, quarters[1][0], student.year_level, student.applicant.id)
+                        class_list[student_index][quarters[2][0]] = self.get_quarter_details(
+                            section.Second_sem_subjects, quarters[2][0], student.year_level, student.applicant.id)
+                        class_list[student_index][quarters[3][0]] = self.get_quarter_details(
+                            section.Second_sem_subjects, quarters[3][0], student.year_level, student.applicant.id)
 
-#                     csrf_token = csrf.get_token(request)
-#                     return Response([csrf_token, quarters, class_list])
+                    csrf_token = csrf.get_token(request)
+                    return Response([csrf_token, quarters, class_list])
 
-#                 else:
-#                     return Response([])
+                else:
+                    return Response([])
 
-#             return Response([])
+            return Response([])
 
-#         except Exception as e:
-#             print(e)
-#             return Response([], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(e)
+            return Response([], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#     def get_quarter_details(self, q_subjects, quarter, yearLevel, stud_id):
-#         my_dict = {}
-#         for index_subj, subject in enumerate(q_subjects):
-#             my_dict[subject.code] = self.get_subject_grade(
-#                 quarter, yearLevel, stud_id, subject.id)
+    def get_quarter_details(self, q_subjects, quarter, yearLevel, stud_id):
+        my_dict = {}
+        for index_subj, subject in enumerate(q_subjects):
+            my_dict[subject.code] = self.get_subject_grade(
+                quarter, yearLevel, stud_id, subject.id)
 
-#         return my_dict
+        return my_dict
 
-#     def get_subject_grade(self, quarter, yearLevel, stud_id, subject_id):
-#         try:
-#             this_subject_grade = student_grades.objects.get(student__id=int(
-#                 stud_id), subject__id=int(subject_id), quarter=quarter, yearLevel=yearLevel)
-#             return this_subject_grade.grade
-#         except ObjectDoesNotExist:
-#             return None
+    def get_subject_grade(self, quarter, yearLevel, stud_id, subject_id):
+        try:
+            this_subject_grade = student_grades.objects.get(student__id=int(
+                stud_id), subject__id=int(subject_id), quarter=quarter, yearLevel=yearLevel)
+            return this_subject_grade.grade
+        except ObjectDoesNotExist:
+            return None
+
+
+class post_grades(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def post(self, request, format=None):
+        data = request.data
+        try:
+            grades = data["grades"]
+
+            for index, grade in enumerate(grades):
+                student_id = int(grade["student_id"])
+                quarter = grade["kwarter"]
+                year_level = grade["ylvl"]
+                sbjcts = grade["subjects"]
+
+                for sub_index, sub in enumerate(sbjcts):
+                    if sub and sub[1]:
+                        get_sg = student_grades.objects.filter(
+                            student__id=student_id, subject__code=sub[0], quarter=quarter, yearLevel=year_level).first()
+                        if get_sg:
+                            student_grades.update_grade(get_sg.id, int(sub[1]))
+                        else:
+                            student_grades.objects.create(
+                                student=User.objects.get(id=student_id),
+                                subject=subjects.objects.get(code=sub[0]),
+                                quarter=quarter,
+                                yearLevel=year_level,
+                                grade=int(sub[1])
+                            )
+
+            return Response({"Done": "Save grades successfully."})
+        except Exception as e:
+            print(e)
+            return Response([])
+
+
+class get_admission_with_pending_token_enrollment_v1(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    # For new students
+    def get(self, request, format=None):
+        this_admissions = student_admission_details.objects.filter(is_accepted=True, is_denied=False).exclude(
+            with_enrollment=True).select_related("admission_owner").only("id", "admission_owner")
+
+        serializer = re_token_enrollment_Serializer(this_admissions, many=True)
+        csrf_token = csrf.get_token(request)
+        return Response([csrf_token, serializer.data])
+
+    def post(self, request, format=None):
+        data = request.data
+
+        try:
+            re_token_admission = student_admission_details.objects.filter(
+                pk__in=data['keys']).exclude(with_enrollment=True, is_accepted=True, is_denied=False)
+
+            if re_token_admission:
+                for re_token in re_token_admission:
+                    email_tokenized_enrollment_link.delay({
+                        "username": re_token.admission_owner.display_name,
+                        "domain": get_current_site(request).domain,
+                        "uid": urlsafe_base64_encode(force_bytes(re_token.pk)),
+                        "token": generate_enrollment_token.make_token(re_token),
+                        "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p")},
+                        send_to=re_token.admission_owner.email)
+                return Response({"Done": "Re_token Student/s."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"Done": "No errors but no admission to re_token found."})
+
+        except Exception as e:
+            print(e)
+            return Response([])

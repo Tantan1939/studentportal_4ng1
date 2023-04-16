@@ -3,10 +3,13 @@
 {% include 'studentportal/messages/messages.html' %}
 
 
+
 <div class="landing">
     <div class="landing_o">
         <div class="newfangled_title">
-            <div class="logo">logo</div>
+            <div class="logo">
+                <img src="/Media/homepage_img/logo.png" alt=""  style="border-radius: 50%; height:100%;">
+            </div>
             <h3 class="landing_title d-flex flex-column text-center mt-3 text-white">
                 Leandro Locsin Integrated School
 
@@ -19,25 +22,15 @@
     <div class="container-fluid" style="background:#f7f7f7; border-top: 3px solid #800000;">
         <div class="track_and_strand_wrapper container py-5 position-relative">
             <div class="tracks_strand_date"  style="background: #f7f7f7;">
-                <!-- <h3> School Year {% firstof sy %} </h3> -->
-                <a href="{% url 'studentportal:select_type' %}" class="btn btn-primary"> Apply Now </a>
-                {% if enroll_now == "postpone" %}
-                    <p> Enrollment and Admission are currently postponed. </p>
-        
-                {% elif enroll_now == "enroll" %}
-                    <p> Enrollment and Admission will end on {{end_date_enrollment.end_date|date:"l, M d, o"}}. </p>
-                    <a href="{% url 'studentportal:admission_application' %}" class="btn btn-primary btn-sm"> {% firstof sy %} Apply Now </a> <!-- Button to apply for admission and enrollment -->
-        
-                {% elif enroll_now == "start_soon" %}
-                    <p> Enrollment and Admission will start on {{start_date_enrollment.start_date|date:"l, M d, o"}}. </p>
-        
+                {% if enroll_now %}
+                    <a href="{% url 'studentportal:select_type' %}"> Apply Now </a>
                 {% endif %}
             </div>
             <!-- #b93535 -->
 
             <center> <h2 class="text-dark" id="courses"> Offered Courses </h2> </center>&nbsp;
             <div class="wrap pt-0" >
-                <div class="row py-3 justify-content-sm-center justify-content-md-start" style="padding-top:0;">
+                <div class="course_cont row py-3 justify-content-sm-center justify-content-md-start" style="padding-top:0;">
                     {% for course in courses %}
                     <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="track_strand p-2 px-3">
@@ -75,7 +68,7 @@
         <div class="container">
             <div class="">
                 <center> 
-                    <h2 class="text-dark mb-4"> Latest News and Events 
+                    <h2 class="text-dark mb-4"> Events 
                     </h2>
                     <!-- <span class="linee"></span>  -->
                 </center>&nbsp;
@@ -151,11 +144,11 @@
                     </li>
 
                     <li class="list-group-item">
-                        <span class="fw-bold"> Contact: </span> {{contacts.cellphone_number}}
+                        <span class="fw-bold"> Contact: </span> 09123-456-789
                     </li>
 
                     <li class="list-group-item">
-                        <span class="fw-bold"> Email: </span>  {{emails.email}}
+                        <span class="fw-bold"> Email: </span>  EmailMe@gmail.com
                     </li>
                 </ul>
             </div>

@@ -215,3 +215,12 @@ class classList_serializer(serializers.ModelSerializer):
     class Meta:
         model = schoolYear
         fields = ['id', 'display_sy', 'sy_section']
+
+
+class re_token_enrollment_Serializer(serializers.ModelSerializer):
+    admission_owner = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field='email')
+
+    class Meta:
+        model = student_admission_details
+        fields = ['id', 'admission_owner']

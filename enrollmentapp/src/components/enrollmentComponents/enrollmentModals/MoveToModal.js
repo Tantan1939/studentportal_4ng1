@@ -96,7 +96,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
           e.stopPropagation();
         }} className='modalContainer'>
           <div className='modalRight'>
-            <p onClick={() => onOut_func()} className='closeBtn'> X </p>
+            <p onClick={() => onOut_func()} className='closeBtn ms-2' style={{fontSize:'32px',fontWeight:'700'}}> &times; </p>
 
             {isNext ? (
               <div>
@@ -116,7 +116,7 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                 {renderBatchMembers}
 
                 <div className='btnContainer moveone'>
-                    <button className='btnOutline m-0'>
+                    <button className='btn btn-dark m-0'>
                         <span className='bold' onClick={() => {
                           setSelectedPk(null);
                           setIsFull(false);
@@ -126,30 +126,30 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                     </button>
 
                     {batchMembers.length ? (
-                      <div>
+                      <div className='mx-2 btn p-0'>
                         {selectedPk && <div>
-                            <button className='btnOutline m-0'>
+                            <button className='btn btn-success mx-2'>
                                 <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                             </button>
                           </div>}
 
                         {!selectedPk && <div>
                             {!isFull && <div>
-                                  <button className='btnOutline m-0'>
+                                  <button className='btn btn-success mx-2'>
                                     <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                                   </button>
                               </div>}
                           </div>}
                       </div>
                     ) : (
-                      <div>
-                        <button className='btnOutline m-0'>
+                      <div className='mx-2 btn p-0'>
+                        <button className='btn btn-success m-0'>
                             <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                         </button>
                       </div>
                     )}
 
-                    <button className='btnOutline m-0'>
+                    <button className='btn btn-danger m-0'>
                         <span className='bold' onClick={() => onOut_func()}> Cancel, exit </span>
                     </button>
                 </div>
@@ -159,11 +159,12 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                 <div className='content'>
                     Choose a Batch
                 </div>
+                <div style={{maxHeight:'280px',overflowY:'auto'}}>
+                  {renderBatch}
+                </div>
 
-                {renderBatch}
-
-                <div className='btnContainer'>
-                    <button className='btnOutline'>
+                <div className='px-3 py-3'>
+                    <button className='btn btn-danger w-100 py-2'>
                         <span className='bold' onClick={() => {
                           closeModalFunc();
                         }}> Cancel, exit </span>
