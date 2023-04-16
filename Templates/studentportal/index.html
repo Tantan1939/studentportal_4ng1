@@ -22,7 +22,8 @@
     <div class="container-fluid" style="background:#f7f7f7; border-top: 3px solid #800000;">
         <div class="track_and_strand_wrapper container py-5 position-relative">
             <div class="tracks_strand_date"  style="background: #f7f7f7;">
-                <h3> School Year {% firstof sy %} </h3>
+                <!-- <h3> School Year {% firstof sy %} </h3> -->
+                <a href="{% url 'studentportal:select_type' %}" class="btn btn-primary"> Apply Now </a>
                 {% if enroll_now == "postpone" %}
                     <p> Enrollment and Admission are currently postponed. </p>
         
