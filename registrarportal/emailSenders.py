@@ -42,11 +42,11 @@ def enrollment_invitation_emails(request, invitations):
 
 
 def enrollment_acceptance_email(request, recipient, name, classDetails):
-    get_firstSemDetails = firstSemSchedule.objects.values(
-        'subject__title', 'time_in', 'time_out').filter(section__id=classDetails.id)
+    get_firstSemDetails = firstSemSchedule.objects.filter(section__id=classDetails.id).order_by(
+        "time_in").values('subject__title', 'time_in', 'time_out')
 
-    get_secondSemDetails = secondSemSchedule.objects.values(
-        'subject__title', 'time_in', 'time_out').filter(section__id=classDetails.id)
+    get_secondSemDetails = secondSemSchedule.objects.filter(section__id=classDetails.id).order_by(
+        "time_in").values('subject__title', 'time_in', 'time_out')
 
     mail = render_to_string("registrarportal/emailTemplates/enrollment_acceptance.html", {
         "account_name": name,

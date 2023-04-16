@@ -98,6 +98,10 @@ def enrollmentCount():
         return 0
 
 
+def countDocumentRequests():
+    return documentRequest.registrarObjects.count()
+
+
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
 class registrarDashboard(TemplateView):
     template_name = "registrarportal/dashboard.html"
@@ -107,6 +111,7 @@ class registrarDashboard(TemplateView):
         context["title"] = "Dashboard"
         context["CountAdmission"] = admissionCount()
         context["CountEnrollment"] = enrollmentCount()
+        context["CountDocumentRequests"] = countDocumentRequests()
         return context
 
 

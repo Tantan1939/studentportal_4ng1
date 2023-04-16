@@ -80,7 +80,7 @@
    
                    <a href="{% url 'registrarportal:requestedDocuments' %}" aria-current="page" class="nav-link a_p_card">
                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
-                       <h4>Document Request</h4>
+                       <h4>Document Request {% firstof CountDocumentRequests %} </h4>
                    </a>
 
                    <a href="{% url 'registrarportal:view_classlists' %}" aria-current="page" class="nav-link a_p_card">

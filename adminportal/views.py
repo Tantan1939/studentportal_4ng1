@@ -1077,8 +1077,9 @@ class get_sections(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "List of Sections"
 
-        sections = schoolSections.latestSections.filter(yearLevel=int(self.kwargs["year"])).prefetch_related(Prefetch("firstSemSched", queryset=firstSemSchedule.objects.all(
-        ), to_attr="firstSemesterSubjects"), Prefetch("secondSemSched", queryset=secondSemSchedule.objects.all(), to_attr="secondSemesterSubjects"))
+        sections = schoolSections.latestSections.filter(yearLevel=int(self.kwargs["year"])).prefetch_related(Prefetch(
+            "firstSemSched", queryset=firstSemSchedule.objects.order_by("time_in"), to_attr="firstSemesterSubjects"), Prefetch(
+                "secondSemSched", queryset=secondSemSchedule.objects.order_by("time_in"), to_attr="secondSemesterSubjects"))
         if sections:
             dct = dict()
             for section in sections:

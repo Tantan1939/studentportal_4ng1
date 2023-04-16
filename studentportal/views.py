@@ -146,6 +146,8 @@ class select_admission_type(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Type of Applicant"
         context["types"] = student_admission_details.applicant_type.choices
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -296,6 +298,8 @@ class admission(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
         context["title"] = "Admission"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -337,6 +341,9 @@ class view_myDocumentRequest(TemplateView):
         context["requestedDocuments"] = ongoing_requests.union(
             previous_requests, all=True)
 
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
         return context
 
 
@@ -377,6 +384,8 @@ class create_documentRequest(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Request a Document"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
 
@@ -409,6 +418,8 @@ class reschedDocumentRequest(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Reschedule of Request"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -473,6 +484,8 @@ class enrollment_new_admission(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -548,6 +561,8 @@ class enrollment_old_students(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -602,6 +617,13 @@ class resend_admission(FormView):
     template_name = "studentportal/applications/admissionForm.html"
     form_class = phb_admForms
     success_url = "/Applications/"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Resend Admission"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+        return context
 
     def check_docu_changes(self, form_docx, change_fields):
         for docx in form_docx:
@@ -752,6 +774,9 @@ class get_submitted_enrollments(TemplateView):
             context["enrollments"] = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(Prefetch("enrollment_address", queryset=student_home_address.objects.all(), to_attr="address"), Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(), to_attr="contactnumber"), Prefetch(
                 "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch("stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
 
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
         return context
 
 
@@ -808,6 +833,8 @@ class resend_enrollment(FormView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment Resubmission"
         context["return_key"] = self.get_enrollment.id
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def get_initial(self):
@@ -865,6 +892,9 @@ class view_classes(TemplateView):
                 context["classes"][key]["Second_sem_subjects"][
                     subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
 
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
         return context
 
 
@@ -903,5 +933,8 @@ class view_grades(TemplateView):
             dct = dict()
 
         context["grade_levels"] = dct
+
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
 
         return context
