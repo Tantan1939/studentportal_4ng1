@@ -16,7 +16,7 @@ export default function StudentLists({admission, DeniedHandler}) {
   }, [admission])
 
 
- 
+  
   let renderDocx = () => {
     if (admission.type === 'Philippine Born'){
       return <PhbornDocx softCopy_admissionRequirements_phBorn={admission.softCopy_admissionRequirements_phBorn[0]}/>
