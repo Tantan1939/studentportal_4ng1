@@ -79,6 +79,7 @@ export default function ForAdmissionStudents() {
     <div class="container pt-3">
     <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
       <button class="btn btn-primary btn-md" onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+      <button onClick={() => window.location.href = '/Registrar/Admission/admitted_students/'}> Students </button>
       </div>
       
       {renderBatches}
@@ -98,6 +99,7 @@ export default function ForAdmissionStudents() {
   <div class="card-body">
     <h5 class="card-title">No Admission...</h5>
     <button class="btn btn-primary btn-lg mt-3"onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+    <button onClick={() => window.location.href = '/Registrar/Admission/admitted_students/'}> Students </button>
     <p class="card-text"></p>
 
   </div>

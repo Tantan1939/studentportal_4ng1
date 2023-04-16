@@ -1060,7 +1060,7 @@ class make_section(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.sy = schoolYear.objects.first()
-        if self.sy.until >= date.today():
+        if self.sy and self.sy.until >= date.today():
             # Must have an ongoing school year
             return super().dispatch(request, *args, **kwargs)
         messages.warning(
@@ -1077,8 +1077,9 @@ class get_sections(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "List of Sections"
 
-        sections = schoolSections.latestSections.filter(yearLevel=int(self.kwargs["year"])).prefetch_related(Prefetch("firstSemSched", queryset=firstSemSchedule.objects.all(
-        ), to_attr="firstSemesterSubjects"), Prefetch("secondSemSched", queryset=secondSemSchedule.objects.all(), to_attr="secondSemesterSubjects"))
+        sections = schoolSections.latestSections.filter(yearLevel=int(self.kwargs["year"])).prefetch_related(Prefetch(
+            "firstSemSched", queryset=firstSemSchedule.objects.order_by("time_in"), to_attr="firstSemesterSubjects"), Prefetch(
+                "secondSemSched", queryset=secondSemSchedule.objects.order_by("time_in"), to_attr="secondSemesterSubjects"))
         if sections:
             dct = dict()
             for section in sections:
@@ -1249,8 +1250,11 @@ class school_year_index(TemplateView):
         context["title"] = "School Year"
 
         this_sy = schoolYear.objects.first()
-        context["school_year"] = this_sy.display_sy(
-        ) if this_sy.until >= date.today() else False
+        try:
+            context["school_year"] = this_sy.display_sy(
+            ) if this_sy.until >= date.today() else False
+        except Exception as e:
+            context["school_year"] = ""
 
         return context
 

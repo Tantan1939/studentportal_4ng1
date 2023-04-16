@@ -1,0 +1,23 @@
+{% extends 'studentportal/base1.html' %}
+{% block content %}
+{% include 'studentportal/messages/messages.html' %}
+
+
+{% if grade_levels %}
+
+    {% for yearlevel, quarters in grade_levels.items %}
+        <h5> {{yearlevel}} </h5>
+        {% for q_name, q_subjects in quarters.items %}
+            <h4> {{q_name}} </h4>
+            {% for subject_code, subject_grade in q_subjects.items %}
+                <p> {{subject_code}}: {{subject_grade}} </p>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+
+{% else %}
+    <h4> No grades found... </h4>
+{% endif %}
+
+
+{% endblock content %}

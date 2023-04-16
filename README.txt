@@ -131,6 +131,7 @@ Step 3: Open the environment variables.
 	Step 3.2: Open the system variable Path and add C:\Program Files\RabbitMQ Server\rabbitmq_server-3.11.10\sbin
 	Step 3.3: Save and Close.
 Step 4: Open the RabbitMQ command prompt (sbin dir) or any cmd.
+	Step 4.0: End task erlang from task manager.
 	Step 4.1: Type rabbitmq-plugins enable rabbitmq_management and hit Enter. (Required to enable the plugins)
 	Step 4.2: Type rabbitmq-server.bat or rabbitmq-server.bat -detached and hit Enter. (to start the broker)
 	Step 4.3: Type rabbitmq-service.bat install and hit Enter. (will install the service, for first time only)
@@ -163,3 +164,9 @@ Step 1: Open the django project with vscode.
 Step 2: Open a new terminal.
 Step 3: type cd enrollmentapp and hit Enter.
 Step 4: Type npm install and hit Enter.
+
+
+-----
+1: pip install virtualenv
+2: virtualenv --python python3 .
+3: 
