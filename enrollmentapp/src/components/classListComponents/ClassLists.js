@@ -81,9 +81,7 @@ export default function ClassLists() {
                             <h4> {class_lists.display_sy} </h4>
                             {class_lists.sy_sections.length ? (
                                 <div>
-                                    <Link to={`/Registrar/Classlist/Print/${class_lists.id}`}>
-                                        <button> Print </button>
-                                    </Link>
+                                    <button onClick={()=> window.location.href = `/Registrar/Classlist/Print/${class_lists.id}`}> Print </button>
                                     {render_classlists}
                                 </div>
                             ) : (
