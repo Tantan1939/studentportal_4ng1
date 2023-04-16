@@ -12,11 +12,19 @@
         <title> Newfangled Senior High School </title>
     {% endif %}
 
+
+    <link rel="stylesheet" href="{% static 'adminportal/dash.css' %}">
+    <link rel="stylesheet" href="{% static 'adminportal/courses_base.css' %}">
 </head>
 <body>
 
+    {% include 'adminportal/dashboard.html' %}
+
+
+
+<div class="main">
     {% block content %}{% endblock content %}
-    
+</div>
     <script src="{% static 'adminportal/js/formSubmit.js' %}"></script>
     
 </body>

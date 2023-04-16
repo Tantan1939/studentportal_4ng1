@@ -5,8 +5,16 @@
 {% include 'adminportal/messages/messages.html' %}
 
 
-<div class="container col-md-8">
-    <form id="postForm" method="post">
+
+<div class="container pt-5">
+    <div class="w-100 mt-3 d-flex pt-3 justify-content-start">
+        <h1>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</h1>
+  </div>
+
+
+
+  <div class="container col-md-8 mt-4 p-3 bg-white box_shadow border rounded">
+    <form id="postForm" class="p-3" method="post">
 
         {{ wizard.form.non_field_errors }}
         {% csrf_token %}
@@ -19,29 +27,39 @@
             {% endfor %}
         {% else %}
 
-        <h4> New Admission Schedule </h4>
+        
+        <h4 class="py-2"> 
+            <i class="fa fa-pencil me-2" aria-hidden="true"></i>
+            <i>
+                New Admission Schedule
+            </i>
+        </h4>
+        <hr>
 
+        <div class="form-outline mb-4">
             {{ wizard.form.start_date.errors }} <!-- Field errors -->
             <label for="{{ wizard.form.start_date.id_for_label }}" class="form-label"> {{ wizard.form.start_date.label }} </label>
             {{ wizard.form.start_date|addclass:"form-control"}} <!-- Input Field -->
-
+        </div>  
+        <div class="form-outline mb-4">
             {{ wizard.form.end_date.errors }} <!-- Field errors -->
             <label for="{{ wizard.form.end_date.id_for_label }}" class="form-label"> {{ wizard.form.end_date.label }} </label>
             {{ wizard.form.end_date|addclass:"form-control"}} <!-- Input Field -->
-
+        </div>
+        <div class="form-outline mb-4">
             {{ wizard.form.students_perBatch.errors }} <!-- Field errors -->
             <label for="{{ wizard.form.students_perBatch.id_for_label }}" class="form-label"> {{ wizard.form.students_perBatch.label }} </label>
             {{ wizard.form.students_perBatch|addclass:"form-control"}} <!-- Input Field -->
-
+        </div>
         {% endif %}
         </table>
 
-        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary btn-sm">{% trans "Prev" %}</button>
-        <input type="submit" name="wizard_goto_step" value="Submit" class="btn btn-primary btn-sm">
+        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary btn-md">{% trans "Prev" %}</button>
+        <input type="submit" name="wizard_goto_step" value="Submit" class="btn btn-success btn-md">
 
     </form>
 </div>
 
-<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+
 
 {% endblock content %}

@@ -66,6 +66,7 @@ code {
   grid-auto-flow: column;
   grid-template-columns: 320px 1fr;
 }
+
 .content .details{
   font-size: 19px;
   color: #000;
@@ -78,10 +79,11 @@ code {
 
 }
 .modalContainer {
-  max-width: 600px;
-  width: 100%;
+  max-width: 1000px;
+  width: 700%;
   position: fixed;
-  top: 53%;
+  height: 80%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -91,20 +93,21 @@ code {
 }
 
 img {
-  width: 250px;
+  width: 750px;
   object-fit: cover;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
 }
 
 .modalRight {
-  width: 100%;
+  width: 500%;
 }
 
 .closeBtn {
   position: fixed;
-  top: 8px;
+  top: 3px;
   right: 8px;
+  cursor: pointer;
 }
 
 .content {
@@ -112,7 +115,16 @@ img {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  padding: 0rem 15px;
+  padding: 1rem 41px;
+}
+.content > div{
+  font-size: 18px;
+  font-weight: 600;
+
+}
+.content{
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .btnContainer {
@@ -120,17 +132,22 @@ img {
   padding: 1rem 1rem;
 }
 .btnContainer button {
-  width: 100%;
+  /* width: 100%;
   margin: .5rem;
-  padding: 16px 0;
+  padding: 20px 0; */
   /* border: none; */
-  border: 1px solid #411b57;
+  /* border: 1px solid #411b57; */
   /* color: #ffffff; */
 }
 .btnContainer.moveone{
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.btnContainer.moveone .btn{
+  max-width: 136px;
+  width: 100%;
+  padding: 12px 5px;
 }
 .btnPrimary {
   background-color: #411b57;
