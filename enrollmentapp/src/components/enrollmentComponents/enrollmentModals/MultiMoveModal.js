@@ -57,7 +57,7 @@ export default function MultiMoveModal({open, closeModalFunc, selectedPKs, batch
                 <p onClick={()=> {
                     closeModalFunc();
                     setIsNext(false);
-                }} className='closeBtn'> X </p>
+                }} className='closeBtn' style={{fontSize:'32px',fontWeight:'700'}}> &times; </p>
 
                 {isNext ? (
                     <div> {batchMembers} </div>
@@ -66,12 +66,14 @@ export default function MultiMoveModal({open, closeModalFunc, selectedPKs, batch
                         <div className='content'>
                             Select a Batch
                         </div>
-
+                        <div style={{maxHeight:'280px',overflowY:'auto'}}>
                         {render_batchs}
 
-                        <div className='btnContainer'>
-                            <button className='btnOutline'>
-                                <span className='bold' onClick={closeModalFunc}> Exit </span>
+                        </div>
+
+                        <div className='px-3 py-3'>
+                            <button className='btn btn-success w-100 py-2'>
+                                <span style={{}} onClick={closeModalFunc}> Exit </span>
                             </button>
                         </div>
                     </div>

@@ -51,15 +51,28 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, bat
   }
   return (
     <div className='student w-100'>
-      <img src={studentPicture} style={imgStyle} onMouseMove={() => setStudPictModal(true)} onMouseOut={() => setStudPictModal(false)}/>
-      <ImageModal isHovering={studPictModal} img={studentPicture}/>
+      <img src={studentPicture} style={imgStyle} onMouseEnter={() => setStudPictModal(true)} onMouseLeave={() => setStudPictModal(false)}/>
+      {setStudPictModal && (
+        <div>
+            <ImageModal isHovering={studPictModal} img={studentPicture}/>
+        </div>
+      )}
+
 
       
-      <div className='namestud d-flex align-items-center' style={span} onMouseMove={() => setStudDetailModal(true)} onMouseOut={() => setStudDetailModal(false)}><p className='m-0'> <span style={{color:'#999'}}>#{enrollmentID} - {enrollment.applicant}: </span>  {enrollment.full_name} - {enrollment.age}</p> </div>
-      <StudentDetailsModal isHovering={studDetailModal} studDetail={enrollment} studpict={studentPicture}/>
+      <div className='namestud d-flex align-items-center' style={span} onMouseEnter={() => setStudDetailModal(true)} onMouseLeave={() => setStudDetailModal(false)}><p className='m-0'> <span style={{color:'#999'}}>#{enrollmentID} - {enrollment.applicant}: </span>  {enrollment.full_name} - {enrollment.age}</p> </div>
+      {setStudDetailModal && (
+        <div>
+          <StudentDetailsModal isHovering={studDetailModal} studDetail={enrollment} studpict={studentPicture}/>
+        </div>
+      )}
+
       
-      <span style={span} className='d-flex align-items-center' onMouseMove={() => setReportCardModal(true)} onMouseOut={() => setReportCardModal(false)}> Report Card </span>
-      <ImageModal isHovering={studCardModal} img={reportCard}/>
+      <span style={span} className='d-flex align-items-center' onMouseEnter={() => setReportCardModal(true)} onMouseLeave={() => setReportCardModal(false)}> Report Card </span>
+      {setReportCardModal && (
+        <ImageModal isHovering={studCardModal} img={reportCard}/>
+        
+      )}
 
       <div className='stud_btn d-flex align-items-center justify-content-center ms-auto'>
         <button className='btn btn-danger me-2' onClick={() => setDeniedConfirmationModal(true)}> Denied </button>

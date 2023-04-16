@@ -7,21 +7,21 @@ function EnrollAllConfirmationModal({open, closeModalFunc, AcceptEnrollees_Handl
       <div onClick={closeModalFunc} className='overlay'>
         <div onClick={(e) => {
           e.stopPropagation();
-        }} className='modalContainer'>
-            <p onClick={closeModalFunc} className='closeBtn'> X </p>
+        }} className='modalContainer d-flex flex-column'>
+            <p onClick={closeModalFunc} className='closeBtn' style={{fontSize:'32px',fontWeight:'700'}}> &times; </p>
             <div className='content'>
                 Do you want to enroll {number_of_enrollment} applicant/s and assign them to {section}?
             </div>
 
-            <div className='btnContainer'>
-                <button className='btnPrimary'>
+            <div className='btnContainer moveone'>
+                <button className='btn btn-success me-2'>
                     <span className='bold' onClick={() => {
                         closeModalFunc();
                         const delay_handler = setTimeout(() => AcceptEnrollees_Handler(enrolleesID, batchID), 100);
                         return () => clearTimeout(delay_handler);
                     }}> Yes </span>
                 </button>
-                <button className='btnOutline'>
+                <button className='btn btn-danger'>
                     <span className='bold' onClick={closeModalFunc}> No, exit </span>
                 </button>
             </div>
