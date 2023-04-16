@@ -65,23 +65,28 @@
                 <div class="links_wrap navbar-nav">
                     <a href="{% url 'registrarportal:view_admissions' %}" aria-current="page" class="nav-link a_p_card">
                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
-                       <h4>Admission</h4>
+                       <h4>Admission {% firstof CountAdmission %} </h4>
                    </a>
    
                    <a href="{% url 'registrarportal:validate_enrollment' %}" aria-current="page" class="nav-link a_p_card">
                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
-                       <h4>Enrollment</h4>
+                       <h4>Enrollment {% firstof CountEnrollment %} </h4>
                    </a>
    
-                   <a href="{% url 'registrarportal:schoolyear' %}" aria-current="page" class="nav-link a_p_card">
+                   <a href="{% url 'registrarportal:view_schoolyears' %}" aria-current="page" class="nav-link a_p_card">
                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
                        <h4>School Years</h4>
                    </a>
    
                    <a href="{% url 'registrarportal:requestedDocuments' %}" aria-current="page" class="nav-link a_p_card">
                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
-                       <h4>Document Request</h4>
+                       <h4>Document Request {% firstof CountDocumentRequests %} </h4>
                    </a>
+
+                   <a href="{% url 'registrarportal:view_classlists' %}" aria-current="page" class="nav-link a_p_card">
+                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->
+                        <h4>Class List</h4>
+                    </a>
    
                    <a href="{% url 'usersPortal:changepassword' %}" aria-current="page" class="nav-link a_p_card">
                        <!-- <i class="fa fa-graduation-cap py-2 me-3" aria-hidden="true"></i> -->

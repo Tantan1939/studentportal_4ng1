@@ -40,4 +40,7 @@ urlpatterns = [
                  name="resubmit_enrollment"),
         ])),
     ])),
+
+    path("Classlist/", view_classes.as_view(), name="classes"),
+    path("Grades/", view_grades.as_view(), name="grades"),
 ]

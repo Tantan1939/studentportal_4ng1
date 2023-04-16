@@ -1,0 +1,5 @@
+Generate Schedule (admin)
+Make Section (admin)
+Display Sections (admin)
+Enrollment Acceptance Email (registrar)
+View Classes (student)

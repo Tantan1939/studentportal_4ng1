@@ -43,7 +43,7 @@ export default function RenderBatchMembersWithSelect({open, members, setIsNextCl
     };
 
     let render_members = members.map((member, index) => (
-        <div key={index}>
+        <div className='px-4 d-flex align-items-center' key={index}>
             <input type={'checkbox'} name={member.id} checked={checkBoxes[member.id]} onChange={handleCheckboxChanges} />
             <RenderStudentImage key={index} image={member.stud_pict[0].user_image}/> {member.full_name} - {member.age}
         </div>
@@ -66,16 +66,16 @@ export default function RenderBatchMembersWithSelect({open, members, setIsNextCl
 
         {render_members}
 
-        <div className='btnContainer'>
-            <button className='btnOutline' onClick={setIsNextClose}>
+        <div className='btnContainer moveone'>
+            <button className='btn btn-dark' onClick={setIsNextClose}>
                 <span className='bold'> Back </span>
             </button>
 
-            <button className='btnOutline'>
+            <button className='btn btn-success mx-2'>
                 <span className='bold' onClick={()=> exchange_swap_this(selectedPKs, currentBatch, targetBatch, checkedBoxes)}> Move </span>
             </button>
 
-            <button className='btnOutline' onClick={() => closeThisModal()}>
+            <button className='btn btn-danger' onClick={() => closeThisModal()}>
                 <span className='bold'> Cancel, exit </span>
             </button>
         </div>

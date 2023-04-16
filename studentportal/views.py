@@ -27,7 +27,6 @@ from smtplib import SMTPException
 from usersPortal.models import user_photo
 from . models import *
 from . email_token import *
-from adminportal.models import *
 from collections import OrderedDict
 from django.core.files.storage import DefaultStorage
 from registrarportal.models import student_admission_details
@@ -40,7 +39,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from studentportal.tasks import admission_batching, enrollment_batching
 
 
-# pytesseract.pytesseract.tesseract_cmd = 'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
 User = get_user_model()
 
 
@@ -90,14 +88,9 @@ class index(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Newfangled Senior High School"
 
-        context["courses"] = shs_track.objects.filter(is_deleted=False).prefetch_related(Prefetch(
-            "track_strand", queryset=shs_strand.objects.filter(is_deleted=False).order_by("strand_name"), to_attr="strands")).order_by("track_name")
-
-        context["contacts"] = school_contact_number.objects.filter(
-            is_deleted=False).first()
-
-        context["emails"] = school_email.objects.filter(
-            is_deleted=False).first()
+        context["courses"] = shs_track.objects.filter(is_deleted=False).alias(count_strands=Count(
+            "track_strand", filter=Q(track_strand__is_deleted=False))).exclude(count_strands__lt=1).prefetch_related(Prefetch(
+                "track_strand", queryset=shs_strand.objects.filter(is_deleted=False).order_by("strand_name"), to_attr="strands")).order_by("track_name")
 
         getEvents = school_events.ongoingEvents.all()
         if getEvents:
@@ -113,16 +106,31 @@ class index(TemplateView):
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
 
+        context["enroll_now"] = self.check_enrollment()
+
         return context
+
+    def check_enrollment(self):
+        if not self.request.user.is_authenticated:
+            return True
+        else:
+            if user_no_admission(self.request.user) and check_for_admission_availability(self.request.user):
+                return True
+            return False
 
 
 def user_no_admission(user):
-    # Return False if the user has validated admission or to_validate admission
+    # Return False if the user has validated admission or to_validate admission, the exclude will remove the denied admission from the result
     return not student_admission_details.objects.filter(admission_owner=user).exclude(is_accepted=False, is_denied=True).exists()
 
 
 def check_for_admission_availability(user):
-    return enrollment_admission_setup.objects.filter(ea_setup_sy__until__gt=date.today(), end_date__gte=date.today()).exists()
+    sy = schoolYear.objects.first()
+    if sy:
+        if sy.until > date.today():
+            return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gt=date.today()).exists()
+        return False
+    return False
 
 
 admission_decorators = [login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index"), user_passes_test(
@@ -138,6 +146,8 @@ class select_admission_type(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Type of Applicant"
         context["types"] = student_admission_details.applicant_type.choices
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -276,42 +286,6 @@ class admission(SessionWizardView):
     def get_template_names(self):
         return [self.templates[self.steps.current]]
 
-    # def rescale_frame(self, frame, scale=0.25):
-    #     width = int(frame.shape[1] * scale)
-    #     height = int(frame.shape[0] * scale)
-    #     dimension = (width, height)
-    #     return cv2.resize(frame, dimension, interpolation=cv2.INTER_AREA)
-
-    # def render_next_step(self, form, **kwargs):
-    #     get_reqs = self.get_cleaned_data_for_step(self.storage.current_step)
-    #     t_methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
-    #                  cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
-
-    #     if self.storage.current_step == "admissionRequirementsForm":
-    #         with Image.open(get_reqs["good_moral"]) as goodMoral:
-    #             depedSeal = cv2.imread("Media/Seals/DepedSeal.png")
-    #             testSeal = cv2.imread("Media/Seals/sampleSeals.jpg")
-    #             depedSeal_h, depedSeal_w, _ = depedSeal.shape
-    #         # with Image.open(get_imgs["good_moral"]) as img:
-    #         #     txt = pytesseract.image_to_string(img)
-
-    #         result = cv2.matchTemplate(
-    #             testSeal, self.rescale_frame(depedSeal), cv2.TM_CCOEFF)
-    #         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-    #         messages.success(self.request, (min_loc, max_loc))
-
-    #         return self.render_goto_step(self.storage.current_step, **kwargs)
-    #     else:
-    #         next_step = self.steps.next
-    #         new_form = self.get_form(
-    #             next_step,
-    #             data=self.storage.get_step_data(next_step),
-    #             files=self.storage.get_step_files(next_step),
-    #         )
-    #         # change the stored current step
-    #         self.storage.current_step = next_step
-    #         return self.render(new_form, **kwargs)
-
     def render_goto_step(self, goto_step, **kwargs):
         form = self.get_form(data=self.request.POST, files=self.request.FILES)
         if form.is_valid():
@@ -324,6 +298,8 @@ class admission(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
         context["title"] = "Admission"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -365,6 +341,9 @@ class view_myDocumentRequest(TemplateView):
         context["requestedDocuments"] = ongoing_requests.union(
             previous_requests, all=True)
 
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
         return context
 
 
@@ -405,6 +384,8 @@ class create_documentRequest(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Request a Document"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
 
@@ -437,6 +418,8 @@ class reschedDocumentRequest(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Reschedule of Request"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -501,6 +484,8 @@ class enrollment_new_admission(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -576,6 +561,8 @@ class enrollment_old_students(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -630,6 +617,13 @@ class resend_admission(FormView):
     template_name = "studentportal/applications/admissionForm.html"
     form_class = phb_admForms
     success_url = "/Applications/"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Resend Admission"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+        return context
 
     def check_docu_changes(self, form_docx, change_fields):
         for docx in form_docx:
@@ -780,6 +774,9 @@ class get_submitted_enrollments(TemplateView):
             context["enrollments"] = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(Prefetch("enrollment_address", queryset=student_home_address.objects.all(), to_attr="address"), Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(), to_attr="contactnumber"), Prefetch(
                 "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch("stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
 
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
         return context
 
 
@@ -836,6 +833,8 @@ class resend_enrollment(FormView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment Resubmission"
         context["return_key"] = self.get_enrollment.id
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def get_initial(self):
@@ -865,3 +864,77 @@ class resend_enrollment(FormView):
             return super().dispatch(request, *args, **kwargs)
         else:
             return HttpResponseRedirect(reverse("studentportal:get_submitted_enrollments"))
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class view_classes(TemplateView):
+    template_name = "studentportal/ClassList.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Class"
+        context["classes"] = list()
+
+        this_classes = schoolSections.objects.filter(
+            classmate__enrollment__applicant__id=self.request.user.id)
+
+        for key, section in enumerate(this_classes):
+            context["classes"].append({})
+            context["classes"][key]["section_name"] = section.name
+            context["classes"][key]["First_sem_subjects"] = dict()
+
+            for index, subject_details in enumerate(section.first_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
+                context["classes"][key]["First_sem_subjects"][
+                    subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+
+            context["classes"][key]["Second_sem_subjects"] = dict()
+            for index, subject_details in enumerate(section.second_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
+                context["classes"][key]["Second_sem_subjects"][
+                    subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
+        return context
+
+
+@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+class view_grades(TemplateView):
+    template_name = "studentportal/Grades.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Grades"
+
+        try:
+            dct = dict()
+            this_student_grades = student_grades.objects.filter(
+                student__id=self.request.user.id).select_related("subject").order_by("quarter")
+
+            for std_grds_indx, std_grds in enumerate(this_student_grades):
+                if std_grds.get_yearLevel_display() not in dct:
+                    dct[std_grds.get_yearLevel_display()] = dict()
+                    dct[std_grds.get_yearLevel_display(
+                    )][std_grds.get_quarter_display()] = dict()
+                    dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                    )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+
+                else:
+                    if std_grds.get_quarter_display() not in dct[std_grds.get_yearLevel_display()]:
+                        dct[std_grds.get_yearLevel_display(
+                        )][std_grds.get_quarter_display()] = dict()
+                        dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                        )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+                    else:
+                        dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                        )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+
+        except Exception as e:
+            dct = dict()
+
+        context["grade_levels"] = dct
+
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
+
+        return context

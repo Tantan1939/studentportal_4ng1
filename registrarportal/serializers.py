@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from . models import *
+from adminportal.models import schoolSections
 
 
 def add_school_year(start_year, year):
@@ -83,9 +84,9 @@ class displayCourseSerializer(serializers.RelatedField):
         return f"{value.track.track_name}: {value.strand_name}"
 
 
-# class SchoolYearRelationSerializer(serializers.RelatedField):
-#     def to_representation(self, value):
-#         return " ".join(map(str, [value.start_on.strftime("%Y"), "-", (add_school_year(value.start_on, 1)).strftime("%Y")]))
+class SchoolYearRelationSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return " ".join(map(str, [value.start_on.strftime("%Y"), "-", (add_school_year(value.start_on, 1)).strftime("%Y")]))
 
 
 class ReportCardSerializer(serializers.ModelSerializer):
@@ -161,3 +162,65 @@ class batchSerializer(serializers.ModelSerializer):
         model = enrollment_batch
         fields = ['id', 'section', 'is_full', 'members',
                   'allowed_students', 'count_members']
+
+
+class schoolyear_serializer(serializers.ModelSerializer):
+    start_on = serializers.DateField()
+    until = serializers.DateField()
+    can_update_startdate = serializers.BooleanField()
+
+    class Meta:
+        model = schoolYear
+        fields = ['id', 'start_on', 'until', 'can_update_startdate']
+
+
+class ea_setup_serializer(serializers.ModelSerializer):
+    can_update_startdate = serializers.BooleanField()
+    can_update_this_setup = serializers.BooleanField()
+    ea_setup_sy = SchoolYearRelationSerializer(many=False, read_only=True)
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+
+    class Meta:
+        model = enrollment_admission_setup
+        fields = ['id', 'can_update_startdate', 'can_update_this_setup',
+                  'ea_setup_sy', 'start_date', 'end_date']
+
+
+class student_serializer(serializers.ModelSerializer):
+    full_name = serializers.CharField()
+    age = serializers.IntegerField()
+    admission = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field='sex')
+
+    class Meta:
+        model = student_enrollment_details
+        fields = ['id', 'full_name', 'age', 'admission']
+
+
+class section_serializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    students = student_serializer(many=True, read_only=True)
+    count_students = serializers.IntegerField()
+
+    class Meta:
+        model = schoolSections
+        fields = ['id', 'name', 'count_students', 'students']
+
+
+class classList_serializer(serializers.ModelSerializer):
+    sy_section = section_serializer(many=True, read_only=True, required=False)
+    display_sy = serializers.CharField()
+
+    class Meta:
+        model = schoolYear
+        fields = ['id', 'display_sy', 'sy_section']
+
+
+class re_token_enrollment_Serializer(serializers.ModelSerializer):
+    admission_owner = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field='email')
+
+    class Meta:
+        model = student_admission_details
+        fields = ['id', 'admission_owner']

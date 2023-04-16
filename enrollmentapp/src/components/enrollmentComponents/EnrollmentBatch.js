@@ -139,8 +139,12 @@ export default function EnrollmentBatch() {
   ));
 
   return (
-    <div>
-      <div> <button onClick={() => window.location.href = '/Registrar/'}> Exit </button> </div>
+    <div className='pb-3'>
+      <div className='d-flex justify-content-end'> 
+        <button onClick={() => window.location.href = '/Registrar/'} className='btn btn-primary'> Exit </button>
+        <button onClick={() => window.location.href = '/Registrar/Enrollment/Enrolled_students/'}> Students </button>
+        <button onClick={() => window.location.href = '/Registrar/Enrollment/Re_token/'} className='btn btn-primary'> Re_Token </button>
+      </div>
 
       <div>
         {loading && <h4> Loading... </h4>}
