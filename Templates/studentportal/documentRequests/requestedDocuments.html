@@ -2,11 +2,28 @@
 {% block content %}
 {% include 'studentportal/messages/messages.html' %}
 
-<div class="container">
-    <div class="col-md-12 pt-4">
-        <div class="box_parent">
-            <a href="{% url 'studentportal:create_documentRequest' %}" class="card_btn_create"> 
-                <div class="box_btn">
+<style>
+    .box_btn{
+    /* box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; */
+    border-radius: 8px;
+    height: 50px;
+    width: 140px;
+    background: #4b4b4b;
+    transition: 0.3s ease-in;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+.box_btn:hover{
+    background: #800000;
+    color: #fff !important;
+}
+</style>
+<div class="bg-dark">
+    <div class="container col-md-12 pt-4 b">
+        <div class="">
+            <a href="{% url 'studentportal:create_documentRequest' %}" class="" style="text-decoration: none; color:#fff;"> 
+                <div class="box_btn d-flex justify-content-center align-items-center" style="gap:10px;">
                     <i class="fa fa-file-text" aria-hidden="true"></i>
                     <span>Request +</span> 
                 </div>

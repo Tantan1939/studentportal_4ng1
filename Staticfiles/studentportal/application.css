@@ -1,27 +1,34 @@
+.navigation_btn{
+}
 .box_btn{
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 border-radius: 8px;
-height: 140px;
-width: 280px;
-background: #a00c16;
-position: relative;
+height: 50px;
+width: 140px;
+background: #4b4b4b;
 transition: 0.3s ease-in;
+display: grid;
+place-items: center;
+cursor: pointer;
 }
 .box_btn:hover{
     background: #800000;
     color: #fff !important;
 }
 .box_btn a{
-    position: absolute;
-    top:0px;
-    padding: 20px 20px;
-    left: 0;
-    width: 100%;
-    height: 100%;
     text-decoration: none;
     color: #fff;
-    font-size: 20px;    
+    font-size: 17px;    
 }
 .box_btn a:hover{
     color: #fff;
+}
+.detail_wrapper p {
+    font-weight: 500;
+    color: #5c5c5c;
+}
+.detail_wrapper h5{
+    padding-bottom: 15px;
+    padding-top: 20px;
+    font-size: 25px;
 }

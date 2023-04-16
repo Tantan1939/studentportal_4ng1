@@ -3,50 +3,87 @@
 {% include 'studentportal/applications/menus.html' %}
 {% include 'studentportal/messages/messages.html' %}
 
-<div class="container col-md-8">
+<style>
+ .enroll_img img{
+    height: auto;
+    width: 200px;
+
+ }
+ .enroll_img{
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+ }
+ .report_card{
+    margin-top: 10px;
+    margin-bottom: 20px;
+ }
+ .report_card img{
+    height: auto;
+    width: 350px;
+ }
+</style>
+<div class="container pb-5 col-md-8">
     {% for sy in sy_enrolled %}
-        <a href="{% url 'studentportal:get_submitted_enrollments' key=sy.id %}" class="btn btn-primary btn-sm"> {{sy.enrolled_school_year}} </a>
+    <div class="school_yr py-3">
+        <a href="{% url 'studentportal:get_submitted_enrollments' key=sy.id %}" class="btn btn-dark"> {{sy.enrolled_school_year}} </a>
+    </div>
     {% endfor %}
+    
+    <div class="enrollment_wrapper border rounded" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;">
+        {% if enrollments %}
+            {% if enrollments.can_resub %}
+             <a href="{% url 'studentportal:resubmit_enrollment' key=enrollments.id %}" class="btn btn-primary btn-sm"> Resubmit </a> 
+             {% endif %}
+    
+            {% for img in enrollments.studentpicture|slice:"1" %}
+            <div class="enroll_img py-3 d-flex justify-content-center bg-dark ">
+                <img src="{{ img.user_image.url }}" alt="" style="  border-radius: 50%;">
 
-    {% if enrollments %}
-        {% if enrollments.can_resub %} <a href="{% url 'studentportal:resubmit_enrollment' key=enrollments.id %}" class="btn btn-primary btn-sm"> Resubmit </a> {% endif %}
+            </div>
+            {% endfor %}
+            <div class="bg-secondary text-white px-4 py-2">
+                <p class="m-0"> {{enrollments.enrolled_school_year}} </p>
 
-        {% for img in enrollments.studentpicture|slice:"1" %}
-            <img src="{{ img.user_image.url }}" alt="">
-        {% endfor %}
-
-        <p> {{enrollments.enrolled_school_year}} </p>
-        <p> Name: {{enrollments.full_name}} - {{enrollments.age}} </p>
-        <p> Year: {{enrollments.get_year_level_display}} </p>
-
-        {% for contact in enrollments.contactnumber|slice:"1" %}
-            <p> Contact: {{contact}} </p>
-        {% endfor %}
-
-        {% for loc in enrollments.address|slice:"1" %}
-            <p> Address: {{loc}} </p>
-        {% endfor %}
-
-        {% for img in enrollments.reportcard|slice:"1" %}
-            <img src="{{ img.report_card.url }}" alt="">
-        {% endfor %}
-
-        <p> Date Applied: {{enrollments.created_on|date:"l, j M o"}} </p>
-
-        <p>
-            Status:
-            {% if not enrollments.is_accepted and not enrollments.is_denied %}
-                For validation
-            {% elif enrollments.is_accepted %}
-                Validated
+            </div>
+            <div class="detail_wrapper p-3">
+             
+                <p> Name: {{enrollments.full_name}} - {{enrollments.age}} </p>
+                <p> Year: {{enrollments.get_year_level_display}} </p>
+        
+                {% for contact in enrollments.contactnumber|slice:"1" %}
+                    <p> Contact: {{contact}} </p>
+                {% endfor %}
+        
+                {% for loc in enrollments.address|slice:"1" %}
+                    <p> Address: {{loc}} </p>
+                {% endfor %}
+        
+                {% for img in enrollments.reportcard|slice:"1" %}
+                    <div class="report_card ">
+                        <h5 class="m-0">Report Card</h5>
+                        <img class="border" src="{{ img.report_card.url }}" alt="">
+                    </div>
+                {% endfor %}
+        
+                <p> Date Applied: {{enrollments.created_on|date:"l, j M o"}} </p>
+        
+                <p>
+                    Status:
+                    {% if not enrollments.is_accepted and not enrollments.is_denied %}
+                        For validation
+                    {% elif enrollments.is_accepted %}
+                        Validated
+                    {% else %}
+                        Denied
+                    {% endif %}
+                </p>
+        
             {% else %}
-                Denied
+                <h6> No enrollment... </h6>
             {% endif %}
-        </p>
+            </div>
 
-    {% else %}
-        <h6> No enrollment... </h6>
-    {% endif %}
+    </div>
 </div>
 
 {% endblock content %}
