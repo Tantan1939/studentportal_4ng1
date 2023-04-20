@@ -170,7 +170,7 @@ class enrollment_invitation_oldStudents(View):
         if self.diff:
             return super().dispatch(request, *args, **kwargs)
         else:
-            messages.warning(request, "No token receipents.")
+            messages.warning(request, "No previous student/s found.")
             return HttpResponseRedirect(reverse("registrarportal:get_enrolled_students"))
 
 
