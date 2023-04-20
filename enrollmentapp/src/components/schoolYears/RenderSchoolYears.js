@@ -122,8 +122,16 @@ export default function RenderSchoolYears() {
 
 
   return (
-    <div>
-      <div> <button onClick={() => window.location.href = '/Registrar/'}> Exit </button> </div>
+    <div class="main">
+      <div class="container"> 
+        <div class="w-100 mt-3 d-flex pt-3 justify-content-end">  
+          <button class="btn btn-primary btn-md"onClick={() => window.location.href = '/Registrar/'}> 
+          <i class="bi bi-box-arrow-left">  </i>
+          Exit
+          </button> 
+        </div>
+
+        
       {initForce.is_loading ? (
         <div>
           <h4> Loading... </h4>
@@ -136,16 +144,40 @@ export default function RenderSchoolYears() {
             </div>
           ) : (
             <div>
+
+
               {schoolYear.sy_data ? (
-                <div>
-                  <h4> {schoolYear.sy_data.sy_name} </h4>
+                <div class="year_parent p-3 mt-3 mb-2 bg-white text-dark border rounded border shadow">
+                <div class="action d-flex justify-content-end ms-2">
+                       {schoolYear.sy_data.can_update && (
+                    <div>
+                      <button class="btn btn-primary me-2" onClick={()=> {
+                        setOpenSyModal(true);
+                        setSetupModal(false);
+                      }}> Update {schoolYear.sy_data.sy_name} </button>
+                      <SchoolYearModal open={openSyModal} close={()=> setOpenSyModal(false)} syname={schoolYear.sy_data.sy_name}/>
+
+                      <button class="btn btn-primary" onClick={()=> {
+                        setSetupModal(true);
+                        setOpenSyModal(false);
+                      }}> Update Period </button>
+                      <ScheduleModal open={openSetupModal} close={()=> setSetupModal(false) }/>
+                    </div>
+                  )}
+                  </div>
+
+                  <div class="year d-flex justify-content-center mb-2">
+                  <h2> {schoolYear.sy_data.sy_name} </h2>
+                  </div>
                   {schoolYear.current_chartData.length ? (
                     <div>
-                      <div>
-                        <button onClick={() => sy_dispatch({ type : CHART_ACTIONS.SELECT_SEX })}> Sex </button>
-                        <button onClick={() => sy_dispatch({ type : CHART_ACTIONS.SELECT_STRAND })}> Strand </button>
-                        <button onClick={() => sy_dispatch({ type : CHART_ACTIONS.SELECT_YEARLEVEL })}> Year level </button>
+                      <div class="action d-flex justify-content-center">
+                        <button class="btn btn-success btn-md me-2" onClick={() => sy_dispatch({ type : CHART_ACTIONS.SELECT_SEX })}> Sex </button>
+                        <button class="btn btn-success btn-md me-2" onClick={() => sy_dispatch({ type : CHART_ACTIONS.SELECT_STRAND })}> Strand </button>
+                        <button class="btn btn-success btn-md me-2" onClick={() => sy_dispatch({ type : CHART_ACTIONS.SELECT_YEARLEVEL })}> Year level </button>
                       </div>
+
+                   
       
                       <Chart
                         chartType="PieChart"
@@ -153,28 +185,14 @@ export default function RenderSchoolYears() {
                         options={options}
                         graph_id="PieChart"
                         width={'100%'}
-                        height={'800px'}
+                        height={'500px'}
                       />
       
                     </div>
                   ) : (
                     <div> No data to display... </div>
                   )}
-                  {schoolYear.sy_data.can_update && (
-                    <div>
-                      <button onClick={()=> {
-                        setOpenSyModal(true);
-                        setSetupModal(false);
-                      }}> Update {schoolYear.sy_data.sy_name} </button>
-                      <SchoolYearModal open={openSyModal} close={()=> setOpenSyModal(false)} syname={schoolYear.sy_data.sy_name}/>
-
-                      <button onClick={()=> {
-                        setSetupModal(true);
-                        setOpenSyModal(false);
-                      }}> Update Period </button>
-                      <ScheduleModal open={openSetupModal} close={()=> setSetupModal(false) }/>
-                    </div>
-                  )}
+               
                   {render_pages}
                 </div>
               ) : (
@@ -184,6 +202,7 @@ export default function RenderSchoolYears() {
           )}
         </div>
       )}
+    </div>
     </div>
   )
 }

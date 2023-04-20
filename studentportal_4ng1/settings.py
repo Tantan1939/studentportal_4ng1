@@ -87,7 +87,7 @@ DATABASES = {
         'NAME': 'db4ng1',
         'USER': 'postgres',
         'PASSWORD': '',
-        'HOST': ''
+        'HOST': 'localhost'
     }
 }
 
