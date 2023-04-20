@@ -36,8 +36,9 @@
     .studuser{}
     .nav-link img{
         margin-left: 20px;
-        height: auto;
+        height: 50px;
         width: 50px;
+
         padding: 0;
     }
     .nav-item{
@@ -165,6 +166,9 @@
             width: 100%;
             /* background: red; */
         }   
+        .navbar-brand{
+            font-size: 20px !important;
+        }
     }
     .track_strand{
         /* margin-bottom: 20px; */
@@ -216,18 +220,29 @@
     .tracks_strand_date{
 
         position: absolute;
-        top: -66px;
+        top: -50px;
         left:12px;
     }
     .tracks_strand_date {
+    }
+    .tracks_strand_date a{
+        text-decoration: none;
         border: 2px solid #800000;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
-        border-bottom: 0;
-        color: #000;
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 8px;
+        /* border-bottom: 8px; */
+        color: #000 !important;
+        font-size: 18px;
         padding: 10px;
         background: #fff;
         margin: 0;
+        transition: 0.3s ease;
+    }
+    .tracks_strand_date:hover a{
+        color:#fff !important;
+        background: #800000 !important;
     }
     .tracks_strand_date h3{
         color: #000;

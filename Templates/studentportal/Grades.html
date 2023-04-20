@@ -4,16 +4,22 @@
 
 
 {% if grade_levels %}
-
+<div class="container py-4">
     {% for yearlevel, quarters in grade_levels.items %}
-        <h5> {{yearlevel}} </h5>
+    
+        <h5 class="mb-4"> {{yearlevel}} </h5>
         {% for q_name, q_subjects in quarters.items %}
-            <h4> {{q_name}} </h4>
+        <div class="bg-light border mb-3 rounded p-3">
+            <h4 class="mb-2"> {{q_name}} </h4>
             {% for subject_code, subject_grade in q_subjects.items %}
-                <p> {{subject_code}}: {{subject_grade}} </p>
+                <p class="m-0"> {{subject_code}}: {{subject_grade}} </p>
             {% endfor %}
+
+        </div>
         {% endfor %}
     {% endfor %}
+
+</div>
 
 {% else %}
     <h4> No grades found... </h4>

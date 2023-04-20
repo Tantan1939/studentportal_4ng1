@@ -4,57 +4,98 @@
 {% load std_portal %}
 {% include 'studentportal/messages/messages.html' %}
 
+<style>
+    .myform h5{
+        font-size: 25px;
+    }
+    .myform #postForm select,
+    .myform #postForm input{
+        margin-bottom: 25px;
+    }
+    .myform #postForm #id_jhs_details-jhs_pept_date_completion,
+    .myform #postForm #id_jhs_details-jhs_ae_date_completion,
+    .myform #postForm #id_jhs_details-jhs_community_learning_center,
+    .myform #postForm #id_jhs_details-jhs_clc_address{
+        margin-bottom: 6px;
+    }
+    .myform img{
+        height: auto;
+        width: 100px;
+        border-radius: 50%;
+    }
+    .myform .row_parent{
+        /* box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px; */
+    }
+    @media screen and (min-width: 992px){
+            .myform img{
+            height: auto;
+            width: 150px;
+            border-radius: 50%;
+        }
+    }
+</style>
 
-<h4> For Submission... </h4>
+<div class="myform container px-4 py-4">
+    <div class="d-lg-flex justify-content-center">
+        <h5 class="mb-4 col-md-11 text-left">  For Submission... </h5>
+    </div>
+    <div class="row_parent row d-flex justify-content-center">
+        <div class="col-lg-3" style="background-color: #800000;">
+            <div class="flex d-flex justify-content-center p-3 pt-lg-5">
+                <img src="/Media/homepage_img/logo.png" alt="">
 
-<div class="container col-md-8">
-    <form id="postForm" method="post" enctype="multipart/form-data">
+            </div>
+        </div>
+        <div class=" col-lg-8 col-xxl-9 p-5 border">
+            <form id="postForm" method="post" enctype="multipart/form-data">
+        
+                {{ wizard.form.non_field_errors }}
+                {% csrf_token %}
+                <table>
+                {{ wizard.management_form }}
+                {% if wizard.form.forms %}
+                    {{ wizard.form.management_form }}
+                    {% for form in wizard.form.forms %}
+                        {{ form }}
+                    {% endfor %}
+                {% else %}
+        
+                    {{ wizard.form.good_moral.errors }} <!-- Field errors -->
+                    <label for="{{ wizard.form.good_moral.id_for_label }}" class="form-label"> {{ wizard.form.good_moral.label }} </label>
+                    {{ wizard.form.good_moral|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
+                    
+                    {{ wizard.form.report_card.errors }} <!-- Field errors -->
+                    <label for="{{ wizard.form.report_card.id_for_label }}" class="form-label"> {{ wizard.form.report_card.label }} </label>
+                    {{ wizard.form.report_card|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
+        
+                    {{ wizard.form.psa.errors }} <!-- Field errors -->
+                    <label for="{{ wizard.form.psa.id_for_label }}" class="form-label"> {{ wizard.form.psa.label }} </label>
+                    {{ wizard.form.psa|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
+        
+                    {{ wizard.form.dual_citizenship.errors }} <!-- Field errors -->
+                    <label for="{{ wizard.form.dual_citizenship.id_for_label }}" class="form-label"> {{ wizard.form.dual_citizenship.label }} </label>
+                    {{ wizard.form.dual_citizenship|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
+                    
+                    {{ wizard.form.philippine_passport.errors }} <!-- Field errors -->
+                    <label for="{{ wizard.form.philippine_passport.id_for_label }}" class="form-label"> {{ wizard.form.philippine_passport.label }} </label>
+                    {{ wizard.form.philippine_passport|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
+        
+                    {{ wizard.form.f137.errors }} <!-- Field errors -->
+                    <label for="{{ wizard.form.f137.id_for_label }}" class="form-label"> {{ wizard.form.f137.label }} </label>
+                    {{ wizard.form.f137|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
+        
+                {% endif %}
+                </table>
+        
+                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary btn-sm">{% trans "Prev" %}</button>
+                <input type="submit" name="wizard_goto_step" value="Next" class="btn btn-primary btn-sm m-0">
+        
+            </form>
+            <p class="mt-2 mb-0">Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 
-        {{ wizard.form.non_field_errors }}
-        {% csrf_token %}
-        <table>
-        {{ wizard.management_form }}
-        {% if wizard.form.forms %}
-            {{ wizard.form.management_form }}
-            {% for form in wizard.form.forms %}
-                {{ form }}
-            {% endfor %}
-        {% else %}
-            <p>hi</p>
-
-            {{ wizard.form.good_moral.errors }} <!-- Field errors -->
-            <label for="{{ wizard.form.good_moral.id_for_label }}" class="form-label"> {{ wizard.form.good_moral.label }} </label>
-            {{ wizard.form.good_moral|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
-            
-            {{ wizard.form.report_card.errors }} <!-- Field errors -->
-            <label for="{{ wizard.form.report_card.id_for_label }}" class="form-label"> {{ wizard.form.report_card.label }} </label>
-            {{ wizard.form.report_card|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
-
-            {{ wizard.form.psa.errors }} <!-- Field errors -->
-            <label for="{{ wizard.form.psa.id_for_label }}" class="form-label"> {{ wizard.form.psa.label }} </label>
-            {{ wizard.form.psa|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
-
-            {{ wizard.form.dual_citizenship.errors }} <!-- Field errors -->
-            <label for="{{ wizard.form.dual_citizenship.id_for_label }}" class="form-label"> {{ wizard.form.dual_citizenship.label }} </label>
-            {{ wizard.form.dual_citizenship|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
-            
-            {{ wizard.form.philippine_passport.errors }} <!-- Field errors -->
-            <label for="{{ wizard.form.philippine_passport.id_for_label }}" class="form-label"> {{ wizard.form.philippine_passport.label }} </label>
-            {{ wizard.form.philippine_passport|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
-
-            {{ wizard.form.f137.errors }} <!-- Field errors -->
-            <label for="{{ wizard.form.f137.id_for_label }}" class="form-label"> {{ wizard.form.f137.label }} </label>
-            {{ wizard.form.f137|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
-
-        {% endif %}
-        </table>
-
-        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary btn-sm">{% trans "Prev" %}</button>
-        <input type="submit" name="wizard_goto_step" value="Next" class="btn btn-primary btn-sm">
-
-    </form>
+        </div>
+    </div>
 </div>
 
-<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 
 {% endblock content %}

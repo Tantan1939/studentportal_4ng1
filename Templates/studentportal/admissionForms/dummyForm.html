@@ -4,32 +4,41 @@
 {% load std_portal %}
 {% include 'studentportal/messages/messages.html' %}
 
+<style>
+    .btn{
+        height: 40px;
+        width: 120px;
+    }
+</style>
 
-<h4> Confirm Your Submission </h4>
+<div class="container d-flex justify-content-center col-md-8 pt-3 pb-3">
+    <div class="col-md-7 p-3 border">
+        <h4 class="mb-4"> Confirm Your Submission </h4>
+        <form id="postForm" method="post">
+    
+            {{ wizard.form.non_field_errors }}
+            {% csrf_token %}
+            <table>
+            {{ wizard.management_form }}
+            {% if wizard.form.forms %}
+                {{ wizard.form.management_form }}
+                {% for form in wizard.form.forms %}
+                    {{ form }}
+                {% endfor %}
+            {% else %}
+    
+            {% endif %}
+            </table>
+            <div class="mb-3 w-100 d-flex justify-content-center">
+                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary btn-md me-3">{% trans "Prev" %}</button>
+                <input type="submit" name="wizard_goto_step" value="Submit" class="btn btn-primary btn-md">
+            </div>
+    
+        </form>
+        <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 
-<div class="container col-md-8">
-    <form id="postForm" method="post">
-
-        {{ wizard.form.non_field_errors }}
-        {% csrf_token %}
-        <table>
-        {{ wizard.management_form }}
-        {% if wizard.form.forms %}
-            {{ wizard.form.management_form }}
-            {% for form in wizard.form.forms %}
-                {{ form }}
-            {% endfor %}
-        {% else %}
-
-        {% endif %}
-        </table>
-
-        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary btn-sm">{% trans "Prev" %}</button>
-        <input type="submit" name="wizard_goto_step" value="Submit" class="btn btn-primary btn-sm">
-
-    </form>
+    </div>
 </div>
 
-<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 
 {% endblock content %}

@@ -68,9 +68,4 @@ urlpatterns = [
         ])),
     ])),
 
-    # For DRF API
-    path("Notes/", include([
-        path("", get_notes.as_view(), name="get_notes"),
-        path("Details/<pk>/", get_note_details.as_view(), name="get_note_details"),
-    ])),
 ]

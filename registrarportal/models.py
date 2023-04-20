@@ -55,6 +55,7 @@ class enrollment_admission_setup(models.Model):
 
 class oldStudent_manager(models.Manager):
     def get_queryset(self):
+        # Exclude objects with no valid grade11 enrollment, or exclude objects with grade 12 enrollment
         return super().get_queryset().alias(g11=Count("enrollment", filter=Q(enrollment__year_level='11', enrollment__is_accepted=True, enrollment__is_denied=False, enrollment__enrolled_school_year__until__lte=date.today())), g12=Count("enrollment", filter=Q(enrollment__year_level='12'))).filter(is_accepted=True, is_denied=False).exclude(Q(g12__gte=1) | Q(g11__lt=1))
 
 
@@ -383,15 +384,6 @@ class enrollment_invitations(models.Model):
 
     class Meta:
         ordering = ["created_on"]
-
-
-class note(models.Model):
-    body = models.TextField(null=True, blank=True)
-    updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.body[0:50]
 
 
 class student_grades(models.Model):

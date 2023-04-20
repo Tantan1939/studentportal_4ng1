@@ -19,33 +19,37 @@
     color: #fff !important;
 }
 </style>
-<div class="bg-dark">
-    <div class="container col-md-12 pt-4 b">
-        <div class="">
-            <a href="{% url 'studentportal:create_documentRequest' %}" class="" style="text-decoration: none; color:#fff;"> 
-                <div class="box_btn d-flex justify-content-center align-items-center" style="gap:10px;">
-                    <i class="fa fa-file-text" aria-hidden="true"></i>
-                    <span>Request +</span> 
-                </div>
+<div class="">
+    <div class="col-md-12">
+        <div class="bg-dark py-4">
+            <div class="container">
+                <a href="{% url 'studentportal:create_documentRequest' %}" class="" style="text-decoration: none; color:#fff;"> 
+                    <div class="box_btn d-flex justify-content-center align-items-center" style="gap:10px;">
+                        <i class="fa fa-file-text" aria-hidden="true"></i>
+                        <span>Request +</span> 
+                    </div>
+                    
                 
-            
-            </a>
+                </a>
+
+            </div>
+        </div>
+        <div class="container pt-3">
+            {% for document in requestedDocuments %}
+                <div class="border bg-light p-3 mb-3">
+                    <p> Document: {{document.document}} </p>
+                    <p> Date Scheduled: {{document.scheduled_date|date:"l, M d, o"}}  </p>
+                    {% if document.can_resched %}
+                        {% if document.is_cancelled %} <p> Registrar has cancelled your request. You can resched it to request again. </p> {% endif %}
+                        <a href="{% url 'studentportal:reschedDocumentRequest' pk=document.id %}" class="btn btn-primary btn-sm "> Re-schedule </a>
+                    {% endif %}
+                </div>
+
+            {% empty %}
+                <p class="py-3"> No requested documents... </p>
+            {% endfor %}
 
         </div>
-      
-        {% for document in requestedDocuments %}
-            <p> Document: {{document.document}} </p>
-            <p> Date Scheduled: {{document.scheduled_date|date:"l, M d, o"}}  </p>
-            {% if document.can_resched %}
-                {% if document.is_cancelled %} <p> Registrar has cancelled your request. You can resched it to request again. </p> {% endif %}
-                <a href="{% url 'studentportal:reschedDocumentRequest' pk=document.id %}" class="btn btn-primary btn-sm"> Re-schedule </a>
-            {% endif %}
-            <br>
-            <br>
-            <br>
-        {% empty %}
-            <p> No requested documents... </p>
-        {% endfor %}
     </div>
 </div>
 
