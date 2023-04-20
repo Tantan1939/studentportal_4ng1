@@ -64,6 +64,30 @@
    
     <ul class="sidebar-nav" id="sidebar-nav">
       <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:view_courses' %}">
+          <i class="bi bi-ticket"></i>
+          <span>Courses</span>
+        </a>
+      </li>
+
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:getSubjects' %}">
+          <i class="bi bi-card-list"></i>
+          <span>Subjects</span>
+        </a>
+      </li>
+
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'adminportal:view_curriculum' %}">
+          <i class="bi bi-view-list"></i>
+          <span>Curriculum</span>
+        </a>
+      </li>
+
+
+      <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:schoolyear' %}">
           <i class="bi bi-ticket"></i>
           <span>School Years</span>
@@ -72,9 +96,9 @@
 
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'adminportal:view_courses' %}">
-          <i class="bi bi-ticket"></i>
-          <span>Courses</span>
+        <a class="nav-link collapsed" href="{% url 'adminportal:get_sections' %}">
+          <i class="bi bi-filter"></i>
+          <span>Sections</span>
         </a>
       </li>
 
@@ -107,30 +131,6 @@
         <a class="nav-link collapsed" href="{% url 'adminportal:get_ongoingSchoolEvents' %}">
           <i class="bi bi-calendar"></i>
           <span>Events</span>
-        </a>
-      </li>
-
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'adminportal:view_curriculum' %}">
-          <i class="bi bi-view-list"></i>
-          <span>Curriculum</span>
-        </a>
-      </li>
-   
-      
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'adminportal:getSubjects' %}">
-          <i class="bi bi-card-list"></i>
-          <span>Subjects</span>
-        </a>
-      </li>
-
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'adminportal:get_sections' %}">
-          <i class="bi bi-filter"></i>
-          <span>Sections</span>
         </a>
       </li>
       
