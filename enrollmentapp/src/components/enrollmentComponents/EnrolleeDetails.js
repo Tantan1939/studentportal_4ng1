@@ -70,8 +70,9 @@ export default function EnrolleeDetails({DeniedEnrollee_Handler, enrollment, bat
       
       <span style={span} className='d-flex align-items-center' onMouseEnter={() => setReportCardModal(true)} onMouseLeave={() => setReportCardModal(false)}> Report Card </span>
       {setReportCardModal && (
+          <div>
         <ImageModal isHovering={studCardModal} img={reportCard}/>
-        
+        </div>
       )}
 
       <div className='stud_btn d-flex align-items-center justify-content-center ms-auto'>

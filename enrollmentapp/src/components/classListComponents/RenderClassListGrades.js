@@ -119,23 +119,30 @@ export default function RenderClassListGrades({match}) {
         save_grades();
     };
 
+    const grid = {
+        display:'grid',
+        gridTemplateColumns:'200px 1fr',
+        gridGap:'50px'
+    }
     let render_classlists = classSheet.student_datas.map((std, index) => (
-        <div key={index}>
+        <div className='mb-2' style={grid} key={index}>
             {std.Name}
+            <div className='input_wrapper d-flex flex-wrap'>
 
             { Object.entries(classSheet.quarter_details[index]).map(([subject, grade], index_1)=> (
-                <div>
-                    <p> {subject}: </p>
-                    <input type='number' key={`${index}-${index_1}-${classSheet.quarter_id}`} name={subject} id={std.id} placeholder={grade} onChange={event => handleFieldChanges(event, index, index_1)}/>
+                <div className='d-flex  align-items-center me-3 mb-3'>
+                    <p className='m-0 me-2'> {subject}: </p>
+                    <input style={{width:'100px',textAlign:'center'}} type='number' key={`${index}-${index_1}-${classSheet.quarter_id}`} name={subject} id={std.id} placeholder={grade} onChange={event => handleFieldChanges(event, index, index_1)}/>
                 </div>
 
             )) }
+            </div>
 
         </div>
     ));
 
     let render_quarter_buttons = quarters.map((quarter, index) => (
-        <button key={index} onClick={()=> {
+        <button className='btn btn-dark' key={index} onClick={()=> {
             setClassSheet({ type : CLASS_SHEET_ACTIONS.SELECT_Q, payload : { quarter_id : quarter[0], quarter_name : quarter[1] } });
             setFormData([]);
         }}>
@@ -168,7 +175,7 @@ export default function RenderClassListGrades({match}) {
 
   return (
     <div>
-        <Link to={`/Registrar/Classlist/`}> <button> Back </button> </Link>
+        <Link to={`/Registrar/Classlist/`}> <button className='btn btn-primary mb-3'>  Back </button> </Link>
 
         {initForce.is_loading ? (
             <h4> Loading... </h4>
@@ -177,15 +184,21 @@ export default function RenderClassListGrades({match}) {
                 {initForce.errorMessage ? (
                     <h4> Please refresh your page. {initForce.errorMessage} </h4>
                 ) : (
-                    <div>
+                    <div className='border bg-light p-3'>
                         {classSheet.student_datas.length ? (
                             <div>
-                                <h4> {classSheet.quarter_name} </h4>
-                                {render_quarter_buttons}
 
+                                <div className='buttons_class d-flex justify-content-center py-2 mb-4' style={{gap:'14px'}}>
+                                    {render_quarter_buttons}
+
+                                </div>
+                                <div className='d-flex justify-content-center mb-4'>
+                                    <h4> {classSheet.quarter_name} </h4>
+                                </div>
                                 <form onSubmit={handleFormSubmit}>
+
                                     {render_classlists}
-                                    <button type='submit' className='btnPrimary'> Save </button>
+                                    <button type='submit' className='btn btn-primary'> Save </button>
                                 </form>
                             </div>
                         ) : (

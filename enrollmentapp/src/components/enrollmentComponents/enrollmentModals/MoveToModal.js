@@ -57,14 +57,17 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
   ));
 
   let renderBatchMembers = batchMembers.map((member_details, index) => (
-    <div key={index} className={isHovered ? 'hover-bg' : isClicked ? 'clicked-bg' : ''} onMouseEnter={()=> setIsHovered(!isHovered)} onMouseLeave={()=> setIsHovered(!isHovered)} onClick={() => {
+    <div key={index} className={`${isHovered ? 'hover-bg' : isClicked ? 'clicked-bg' : ''} d-flex mb-3`} onMouseEnter={()=> setIsHovered(!isHovered)} onMouseLeave={()=> setIsHovered(!isHovered)} onClick={() => {
       setSelectedPk(selectedPk ? null : member_details.id);
       setWarningMsg('');
       setIsClicked(!isClicked);
     }}>
-      <h4>
-        <RenderStudentImage key={index} image={member_details.stud_pict[0].user_image}/> {member_details.full_name} - {member_details.age}
-      </h4>
+      <div className=' d-flex align-items-center py-2 w-100'>
+        <RenderStudentImage key={index} image={member_details.stud_pict[0].user_image}/> 
+        <div>
+          {member_details.full_name} - {member_details.age}
+        </div>
+      </div>
     </div>
   ));
 
@@ -112,8 +115,10 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                       </div>
                     )}
                 </div>
+                <div className='render py-3' style={{overflow:'auto',height:'200px'}}>
+                  {renderBatchMembers}
 
-                {renderBatchMembers}
+                </div>
 
                 <div className='btnContainer moveone'>
                     <button className='btn btn-dark m-0'>
@@ -128,14 +133,14 @@ function MoveToModal({open, closeModalFunc, batchID, enrollmentID, move_function
                     {batchMembers.length ? (
                       <div className='mx-2 btn p-0'>
                         {selectedPk && <div>
-                            <button className='btn btn-success mx-2'>
+                            <button className='btn btn-success '>
                                 <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                             </button>
                           </div>}
 
                         {!selectedPk && <div>
                             {!isFull && <div>
-                                  <button className='btn btn-success mx-2'>
+                                  <button className='btn btn-success'>
                                     <span className='bold' onClick={() => call_move_function(enrollmentID, batchID, targetBatch, selectedPk)}> Move </span>
                                   </button>
                               </div>}

@@ -21,9 +21,9 @@
     <!-- Offered Courses -->
     <div class="container-fluid" style="background:#f7f7f7; border-top: 3px solid #800000;">
         <div class="track_and_strand_wrapper container py-5 position-relative">
-            <div class="tracks_strand_date"  style="background: #f7f7f7;">
+            <div class="tracks_strand_date"  >
                 {% if enroll_now %}
-                    <a href="{% url 'studentportal:select_type' %}"> Apply Now </a>
+                    <a href="{% url 'studentportal:select_type' %}" style="background: #f7f7f7;"> Apply Now </a>
                 {% endif %}
             </div>
             <!-- #b93535 -->

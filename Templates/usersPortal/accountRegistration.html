@@ -5,7 +5,7 @@
 
 <div class="main">
   <div class="submain">   
-    <form id="postForm" method="post">
+    <form id="postForm" method="post" class="pb-4">
       {% csrf_token %}
       <!-- List of errors from forms.py -->
       {{ form.non_field_errors }}

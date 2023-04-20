@@ -43,10 +43,15 @@
 </head>
 <body>
 
-    <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Dashboard </a>
-    <a href="{% url 'registrarportal:validate_enrollment' %}" class="btn btn-primary"> Enrollees </a>
-    <a href="{% url 'registrarportal:re_enroll' %}" class="btn btn-primary"> Re-enroll (Prev Students) </a>
-    <a href="{% url 'usersPortal:logout' %}" class="btn btn-primary"> Logout </a>
+    <div class="container py-4">
+        <div class="d-flex " style="gap:8px;">
+            <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-success"> Dashboard </a>
+            <a href="{% url 'registrarportal:validate_enrollment' %}" class="btn btn-success"> Enrollees </a>
+            <a href="{% url 'registrarportal:re_enroll' %}" class="btn btn-success"> Re-enroll (Prev Students) </a>
+            <a href="{% url 'usersPortal:logout' %}" class="btn btn-dark ms-auto"> Logout </a>
+        </div>
+
+    </div>
 
     {% block content %}{% endblock content %}
           

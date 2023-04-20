@@ -12,17 +12,6 @@
 .admin_sidebar.active{
     margin-left: -210px;
 }
-@media screen and (max-width: 983px){
-    .admin_sidebar{
-        margin-left: -210px;
-    }  
-    .admin_sidebar.active{
-        margin-left: 0px;
-    }  
-    .admin_sidebar .bars{
-        display: block;
-    }
-}
 .admin_sidebar .bars{
     position: absolute;
     right: -55px;
@@ -66,4 +55,16 @@
 .admin_portal_function .links_wrap a:hover h4,
 .admin_portal_function .links_wrap a:hover i{
     color: rgba(255, 255, 255, 0.74);
+}
+
+@media screen and (max-width: 983px){
+    .admin_sidebar{
+        margin-left: -210px;
+    }  
+    .admin_sidebar.active{
+        margin-left: 0px;
+    }  
+    .admin_sidebar .bars{
+        display: block !important;
+    }
 }

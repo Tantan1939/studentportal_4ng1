@@ -1,19 +1,19 @@
 /* profile details */
 .content_wrapper p{
-    color: #868686 !important;
-    border-bottom: 1px solid #999;
-    padding: 10px 10px;
-    font-size: 20px !important;
+    font-weight: 500;
+    color: #5c5c5c;
+    /* font-size: 20px !important; */
 }
-.content_wrapper p span{
+/* .content_wrapper p span{
     color: black;
     font-size: 20px !important;
-}
+} */
 .l_img img{
-    height: auto;
+    height: 190px;
     width: 100%;
     max-width: 190px;
 }
+
 /* profileupdate */
 .edit_img img{
     height: auto;
@@ -75,4 +75,12 @@
 }
 .box_parent a .box_btn span{
     color:#fff;
+}
+@media screen and (max-width: 768px){
+    .l_img img{
+        height: auto;
+        width: 100%;
+        max-width: 100px;
+        margin-bottom: 15px;
+    }
 }
