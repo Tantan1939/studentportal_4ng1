@@ -78,8 +78,9 @@ export default function ForAdmissionStudents() {
   return batchList.length ? (
     <div class="container pt-3">
     <div class="w-100 mt-3 d-flex pt-3 justify-content-end">
-      <button class="btn btn-primary btn-md" onClick={() => window.location.href = '/Registrar/'}> Exit </button>
-      <button onClick={() => window.location.href = '/Registrar/Admission/admitted_students/'}> Students </button>
+    <button class="btn btn-success btn-md me-2" onClick={() => window.location.href = '/Registrar/Admission/admitted_students/'}> Students </button>
+      <button class="btn btn-primary btn-md " onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+      
       </div>
       
       {renderBatches}
@@ -88,18 +89,15 @@ export default function ForAdmissionStudents() {
   ) : (
 
     <div class="container pt-5">
-
-
-
-
 <div class="card text-center">
   <div class="card-header">
     ADMISSION
   </div>
   <div class="card-body">
-    <h5 class="card-title">No Admission...</h5>
-    <button class="btn btn-primary btn-lg mt-3"onClick={() => window.location.href = '/Registrar/'}> Exit </button>
-    <button onClick={() => window.location.href = '/Registrar/Admission/admitted_students/'}> Students </button>
+    <h3 class="card-title">No Admission.</h3>
+    <button class="btn btn-primary btn-md mt-3 me-3" onClick={() => window.location.href = '/Registrar/Admission/admitted_students/'}> Students </button>
+    <button class="btn btn-primary btn-md mt-3"onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+    
     <p class="card-text"></p>
 
   </div>

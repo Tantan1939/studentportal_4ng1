@@ -93,11 +93,17 @@ export default function ScheduleModal({open, close}) {
         <div className='modalRight'>
           <p onClick={close} className='closeBtn'> X </p>
 
+
+          <div class="container pt-3">
           <div className='content'>
             {updateThisSetup ? (
               <div>
                 <form onSubmit={handleFormSubmit}>
-                  <h4> {formData.ea_setup_sy} Admission/Enrollment Period </h4>
+                  <h4 class="py-2 mb-2"> 
+                      <i class="fa fa-pencil me-2" aria-hidden="true"></i>
+                  <i> {formData.ea_setup_sy} Admission/Enrollment Period </i>
+                
+                  </h4>
 
                   {startOnEditable && (
                     <label>
@@ -111,7 +117,7 @@ export default function ScheduleModal({open, close}) {
                       <input type='date' name="end_date" value={formData.end_date} onChange={handleFieldChanges}/>
                   </label>
 
-                  <button type='submit' className='btnPrimary'>
+                  <button type='submit' class="btn btn-success btn-md ms-2">
                       Save
                   </button>
                 </form>
@@ -123,14 +129,16 @@ export default function ScheduleModal({open, close}) {
             )}
           </div>
 
-          <div className='btnContainer'>
-            <button className='btnOutline' onClick={close}>
+       
+          <div class="buttonz d-flex justify-content-end">
+            <button class="btn btn-primary btn-md mt-3" onClick={close}>
               Exit
             </button>
           </div>
 
         </div>
       </div>
+    </div>
     </div>
   )
 }

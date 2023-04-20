@@ -112,7 +112,7 @@ class index(TemplateView):
 
     def check_enrollment(self):
         if not self.request.user.is_authenticated:
-            return True
+            return False
         else:
             if user_no_admission(self.request.user) and check_for_admission_availability(self.request.user):
                 return True
@@ -356,7 +356,7 @@ class create_documentRequest(FormView):
     def form_valid(self, form):
         try:
             checkDocu = documentRequest.objects.filter(document__id=int(
-                form.cleaned_data["documents"]), scheduled_date__gte=date.today()).first()
+                form.cleaned_data["documents"]), request_by__id=self.request.user.id, scheduled_date__gte=date.today()).first()
             if checkDocu:
                 messages.warning(
                     self.request, f"You have an upcoming schedule to claim your {checkDocu.document.documentName} on {(checkDocu.scheduled_date).strftime('%A, %B %d, %Y')}.")
