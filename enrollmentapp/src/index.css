@@ -27,23 +27,53 @@ code {
   z-index: -1;
   padding: 12px 24px;
 }
-
+/* .hoverme{
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.hoverme:hover{
+  background: #861616;
+  color: #fff;
+} */
 .hover-bg {
-  background-color: #ccc;
+  background-color: #800000;
+  color:#fff;
 }
 
 .clicked-bg {
-  background-color: #f00;
+  background-color: #861616;
+  color: #fff;
 }
 
 
 /* Modal */
+.newModal{
+  position: fixed;
+  width: 100%;
+  max-width: 500px;
+  z-index: 999;  
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%,0);
+  padding: 20px;
+  background: #fff;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+}
+.newModal img{
+  height: 80px;
+  width: 80px;
+}
 .overlay {
   /* background-color: rgba(0, 0, 0, 0.5); */
   position: fixed;
   width: 100%;
+  max-width: 500px;
   height: 100%;
   z-index: 999;
+}
+.overlay img{
+  height: 128px;
+  width: 128px;
 }
 .overlaytwo{
   position: fixed;
@@ -79,10 +109,10 @@ code {
 
 }
 .modalContainer {
-  max-width: 1000px;
-  width: 700%;
+  max-width: 500px;
+  width: 100%;
   position: fixed;
-  height: 80%;
+  /* height: 80%; */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);

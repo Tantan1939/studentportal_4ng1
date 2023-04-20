@@ -4,27 +4,85 @@
 {% include 'studentportal/applications/menus.html' %}
 {% include 'studentportal/messages/messages.html' %}
 
-<div class="container col-md-12">
-    <form id="postForm" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <!-- List of errors from forms.py -->
-        {{ form.non_field_errors }}
-    
-        <h4> Resubmission </h4>
+<style>
+    .myform h5{
+        font-size: 25px;
+    }
+    .myform #postForm select,
+    .myform #postForm input{
+        margin-bottom: 25px;
+    }
+    .myform #postForm #id_jhs_details-jhs_pept_date_completion,
+    .myform #postForm #id_jhs_details-jhs_ae_date_completion,
+    .myform #postForm #id_jhs_details-jhs_community_learning_center,
+    .myform #postForm #id_jhs_details-jhs_clc_address{
+        margin-bottom: 6px;
+    }
+    .myform img{
+        height: auto;
+        width: 100px;
+        border-radius: 50%;
+    }
+    .myform .row_parent{
+        /* box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px; */
+    }
+    .buttons{
+        display: flex;
+        gap: 10px;
+    }
+    .buttons .btns{
+        width: 120px;
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    @media screen and (min-width: 992px){
+            .myform img{
+            height: auto;
+            width: 150px;
+            border-radius: 50%;
+        }
+    }
+</style>
+<div class="myform container px-4 py-4">
+    <div class="d-lg-flex justify-content-center">
+        <h5 class="mb-4 col-md-11 text-left"> Resubmission </h5>
+    </div>
+    <div class="row_parent row d-flex justify-content-center">
+        <div class="col-lg-3" style="background-color: #800000;">
+            <div class="flex d-flex justify-content-center p-3 pt-lg-5">
+                <img src="/Media/homepage_img/logo.png" alt="">
 
-        {% for field in form %}
-            <div class="form-outline mb-4">
-                <label for="{{ field.id_for_label }}" class="form-label"> {{ field.label }}: </label>
-                {{ field|addclass:"form-control"}} <!-- Input Field -->
-                {{ field.help_text }} <!-- Input Field -->
-                {{ field.errors }} <!-- Field errors -->
             </div>
-        {% endfor %}
+        </div>
+        <div class=" col-lg-8 col-xxl-9 p-5 border">
+            <form id="postForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- List of errors from forms.py -->
+                {{ form.non_field_errors }}
+        
+                {% for field in form %}
+                    <div class="form-outline mb-4">
+                        <label for="{{ field.id_for_label }}" class="form-label"> {{ field.label }}: </label>
+                        {{ field|addclass:"form-control"}} <!-- Input Field -->
+                        {{ field.help_text }} <!-- Input Field -->
+                        {{ field.errors }} <!-- Field errors -->
+                    </div>
+                {% endfor %}
+                    
 
-        <input type="submit" value="Resubmit" class="btn btn-primary btn-block mb-4">
-    </form>
+                <div class="buttons ">
+                    <input type="submit" value="Resubmit" class="btns btn btn-success btn-block mb-4">
+                    <a href="{% url 'studentportal:get_submitted_admission' %}" class="btns btn btn-danger"> Back </a>
 
-    <a href="{% url 'studentportal:get_submitted_admission' %}" class="btn btn-primary"> Back </a>
+                </div>
+
+            </form>
+        
+
+        </div>
+    </div>
 </div>
 
 

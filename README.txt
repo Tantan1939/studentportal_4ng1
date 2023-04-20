@@ -169,4 +169,3 @@ Step 4: Type npm install and hit Enter.
 -----
 1: pip install virtualenv
 2: virtualenv --python python3 .
-3: 

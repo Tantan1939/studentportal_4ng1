@@ -4,6 +4,25 @@
 {% include 'registrarportal/messages/messages.html' %}
 
 
+<style>
+    .student_wrap{
+        overflow: auto;
+        /* width: 1400px; */
+        gap: 15px;
+        display: flex;
+        overflow: auto !important;
+        /* overflow-x: scroll; */
+        width: 100%;
+    }
+    .student_wrap p{
+        text-align: nowrap;
+    }
+    .student_wrap .student_img_name img{
+        height: auto;
+        width: 100px;
+        border-radius: 50%;
+    }
+</style>
 <div class="container-fluid" style="background: #fff;">
     <div class="container py-5">
         <form method="post">
@@ -17,8 +36,12 @@
         </form>
 
         {% for student in students %}
+        <div class="student_wrap bg-light border d-flex p-3 mb-3">
             {% for img in student.studentpict|slice:"1" %}
-                <h6> Student Picture: <img src="{{ img.user_image.url }}" alt=""> </h6>
+                <div class="student_img_name">
+                    <h6> Student Picture:</h6>
+                    <img src="{{ img.user_image.url }}" alt=""> 
+                </div>
             {% endfor %}
 
             <p> Name: {{student.full_name}} - {{student.admission.sex}} </p>
@@ -33,6 +56,8 @@
             {% endfor %}
 
             <hr>
+
+        </div>
 
         {% empty %}
             <h6> No enrolled students... </h6>
