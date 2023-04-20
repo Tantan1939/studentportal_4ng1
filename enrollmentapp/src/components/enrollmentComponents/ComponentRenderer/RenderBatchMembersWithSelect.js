@@ -43,7 +43,7 @@ export default function RenderBatchMembersWithSelect({open, members, setIsNextCl
     };
 
     let render_members = members.map((member, index) => (
-        <div className='px-4 d-flex align-items-center' key={index}>
+        <div className='px-4 d-flex align-items-center mb-3' key={index}>
             <input type={'checkbox'} name={member.id} checked={checkBoxes[member.id]} onChange={handleCheckboxChanges} />
             <RenderStudentImage key={index} image={member.stud_pict[0].user_image}/> {member.full_name} - {member.age}
         </div>

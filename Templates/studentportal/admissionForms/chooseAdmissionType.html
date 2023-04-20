@@ -3,14 +3,28 @@
 {% include 'studentportal/messages/messages.html' %}
 
 
+<style>
+       .buttons{
+    transition: 0.3s ease-in;
+    background: #4b4b4b !important;
+        color: #fff;
+}
+.buttons:hover{
+    background: #800000 !important;
+    color: #fff !important;
+}
+</style>
 <div class="container col-md-12">
 
-    <h6> Type of Applicant </h6>
-    {% for type in types %}
-        <a href="{% url 'studentportal:admission' pk=type.0 %}" class="btn btn-primary btn-sm"> {{type.1}} </a> <br><br>
-    {% endfor %}
-
-    <a href="{% url 'studentportal:index' %}" class="btn btn-primary"> Back </a>
+    <div class="buttons_wrapper py-4">
+        <h4 class="mb-4"> Type of Applicant </h4>
+        {% for type in types %}
+    
+            <a href="{% url 'studentportal:admission' pk=type.0 %}" class="btn btn-dark btn-lg buttons"> {{type.1}} </a>
+        {% endfor %}
+    
+        <a href="{% url 'studentportal:index' %}" class="btn btn-danger btn-lg"> Back </a>
+    </div>
 </div>
 
 

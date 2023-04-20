@@ -90,10 +90,15 @@ export default function SchoolYearModal({open, close, syname}) {
             <div className='modalRight'>
                 <p onClick={close} className='closeBtn'> X </p>
                 
+            <div class="container pt-3">
                 <div className='content'>
                     <form onSubmit={handleFormSubmit}>
-                        <h4> {syname} Period </h4>
-
+                        <h3 class="py-2 mb-2"> 
+                            <i class="fa fa-pencil me-2" aria-hidden="true"> 
+                            </i>
+                        <i>{syname} Period  </i>
+                        </h3>
+                        
                         {startOnEditable && (
                             <label>
                                 Start On: 
@@ -106,19 +111,20 @@ export default function SchoolYearModal({open, close, syname}) {
                             <input type='date' name="until" value={formData.until} onChange={handleFieldChanges}/>
                         </label>
 
-                        <button type='submit' className='btnPrimary'>
+                        <button type='submit' class="btn btn-success btn-md ms-2">
                             Save
                         </button>
                     </form>
                 </div>
 
-                <div className='btnContainer'>
-                    <button className='btnOutline' onClick={close}>
+                <div class="buttonz d-flex justify-content-end">
+                    <button class="btn btn-primary btn-md mt-3" onClick={close}>
                         Exit
                     </button>
                 </div>
             </div>
         </div>
+    </div>
     </div>
   )
 }

@@ -4,9 +4,9 @@ function ImageModal({isHovering, img}) {
     if (!isHovering) return null
 
   return (
-    <div className='overlay'>
-      <div className='modalContainer p-4' style={{display:'grid',placeItems:'center'}}>
-        <img style={{height:'auto', width:'100%'}} src={img} />
+    <div className='newModal'>
+      <div className=' p-4' style={{display:'grid',placeItems:'center'}}>
+        <img style={{height:'auto', width:'300px'}} src={img} />
       </div>
     </div>
   )

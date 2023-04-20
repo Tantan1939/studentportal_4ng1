@@ -21,6 +21,15 @@
     height: auto;
     width: 350px;
  }
+ .resub{
+    transition: 0.3s ease-in;
+    background: #9e1c1c !important;
+        color: #fff;
+}
+.resub:hover{
+    background: #800000 !important;
+    color: #fff !important;
+}
 </style>
 <div class="container pb-5 col-md-8">
     {% for sy in sy_enrolled %}
@@ -32,7 +41,7 @@
     <div class="enrollment_wrapper border rounded" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;">
         {% if enrollments %}
             {% if enrollments.can_resub %}
-             <a href="{% url 'studentportal:resubmit_enrollment' key=enrollments.id %}" class="btn btn-primary btn-sm"> Resubmit </a> 
+             <a href="{% url 'studentportal:resubmit_enrollment' key=enrollments.id %}" class="resub btn btn-lg mb-3"> Resubmit </a> 
              {% endif %}
     
             {% for img in enrollments.studentpicture|slice:"1" %}
