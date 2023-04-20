@@ -2,12 +2,16 @@
 <div class="bg-dark py-3">
     <div class="navigation_btn  container">
         <div class="d-flex">
-            <div class="box_btn me-3">
-                <a href="{% url 'studentportal:get_submitted_admission' %}" class=""> Admission </a>
-            </div>
-            <div class="box_btn">
-                <a href="{% url 'studentportal:get_submitted_enrollments' %}" class=""> Enrollment </a>
-            </div>
+
+            <a href="{% url 'studentportal:get_submitted_admission' %}" class="box_btn text-white me-3" style="text-decoration: none;">
+                <div class=""> Admission </div>
+            </a>
+            <a href="{% url 'studentportal:get_submitted_enrollments' %}" class="box_btn text-white" style="text-decoration: none;">
+                 <div class="">
+                    Enrollment
+                </div> 
+            </a>
+
     
         </div>
 
