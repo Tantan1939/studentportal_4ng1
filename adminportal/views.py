@@ -1286,8 +1286,8 @@ class add_schoolYear(SessionWizardView):
             self.create_schoolyear(sy)
             self.start_admission(ea)
             messages.success(
-                self.request, f"SY: {self.new_sy.display_sy()} is created.")
-            return HttpResponseRedirect(reverse("adminportal:schoolyear"))
+                self.request, f"SY: {self.new_sy.display_sy()} is created. Make a new section now.")
+            return HttpResponseRedirect(reverse("adminportal:new_section"))
         except Exception as e:
             return HttpResponseRedirect(reverse("adminportal:add_schoolyear"))
 

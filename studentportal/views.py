@@ -322,16 +322,15 @@ class view_myDocumentRequest(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = "Requested Documents"
+        context["title"] = "Document Requests"
 
         ongoing_requests = documentRequest.objects.annotate(
             can_resched=Case(
-                When(scheduled_date__gte=date.today(), then=Value(True)),
-                default=Value(False),
+                default=Value(True)
             ),
             is_cancelled=Case(
                 When(is_cancelledByRegistrar=True, then=Value(True)),
-                default=Value(False),
+                default=Value(False)
             )
         ).filter(request_by=self.request.user, scheduled_date__gte=date.today()).only("document", "scheduled_date")
 
@@ -358,9 +357,14 @@ class create_documentRequest(FormView):
             checkDocu = documentRequest.objects.filter(document__id=int(
                 form.cleaned_data["documents"]), request_by__id=self.request.user.id, scheduled_date__gte=date.today()).first()
             if checkDocu:
-                messages.warning(
-                    self.request, f"You have an upcoming schedule to claim your {checkDocu.document.documentName} on {(checkDocu.scheduled_date).strftime('%A, %B %d, %Y')}.")
-                return self.form_invalid(form)
+                if checkDocu and checkDocu.is_cancelledByRegistrar:
+                    messages.warning(
+                        self.request, f"Your request to claim {checkDocu.document.documentName} is cancelled by the registrar. You can set another date to reactivate your request.")
+                    return self.form_invalid(form)
+                else:
+                    messages.warning(
+                        self.request, f"You have an upcoming schedule to claim your {checkDocu.document.documentName} on {(checkDocu.scheduled_date).strftime('%A, %B %d, %Y')}.")
+                    return self.form_invalid(form)
             documentRequest.objects.create(
                 document=studentDocument.objects.get(
                     pk=int(form.cleaned_data["documents"])),
@@ -371,11 +375,6 @@ class create_documentRequest(FormView):
             #     form.cleaned_data["scheduled_date"]).strftime("%A, %B %d, %Y")})
             messages.success(self.request, "Document request is sent.")
             return super().form_valid(form)
-
-        except IntegrityError:
-            messages.error(
-                self.request, "Invalid to request same document at the same time.")
-            return self.form_invalid(form)
 
         except Exception as e:
             messages.error(self.request, e)
@@ -397,7 +396,7 @@ class reschedDocumentRequest(FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["documents"] = self.obj.document.documentName
+        initial["documents"] = str(self.obj.document.id)
         initial["scheduled_date"] = self.obj.scheduled_date
         return initial
 
@@ -423,10 +422,11 @@ class reschedDocumentRequest(FormView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        self.obj = documentRequest.objects.filter(
-            pk=int(self.kwargs["pk"]), scheduled_date__gte=date.today()).first()
+        self.obj = documentRequest.objects.filter(pk=int(
+            self.kwargs["pk"]), request_by=request.user, scheduled_date__gte=date.today()).first()
         if self.obj:
             return super().dispatch(request, *args, **kwargs)
+        messages.warning(request, "No such request found.")
         return HttpResponseRedirect(reverse("studentportal:view_myDocumentRequest"))
 
 
@@ -909,7 +909,7 @@ class view_grades(TemplateView):
         try:
             dct = dict()
             this_student_grades = student_grades.objects.filter(
-                student__id=self.request.user.id).select_related("subject").order_by("quarter")
+                student__id=self.request.user.id).select_related("subject").order_by("quarter", "-yearLevel")
 
             for std_grds_indx, std_grds in enumerate(this_student_grades):
                 if std_grds.get_yearLevel_display() not in dct:

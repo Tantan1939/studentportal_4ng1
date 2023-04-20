@@ -26,7 +26,6 @@ class documentRequest(models.Model):
 
     class Meta:
         ordering = ["scheduled_date", "last_modified"]
-        unique_together = ["document", "scheduled_date"]
 
     def __str__(self):
         return f"{self.document.documentName} Request by - {self.request_by.display_name}"

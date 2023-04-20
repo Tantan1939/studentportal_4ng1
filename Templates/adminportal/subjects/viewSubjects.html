@@ -36,16 +36,15 @@
     <table class="table border rounded">
         <thead class="thead border rounded">
             <tr>
-                <th scope="col">Id</th>
                 <th scope="col">Subject Code</th>
                 <th scope="col">Subject Name</th>
+                <th> Action </th>
             </tr>
         </thead>
         <tbody>
             {% for subject in subjects %}
             <tr>
-                <th scope="row"> {{subject.id}} </th>
-                <td> {{subject.code}} </td>
+                <td scope="row"> {{subject.code}} </td>
                 <td> {{subject.title}} </td>
                 <td> <a href="{% url 'adminportal:updateSubjects' pk=subject.id %}" class="btn btn-primary btn-sm"> Edit
                     </a> </td>

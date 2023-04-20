@@ -35,7 +35,7 @@ def enrollment_invitation_emails(request, invitations):
                       loop_requests, invitations))
 
         messages.success(
-            request, f"{emails.count(True)} out of {np.size(emails)} enrollment token has been sent.")
+            request, "Success.")
 
     except Exception as e:
         pass
