@@ -11,12 +11,6 @@ def add_school_year(start_year, year):
         return start_year.replace(year=start_year.year + year, day=28)
 
 
-class NoteSerializer(ModelSerializer):
-    class Meta:
-        model = note
-        fields = '__all__'
-
-
 class Ph_born_Serializer(serializers.ModelSerializer):
     class Meta:
         model = ph_born

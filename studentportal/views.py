@@ -909,7 +909,7 @@ class view_grades(TemplateView):
         try:
             dct = dict()
             this_student_grades = student_grades.objects.filter(
-                student__id=self.request.user.id).select_related("subject").order_by("quarter")
+                student__id=self.request.user.id).select_related("subject").order_by("quarter", "-yearLevel")
 
             for std_grds_indx, std_grds in enumerate(this_student_grades):
                 if std_grds.get_yearLevel_display() not in dct:

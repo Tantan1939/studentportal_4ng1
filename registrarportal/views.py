@@ -36,7 +36,6 @@ from openpyxl.styles import Border, Side, Alignment, Font
 from . drf_permissions import EnrollmentValidationPermissions
 from . tokenGenerators import generate_enrollment_token
 from . serializers import *
-from . notes import *
 from . models import *
 from . forms import *
 import re
@@ -344,34 +343,6 @@ class get_enrolled_students(ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrolled Students"
         return context
-
-
-class get_notes(APIView):
-    permission_classes = [EnrollmentValidationPermissions]
-
-    def get(self, request, format=None):
-        notes = note.objects.all()
-        serializer = NoteSerializer(notes, many=True)
-        return Response(serializer.data)
-
-
-class get_note_details(get_notes):
-
-    def get(self, request, pk, format=None):
-        try:
-            notes = note.objects.get(id=int(pk))
-            serializer = NoteSerializer(notes, many=False)
-            return Response(serializer.data)
-        except Exception as e:
-            return Response({"Bad Request": e}, status=status.HTTP_409_CONFLICT)
-
-    def post(self, request, pk):
-        data = request.data
-        update_this_note = note.objects.get(id=int(pk))
-        if update_this_note.body != data["body"]:
-            update_this_note.body = data["body"]
-            update_this_note.save()
-        return Response({"Done": "Success transaction."}, status=status.HTTP_200_OK)
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
