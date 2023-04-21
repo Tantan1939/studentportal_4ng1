@@ -474,6 +474,8 @@ class userChangePassword(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Change Password"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
 
@@ -499,6 +501,8 @@ class authenticatedUser_resetPassword(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Password Reset"
+        context["user_profilePicture"] = load_userPic(
+            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
 

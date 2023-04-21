@@ -86,7 +86,7 @@ class index(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = "Newfangled Senior High School"
+        context["title"] = "Leandro Locsin Integrated School"
 
         context["courses"] = shs_track.objects.filter(is_deleted=False).alias(count_strands=Count(
             "track_strand", filter=Q(track_strand__is_deleted=False))).exclude(count_strands__lt=1).prefetch_related(Prefetch(
