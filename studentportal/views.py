@@ -89,8 +89,10 @@ class index(TemplateView):
         context["title"] = "Leandro Locsin Integrated School"
 
         context["courses"] = shs_track.objects.filter(is_deleted=False).alias(count_strands=Count(
-            "track_strand", filter=Q(track_strand__is_deleted=False))).exclude(count_strands__lt=1).prefetch_related(Prefetch(
-                "track_strand", queryset=shs_strand.objects.filter(is_deleted=False).order_by("strand_name"), to_attr="strands")).order_by("track_name")
+            "track_strand", filter=Q(track_strand__is_deleted=False, track_strand__curriculum_strand__effective_date__lte=date.today()))).exclude(
+                count_strands__lt=1).prefetch_related(Prefetch("track_strand", queryset=shs_strand.objects.filter(is_deleted=False).alias(with_curriculums=Count(
+                    "curriculum_strand", filter=Q(curriculum_strand__effective_date__lte=date.today()))).exclude(with_curriculums__lt=1).order_by(
+                        "strand_name"), to_attr="strands")).order_by("track_name")
 
         getEvents = school_events.ongoingEvents.all()
         if getEvents:
@@ -371,8 +373,6 @@ class create_documentRequest(FormView):
                 request_by=self.request.user,
                 scheduled_date=form.cleaned_data["scheduled_date"]
             )
-            # email_requestDocument(self.request, self.request.user, {"type": form.cleaned_data["documents"], "schedule": (
-            #     form.cleaned_data["scheduled_date"]).strftime("%A, %B %d, %Y")})
             messages.success(self.request, "Document request is sent.")
             return super().form_valid(form)
 

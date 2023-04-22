@@ -26,7 +26,7 @@ from django.middleware import csrf
 from studentportal.models import documentRequest
 from formtools.wizard.views import SessionWizardView
 from registrarportal.tasks import email_tokenized_enrollment_link
-from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email
+from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email, cancelDocumentRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -125,6 +125,12 @@ class getList_documentRequest(ListView, DeletionMixin):
 
     def delete(self, request, *args, **kwargs):
         try:
+            cancelDocumentRequest(request,
+                                  self.cancel_this_request.request_by.email,
+                                  self.cancel_this_request.request_by.display_name,
+                                  self.cancel_this_request.scheduled_date,
+                                  self.cancel_this_request.document.documentName)
+
             self.cancel_this_request.is_cancelledByRegistrar = True
             self.cancel_this_request.save()
         except Exception as e:
@@ -140,10 +146,14 @@ class getList_documentRequest(ListView, DeletionMixin):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        if ("pk" in request.POST) and request.method == "POST":
-            self.cancel_this_request = documentRequest.registrarObjects.filter(
-                id=int(request.POST["pk"])).first()
-        return super().dispatch(request, *args, **kwargs)
+        try:
+            if request.method == "POST" and ("pk" in request.POST):
+                self.cancel_this_request = documentRequest.registrarObjects.get(
+                    id=int(request.POST["pk"]))
+            return super().dispatch(request, *args, **kwargs)
+        except ObjectDoesNotExist:
+            messages.error(request, "Request no longer exist.")
+            return HttpResponseRedirect(reverse("registrarportal:requestedDocuments"))
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index"), user_passes_test(check_admissionSched, login_url="registrarportal:dashboard")], name="dispatch")
