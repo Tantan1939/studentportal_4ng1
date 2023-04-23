@@ -109,7 +109,7 @@ class index(TemplateView):
             self.request.user) if self.request.user.is_authenticated else ""
 
         context["enroll_now"] = self.check_enrollment()
-
+        context["urs"] = settings.MEDIA_ROOT
         return context
 
     def check_enrollment(self):
