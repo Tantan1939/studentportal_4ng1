@@ -1,0 +1,15 @@
+{% autoescape off %}
+
+    Hi {{account_name}},
+
+    After carefully reviewing your request, we regret to inform you that your request to claim {{document}} in Leandro Locsin Integrated High School was denied.
+    To resubmit another request, you can set another date to claim {{document}}.
+    
+    GUIDE: Click this link http://{{domain}}{% url "studentportal:view_myDocumentRequest" %} and
+    1. Select the requested document.
+    2. Choose another date.
+    3. Then submit.
+    
+    Best regards,
+
+{% endautoescape %}

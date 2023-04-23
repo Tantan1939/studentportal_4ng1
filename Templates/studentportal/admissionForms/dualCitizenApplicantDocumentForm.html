@@ -61,11 +61,11 @@
                 {% else %}
         
                     {{ wizard.form.good_moral.errors }} <!-- Field errors -->
-                    <label for="{{ wizard.form.good_moral.id_for_label }}" class="form-label"> {{ wizard.form.good_moral.label }} </label>
+                    <label for="{{ wizard.form.good_moral.id_for_label }}" class="form-label"> {{ wizard.form.good_moral.label }} (If not applicable, upload excuse letter)</label>
                     {{ wizard.form.good_moral|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
                     
                     {{ wizard.form.report_card.errors }} <!-- Field errors -->
-                    <label for="{{ wizard.form.report_card.id_for_label }}" class="form-label"> {{ wizard.form.report_card.label }} </label>
+                    <label for="{{ wizard.form.report_card.id_for_label }}" class="form-label"> {{ wizard.form.report_card.label }} (If not applicable, upload excuse letter)</label>
                     {{ wizard.form.report_card|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
         
                     {{ wizard.form.psa.errors }} <!-- Field errors -->
@@ -73,15 +73,15 @@
                     {{ wizard.form.psa|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
         
                     {{ wizard.form.dual_citizenship.errors }} <!-- Field errors -->
-                    <label for="{{ wizard.form.dual_citizenship.id_for_label }}" class="form-label"> {{ wizard.form.dual_citizenship.label }} </label>
+                    <label for="{{ wizard.form.dual_citizenship.id_for_label }}" class="form-label"> {{ wizard.form.dual_citizenship.label }} (If not applicable, upload excuse letter)</label>
                     {{ wizard.form.dual_citizenship|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
                     
                     {{ wizard.form.philippine_passport.errors }} <!-- Field errors -->
-                    <label for="{{ wizard.form.philippine_passport.id_for_label }}" class="form-label"> {{ wizard.form.philippine_passport.label }} </label>
+                    <label for="{{ wizard.form.philippine_passport.id_for_label }}" class="form-label"> {{ wizard.form.philippine_passport.label }} (If not applicable, upload excuse letter)</label>
                     {{ wizard.form.philippine_passport|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
         
                     {{ wizard.form.f137.errors }} <!-- Field errors -->
-                    <label for="{{ wizard.form.f137.id_for_label }}" class="form-label"> {{ wizard.form.f137.label }} </label>
+                    <label for="{{ wizard.form.f137.id_for_label }}" class="form-label"> {{ wizard.form.f137.label }} (If not applicable, upload excuse letter)</label>
                     {{ wizard.form.f137|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
         
                 {% endif %}
