@@ -58,10 +58,9 @@
         </div>
 
         <input type="submit" value="Resubmit" class="btn btn-primary btn-block mb-4">
+        <a href="{% url 'studentportal:get_submitted_enrollments' key=return_key %}" class="btn btn-danger mb-4"> Back </a>
     </div>
 
 </form>
-
-<a href="{% url 'studentportal:get_submitted_enrollments' key=return_key %}" class="btn btn-primary btn-sm"> Back </a>
 
 {% endblock content %}

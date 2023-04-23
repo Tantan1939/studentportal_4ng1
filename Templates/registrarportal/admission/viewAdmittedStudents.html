@@ -3,9 +3,24 @@
 {% load registrar_Tags %}
 {% include 'registrarportal/messages/messages.html' %}
 
-
+<style>
+    .student_wrap{
+        overflow: auto;
+        gap: 15px;
+        display:grid;
+        grid-auto-flow: column;
+        grid-template-columns: repeat(7, minmax(120px,1fr)) ;
+        overflow: auto !important;
+    }
+    .student_wrap p{
+        /* text-align: nowrap; */
+    }
+    .student_wrap img{
+        height:auto;
+        width: 250px;
+    }
+</style>
 <div class="container-fluid" style="background: #fff;">
-
     <div class="container py-5">
         <form method="post">
             {% csrf_token %}
@@ -17,7 +32,7 @@
             </div>
         </form>
         {% for student in students %}
-
+        <div class="student_wrap bg-light border p-3 mb-3" >
             <p> Name: {{student.first_name}} {{student.middle_name}} {{student.last_name}} - {{student.sex}} </p>
             <p> Date of Birth: {{student.date_of_birth|date:"l, j M o"}} </p>
             <p> Birthplace: {{student.birthplace}} </p>
@@ -46,13 +61,12 @@
                     <h6> Good Moral: <img src="{{ img.good_moral.url }}" alt=""> </h6>
                     <h6> Report Card: <img src="{{ img.report_card.url }}" alt=""> </h6>
                     <h6> PSA: <img src="{{ img.psa.url }}" alt=""> </h6>
-                    <h6> Certificate of Dual Citizenship: <img src="{{ img.dual_citizenship.url }}" alt=""> </h6>
-                    <h6> Philippine Passport: <img src="{{ img.philippine_passport.url }}" alt=""> </h6>
-                    <h6> F137: <img src="{{ img.f137.url }}" alt=""> </h6>
+                    <h6> Certificate of Dual Citizenship: <img class="img" src="{{ img.dual_citizenship.url }}" alt=""> </h6>
+                    <h6> Philippine Passport: <img class="img" src="{{ img.philippine_passport.url }}" alt=""> </h6>
+                    <h6> F137: <img class="img" src="{{ img.f137.url }}" alt=""> </h6>
                 {% endfor %}
             {% endif %}
-
-            <hr>
+        </div>
 
         {% empty %}
             <h6> No admitted students... </h6>
