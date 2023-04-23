@@ -65,7 +65,7 @@
     <ul class="sidebar-nav" id="sidebar-nav">
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:view_courses' %}">
-          <i class="bi bi-ticket"></i>
+          <i class="bi bi-ticket-detailed"></i>
           <span>Courses</span>
         </a>
       </li>
@@ -89,7 +89,7 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:schoolyear' %}">
-          <i class="bi bi-ticket"></i>
+          <i class="bi bi-calendar-plus"></i>
           <span>School Years</span>
         </a>
       </li>
@@ -121,7 +121,7 @@
    
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:schoolDocuments' %}">
-          <i class="bi bi-file"></i>
+          <i class="bi bi-files"></i>
           <span>School Documents</span>
         </a>
       </li>
@@ -129,11 +129,17 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'adminportal:get_ongoingSchoolEvents' %}">
-          <i class="bi bi-calendar"></i>
+          <i <i class="bi bi-calendar-event"></i>
           <span>Events</span>
         </a>
       </li>
       
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'usersPortal:changepassword' %}">
+          <i class="bi bi-shield-lock"></i>
+        <span> Change Password </span>
+        </a>
+      </li>
       
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'usersPortal:logout' %}"> 
