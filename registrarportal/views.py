@@ -17,7 +17,6 @@ from django.db.models import Prefetch, Count, Q, Case, When, Value, F, OuterRef,
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.exceptions import ObjectDoesNotExist
-from ratelimit.decorators import ratelimit
 from adminportal.models import *
 from datetime import date, datetime
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS

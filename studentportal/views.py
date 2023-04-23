@@ -19,7 +19,6 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from ratelimit.decorators import ratelimit
 from adminportal.models import *
 from formtools.wizard.views import SessionWizardView
 from datetime import date, datetime
@@ -30,8 +29,6 @@ from . email_token import *
 from collections import OrderedDict
 from django.core.files.storage import DefaultStorage
 from registrarportal.models import student_admission_details
-import cv2
-import pytesseract
 from PIL import Image
 from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students
 from usersPortal.models import user_profile

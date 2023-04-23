@@ -3,28 +3,23 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic.base import TemplateView, RedirectView
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import FormView, CreateView
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.db import IntegrityError, transaction
-from django.db.models import Prefetch, Count, Q
+from django.db import IntegrityError
 from . forms import *
 from . email_token import *
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_decode
 from .tokens import account_activation_token, password_reset_token
-from ratelimit.decorators import ratelimit
 from adminportal.models import *
-from datetime import date, datetime
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from studentportal.views import student_access_only
 from . models import *
 from adminportal.views import superuser_only
-from registrarportal.views import registrar_only
 from django.core.exceptions import ObjectDoesNotExist
 from email_validator import validate_email, EmailUndeliverableError
 from django.utils.translation import gettext_lazy as _
@@ -52,7 +47,7 @@ def logout_user(request):
     return HttpResponseRedirect(reverse("usersPortal:login"))
 
 
-@method_decorator([user_passes_test(not_authenticated_user, login_url="studentportal:index"), ratelimit(key='ip', rate='0/s')], name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class create_useraccount(FormView):
     template_name = "usersPortal/accountRegistration.html"
     form_class = accountRegistrationForm
@@ -210,7 +205,7 @@ class request_newAccountActivationToken(FormView):
         return context
 
 
-@method_decorator([user_passes_test(not_authenticated_user, login_url="studentportal:index"), ratelimit(key='ip', rate='0/s')], name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class forgotPassword(FormView):
     template_name = "usersPortal/forgotPassword/forgotPassword.html"
     form_class = forgotPasswordForm
@@ -247,7 +242,7 @@ class forgotPassword(FormView):
 
 
 # When user click the password reset link
-@method_decorator([user_passes_test(not_authenticated_user, login_url="studentportal:index"), ratelimit(key='ip', rate='0/s')], name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class passwordReset(FormView):
     template_name = "usersPortal/forgotPassword/makeNewPassword.html"
     form_class = makeNewPasswordForm
