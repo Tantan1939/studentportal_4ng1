@@ -149,7 +149,7 @@ class g12_secondSem(forms.Form):
 class makeSectionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         choices = ((strand.strand.id, f"{strand.strand.track.track_name}: {strand.strand.strand_name}")
-                   for strand in curriculum.objects.order_by('strand').distinct('strand'))
+                   for strand in curriculum.objects.filter(strand__is_deleted=False).order_by('strand').distinct('strand'))
         super(makeSectionForm, self).__init__(*args, **kwargs)
         self.fields["yearLevel"] = forms.TypedChoiceField(
             choices=schoolSections.year_levels.choices)
