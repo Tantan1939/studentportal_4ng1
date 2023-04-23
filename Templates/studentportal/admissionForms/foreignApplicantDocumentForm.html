@@ -60,11 +60,11 @@
                     {% else %}
             
                         {{ wizard.form.good_moral.errors }} <!-- Field errors -->
-                        <label for="{{ wizard.form.good_moral.id_for_label }}" class="form-label"> {{ wizard.form.good_moral.label }} </label>
+                        <label for="{{ wizard.form.good_moral.id_for_label }}" class="form-label"> {{ wizard.form.good_moral.label }} (If not applicable, upload excuse letter)</label>
                         {{ wizard.form.good_moral|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
                         
                         {{ wizard.form.report_card.errors }} <!-- Field errors -->
-                        <label for="{{ wizard.form.report_card.id_for_label }}" class="form-label"> {{ wizard.form.report_card.label }} </label>
+                        <label for="{{ wizard.form.report_card.id_for_label }}" class="form-label"> {{ wizard.form.report_card.label }} (If not applicable, upload excuse letter)</label>
                         {{ wizard.form.report_card|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
             
                         {{ wizard.form.psa.errors }} <!-- Field errors -->
@@ -72,15 +72,15 @@
                         {{ wizard.form.psa|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
             
                         {{ wizard.form.alien_certificate_of_registration.errors }} <!-- Field errors -->
-                        <label for="{{ wizard.form.alien_certificate_of_registration.id_for_label }}" class="form-label"> {{ wizard.form.alien_certificate_of_registration.label }} </label>
+                        <label for="{{ wizard.form.alien_certificate_of_registration.id_for_label }}" class="form-label"> {{ wizard.form.alien_certificate_of_registration.label }} (If not applicable, upload excuse letter)</label>
                         {{ wizard.form.alien_certificate_of_registration|addclass:"form-control"}} <!-- Auto-fill junior high school name -->
                         
                         {{ wizard.form.study_permit.errors }} <!-- Field errors -->
-                        <label for="{{ wizard.form.study_permit.id_for_label }}" class="form-label"> {{ wizard.form.study_permit.label }} </label>
+                        <label for="{{ wizard.form.study_permit.id_for_label }}" class="form-label"> {{ wizard.form.study_permit.label }} (If not applicable, upload excuse letter)</label>
                         {{ wizard.form.study_permit|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
             
                         {{ wizard.form.f137.errors }} <!-- Field errors -->
-                        <label for="{{ wizard.form.f137.id_for_label }}" class="form-label"> {{ wizard.form.f137.label }} </label>
+                        <label for="{{ wizard.form.f137.id_for_label }}" class="form-label"> {{ wizard.form.f137.label }} (If not applicable, upload excuse letter)</label>
                         {{ wizard.form.f137|addclass:"form-control"}} <!-- Auto-fill based on selected or entered jhs name -->
             
                     {% endif %}

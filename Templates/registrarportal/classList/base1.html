@@ -43,9 +43,12 @@
 </head>
 <body>
 
-    <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary"> Dashboard </a>
-    <a href="{% url 'registrarportal:view_classlists' %}" class="btn btn-primary"> Class List </a>
-    <a href="{% url 'usersPortal:logout' %}" class="btn btn-primary"> Logout </a>
+
+        <div class="container d-flex justify-content-end pt-5">
+            <a href="{% url 'registrarportal:dashboard' %}" class="btn btn-primary btn-md me-2"> Dashboard </a>
+            <a href="{% url 'registrarportal:view_classlists' %}" class="btn btn-primary btn-md me-2"> Class List </a>
+            <a href="{% url 'usersPortal:logout' %}" class="btn btn-danger btn-md"> Logout </a>
+        </div>
 
     {% block content %}{% endblock content %}
           

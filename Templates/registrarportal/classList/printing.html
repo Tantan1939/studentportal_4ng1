@@ -3,16 +3,38 @@
 {% include 'registrarportal/messages/messages.html' %}
 
 {% if sections %}
+
+
+
+
+
+<div class="container col-md-5 mt-5 border rounded border shadow">
+
+
+    
+
     <form method="post">
         {% csrf_token %}
         {% for section in sections %}
-            <label>
-                <input type="checkbox" name="options" value="{{ section.id }}">
+
+        
+        <h4 class="mt-3 ms-3">
+            <i class="bi bi-check2-circle"></i>
+            <i>
+            Choose Section
+        </i>
+        </h4>
+        <hr>
+            <h5 class="py-3 ms-3">
+                <input class="me-2" type="checkbox" name="options" value="{{ section.id }}">
                 {{ section.name }}
-            </label>
+            </h5>
             <br>
         {% endfor %}
-        <button type="submit"> Print </button>
+        <div class="action d-flex justify-content-end ms-3">
+        <button class="btn btn-dark btn-lg mb-3" type="submit"> Print </button>
+    </div>
+</div>  
     </form>
 {% else %}
     <p> No sections found... </p>
