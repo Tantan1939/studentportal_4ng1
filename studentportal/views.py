@@ -19,7 +19,6 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from ratelimit.decorators import ratelimit
 from adminportal.models import *
 from formtools.wizard.views import SessionWizardView
 from datetime import date, datetime
@@ -30,8 +29,6 @@ from . email_token import *
 from collections import OrderedDict
 from django.core.files.storage import DefaultStorage
 from registrarportal.models import student_admission_details
-import cv2
-import pytesseract
 from PIL import Image
 from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students
 from usersPortal.models import user_profile
@@ -86,11 +83,13 @@ class index(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = "Newfangled Senior High School"
+        context["title"] = "Leandro Locsin Integrated School"
 
         context["courses"] = shs_track.objects.filter(is_deleted=False).alias(count_strands=Count(
-            "track_strand", filter=Q(track_strand__is_deleted=False))).exclude(count_strands__lt=1).prefetch_related(Prefetch(
-                "track_strand", queryset=shs_strand.objects.filter(is_deleted=False).order_by("strand_name"), to_attr="strands")).order_by("track_name")
+            "track_strand", filter=Q(track_strand__is_deleted=False, track_strand__curriculum_strand__effective_date__lte=date.today()))).exclude(
+                count_strands__lt=1).prefetch_related(Prefetch("track_strand", queryset=shs_strand.objects.filter(is_deleted=False).alias(with_curriculums=Count(
+                    "curriculum_strand", filter=Q(curriculum_strand__effective_date__lte=date.today()))).exclude(with_curriculums__lt=1).order_by(
+                        "strand_name"), to_attr="strands")).order_by("track_name")
 
         getEvents = school_events.ongoingEvents.all()
         if getEvents:
@@ -107,7 +106,6 @@ class index(TemplateView):
             self.request.user) if self.request.user.is_authenticated else ""
 
         context["enroll_now"] = self.check_enrollment()
-
         return context
 
     def check_enrollment(self):
@@ -371,8 +369,6 @@ class create_documentRequest(FormView):
                 request_by=self.request.user,
                 scheduled_date=form.cleaned_data["scheduled_date"]
             )
-            # email_requestDocument(self.request, self.request.user, {"type": form.cleaned_data["documents"], "schedule": (
-            #     form.cleaned_data["scheduled_date"]).strftime("%A, %B %d, %Y")})
             messages.success(self.request, "Document request is sent.")
             return super().form_valid(form)
 

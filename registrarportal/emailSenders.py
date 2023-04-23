@@ -10,7 +10,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 import numpy as np
-from .tasks import enrollment_acceptance, failed_enrollment, failed_admission, email_enrollment_invitation
+from .tasks import enrollment_acceptance, failed_enrollment, failed_admission, email_enrollment_invitation, cancelledDocumentEmailSend
 from adminportal.models import firstSemSchedule, secondSemSchedule
 
 
@@ -73,3 +73,12 @@ def denied_admission_email(request, recipient, name):
         "domain": get_current_site(request).domain,
     })
     failed_admission.delay(mail, recipient)
+
+
+def cancelDocumentRequest(request, receiver_email, receiver_name, cancelled_date, cancelled_document):
+    mail = render_to_string("registrarportal/emailTemplates/cancelledDocumentRequest.html", {
+        "account_name": receiver_name,
+        "domain": get_current_site(request).domain,
+        "document": cancelled_document
+    })
+    cancelledDocumentEmailSend.delay(mail, cancelled_document, receiver_email)

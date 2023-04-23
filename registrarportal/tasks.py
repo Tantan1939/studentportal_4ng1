@@ -67,19 +67,11 @@ def email_tokenized_enrollment_link(instance_dict, send_to):
 
 
 @shared_task
-def email_users(email_receipent):
+def cancelledDocumentEmailSend(mail_details, document, receiver):
     try:
-        email = EmailMessage(
-            "Email Subject",
-            "This is the message",
-            to=[email_receipent]
-        )
+        mail_subject = f"Request to claim {document}"
+        email = EmailMessage(mail_subject, mail_details, to=[receiver])
         email.send()
-        return "Email sent"
+        return f"Cancelled {document} email is sent to {receiver}"
     except Exception as e:
         return e
-
-
-@shared_task
-def note_task(instance):
-    return instance
