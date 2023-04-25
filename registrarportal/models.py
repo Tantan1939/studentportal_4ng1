@@ -158,9 +158,11 @@ class student_admission_details(models.Model):
 
 
 class admission_requirements(models.Model):
-    good_moral = models.ImageField(upload_to="admission/goodMorals/%Y")
-    report_card = models.ImageField(upload_to="admission/reportCards/%Y")
-    psa = models.ImageField(upload_to="admission/studentPsa/%Y")
+    good_moral = models.ImageField(
+        upload_to="admission/goodMorals/%Y", db_index=True)
+    report_card = models.ImageField(
+        upload_to="admission/reportCards/%Y", db_index=True)
+    psa = models.ImageField(upload_to="admission/studentPsa/%Y", db_index=True)
 
     class Meta:
         abstract = True
@@ -183,11 +185,11 @@ class foreign_citizen_documents(admission_requirements):
     admission = models.ForeignKey(
         student_admission_details, on_delete=models.RESTRICT, related_name="softCopy_admissionRequirements_foreigner")
     alien_certificate_of_registration = models.ImageField(
-        upload_to="admission/foreignCitizenDocuments/alienRegistration/%Y")
+        upload_to="admission/foreignCitizenDocuments/alienRegistration/%Y", db_index=True)
     study_permit = models.ImageField(
-        upload_to="admission/foreignCitizenDocuments/studyPermit/%Y")
+        upload_to="admission/foreignCitizenDocuments/studyPermit/%Y", db_index=True)
     f137 = models.ImageField(
-        upload_to="admission/foreignCitizenDocuments/f137s/%Y")
+        upload_to="admission/foreignCitizenDocuments/f137s/%Y", db_index=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -202,11 +204,11 @@ class dual_citizen_documents(admission_requirements):
     admission = models.ForeignKey(
         student_admission_details, on_delete=models.RESTRICT, related_name="softCopy_admissionRequirements_dualCitizen")
     dual_citizenship = models.ImageField(
-        upload_to="admission/dualCitizenDocuments/dualCitizenshipCertificates/%Y")
+        upload_to="admission/dualCitizenDocuments/dualCitizenshipCertificates/%Y", db_index=True)
     philippine_passport = models.ImageField(
-        upload_to="admission/dualCitizenDocuments/phPassports/%Y")
+        upload_to="admission/dualCitizenDocuments/phPassports/%Y", db_index=True)
     f137 = models.ImageField(
-        upload_to="admission/dualCitizenDocuments/f137s/%Y")
+        upload_to="admission/dualCitizenDocuments/f137s/%Y", db_index=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -325,7 +327,8 @@ class student_contact_number(models.Model):
 class student_report_card(models.Model):
     card_from = models.ForeignKey(
         student_enrollment_details, on_delete=models.RESTRICT, related_name="report_card")
-    report_card = models.ImageField(upload_to="enrollment/report_cards/%Y")
+    report_card = models.ImageField(
+        upload_to="enrollment/report_cards/%Y", db_index=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -339,7 +342,8 @@ class student_report_card(models.Model):
 class student_id_picture(models.Model):
     image_from = models.ForeignKey(
         student_enrollment_details, on_delete=models.RESTRICT, related_name="stud_pict")
-    user_image = models.ImageField(upload_to="enrollment/user_pic/%Y")
+    user_image = models.ImageField(
+        upload_to="enrollment/user_pic/%Y", db_index=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
