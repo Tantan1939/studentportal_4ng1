@@ -31,10 +31,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
-    'studentportal.apps.StudentportalConfig',
-    'adminportal.apps.AdminportalConfig',
-    'usersPortal.apps.UsersportalConfig',
-    'registrarportal.apps.RegistrarportalConfig',
+    'studentportal',
+    'adminportal',
+    'usersPortal',
+    'registrarportal',
 ]
 
 MIDDLEWARE = [
@@ -83,10 +83,10 @@ CELERY_RESULT_BACKEND = 'rpc://'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'db4ng1',
         'USER': 'postgres',
-        'PASSWORD': '',
+        'PASSWORD': 'SIGMA2022',
         'HOST': 'localhost'
     }
 }
@@ -133,13 +133,13 @@ USE_TZ = False  # Defaults to True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Staticfiles'),
                     os.path.join(BASE_DIR, r"enrollmentapp\build\static"))
-STATIC_ROOT = os.path.join(BASE_DIR, 'StaticrootFiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-MEDIA_URL = 'Media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
+MEDIA_URL = '/Media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'Media/')
 
 
 # SMTP Configuration - for sending an email

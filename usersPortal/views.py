@@ -388,10 +388,8 @@ class updateAccountProfile(FormView):
                                 return self.form_invalid(form)
 
                         case "image":
-                            image, isImageCreated = user_photo.objects.get_or_create(
+                            create_image = user_photo.objects.create(
                                 photo_of=userProfile, image=form.cleaned_data[field])
-                            if not isImageCreated:
-                                image.save()
 
                         case _:
                             setattr(userProfile, field,
