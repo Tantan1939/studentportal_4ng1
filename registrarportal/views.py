@@ -119,7 +119,7 @@ class getList_documentRequest(ListView, DeletionMixin):
     context_object_name = "listOfDocumentRequests"
     http_method_names = ["get", "post"]
     paginate_by = 35
-    template_name = "registrarPortal/documentRequests/listOfDocumentRequests.html"
+    template_name = "registrarportal/documentRequests/listOfDocumentRequests.html"
     success_url = "/Registrar/RequestDocuments/"
 
     def delete(self, request, *args, **kwargs):
