@@ -130,7 +130,7 @@ export default function ScheduleModal({open, close}) {
           </div>
 
        
-          <div class="buttonz d-flex justify-content-end">
+          <div class="buttonz d-flex justify-content-end mb-2">
             <button class="btn btn-primary btn-md mt-3" onClick={close}>
               Exit
             </button>

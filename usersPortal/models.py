@@ -126,7 +126,7 @@ class user_photo(models.Model):
     photo_of = models.ForeignKey(
         "user_profile", on_delete=models.RESTRICT, related_name="user_pic")
     image = models.ImageField(
-        default="user_images/default_male.png", upload_to="user_images/%Y/%m/%d/")
+        default="user_images/default_male.png", upload_to="user_images/%Y/%m/%d/", db_index=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
