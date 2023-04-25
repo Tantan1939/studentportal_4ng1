@@ -278,11 +278,25 @@
                         color: #fff;
                         padding: 8px;
                         transition-duration: 0.4s;
-                        border-radius: 4px;
+                        border-radius: 4px !important;
                     }
-                     
+                     #back{
+                        border: none;
+                        outline: none;
+                        color: #fff;
+                        padding: 8px;
+                        transition-duration: 0.4s;
+                        border-radius: 4px !important;
+                        border-radius: 4px !important;
+                        background: #2e2e2e;
+                        text-decoration: none;
+                        text-align: center;
+                     }
+                     #back:hover{
+                        background: #2e2e2e;
+                     }
                     .btn_login:hover {
-                        background-color:#831b1b; /* Green */
+                        background-color:#960a0a; /* Green */
                         color: white;
                     }
                     .card_login a{

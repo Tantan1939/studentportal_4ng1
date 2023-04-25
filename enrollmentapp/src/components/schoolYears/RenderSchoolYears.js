@@ -190,13 +190,24 @@ export default function RenderSchoolYears() {
       
                     </div>
                   ) : (
-                    <div> No data to display... </div>
+                    <div> 
+                    <h4>
+                    
+                    No data to display.
+                    </h4> 
+                    </div>
                   )}
                
                   {render_pages}
                 </div>
               ) : (
-                <div> No school year found... </div>
+                <div>
+                <h4>
+                
+                No school year found.
+                
+                </h4> 
+                 </div>
               )}
             </div>
           )}
