@@ -78,11 +78,11 @@
           </div>
         </div>
 
-        <input type="submit" value="Create" class="btn_login btn-block mb-3" />
+        <input type="submit" value="Create" class="btn_login create btn-block mb-3" />
         {% if user.is_superuser %}
         <a
           href="{% url 'adminportal:index' %}"
-          class="btn_create btn-block mb-3"
+          id="back" class="text-white mb-3"
         >
           Back
         </a>
