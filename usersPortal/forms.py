@@ -45,7 +45,7 @@ class accountRegistrationForm(forms.Form):
     email = forms.EmailField(
         label="Email", max_length=50, validators=[validate_emailIntegrity])
     display_name = forms.CharField(
-        label="Username", max_length=25, validators=[validate_username, ])
+        label="Name", max_length=25, validators=[validate_username, ])
     password = forms.CharField(
         label="Password", widget=forms.PasswordInput)
     confirmpassword = forms.CharField(
