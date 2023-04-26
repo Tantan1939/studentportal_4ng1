@@ -6,7 +6,7 @@ export default function AdmissionDetailsModal({isHovering, admission}) {
 
   return (
     <div className='overlay'>
-        <div className='modalContainer'>
+        <div className='modalContainer ad'>
             <img src={akainu} alt='' />
             <div className='modalRight'>
                 <div className='content'>

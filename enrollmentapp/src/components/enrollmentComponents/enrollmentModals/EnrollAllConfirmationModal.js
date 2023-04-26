@@ -13,7 +13,7 @@ function EnrollAllConfirmationModal({open, closeModalFunc, AcceptEnrollees_Handl
                 Do you want to enroll {number_of_enrollment} applicant/s and assign them to {section}?
             </div>
 
-            <div className='btnContainer moveone'>
+            <div className='btnContainer moveone my-3 w-100'>
                 <button className='btn btn-success me-2'>
                     <span className='bold' onClick={() => {
                         closeModalFunc();
