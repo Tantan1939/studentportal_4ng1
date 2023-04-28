@@ -106,11 +106,6 @@ class index(TemplateView):
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
 
-        client_ip, is_routable = get_client_ip(self.request)
-        context["client_ip"] = client_ip
-
-        context["enroll_now"] = self.check_enrollment()
-        messages.success(self.request, client_ip)
         return context
 
     def check_enrollment(self):
