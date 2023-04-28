@@ -34,7 +34,6 @@ from registrarportal.tokenGenerators import generate_enrollment_token, new_enrol
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
 from studentportal.tasks import admission_batching, enrollment_batching
-from ipware import get_client_ip
 
 
 User = get_user_model()
@@ -202,6 +201,7 @@ class admission(SessionWizardView):
         return form_list
 
     def initialize_row(self, myDict):
+        # Loop the form fields and get its value to initialize the self.get_admission instance
         for key, value in myDict.items():
             match key:
                 case ("first_chosen_strand" | "second_chosen_strand"):

@@ -58,7 +58,7 @@ class AdmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = student_admission_details
         fields = ['id', 'admission_owner', 'first_name', 'middle_name', 'last_name', 'sex', 'date_of_birth', 'birthplace', 'nationality',
-                  'elem_name', 'elem_address', 'elem_region', 'elem_year_completed',
+                  'elem_name', 'elem_address', 'elem_region', 'elem_year_completed', 'student_lrn',
                   'jhs_name', 'jhs_address', 'jhs_region', 'jhs_year_completed',
                   'first_chosen_strand', 'second_chosen_strand', 'type',
                   'softCopy_admissionRequirements_phBorn', 'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen']

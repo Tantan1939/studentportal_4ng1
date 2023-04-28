@@ -33,6 +33,7 @@
         </form>
         {% for student in students %}
         <div class="student_wrap bg-light border p-3 mb-3" >
+            <p> LRN: {{student.student_lrn}} </p>
             <p> Name: {{student.first_name}} {{student.middle_name}} {{student.last_name}} - {{student.sex}} </p>
             <p> Date of Birth: {{student.date_of_birth|date:"l, j M o"}} </p>
             <p> Birthplace: {{student.birthplace}} </p>
@@ -66,6 +67,8 @@
                     <h6> F137: <img class="img" src="{{ img.f137.url }}" alt=""> </h6>
                 {% endfor %}
             {% endif %}
+
+            <p> Approved By: {{student.audited_by.display_name}} </p>
         </div>
 
         {% empty %}

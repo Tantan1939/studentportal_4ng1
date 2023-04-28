@@ -391,6 +391,7 @@ class denied_admission(APIView):
             to_deny = student_admission_details.objects.get(
                 id=int(data["key"]))
             to_deny.is_denied = True
+            to_deny.audited_by = self.request.user
             to_deny.save()
             get_batch.members.remove(to_deny)
 
@@ -411,7 +412,7 @@ class admit_students(APIView):
             to_admit_students = student_admission_details.objects.filter(
                 pk__in=data['keys']).exclude(is_accepted=True).values_list('id', flat=True)
             student_admission_details.admit_this_students(
-                request, to_admit_students)
+                request, to_admit_students, self.request.user)
             return Response({"Done": "Admitted Students."}, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -450,6 +451,7 @@ class denied_enrollee(APIView):
                 to_denied = student_enrollment_details.objects.select_for_update().get(
                     pk=int(data["key"]))
                 to_denied.is_denied = True
+                to_denied.audited_by = self.request.user
                 to_denied.save()
 
             denied_stud = student_enrollment_details.objects.get(
@@ -478,7 +480,8 @@ class accept_enrollees(APIView):
                 'id', flat=True).filter(pk__in=data["keys"], is_accepted=False, is_denied=False)
 
             # To accept each enrollment via an atomic transaction to avoid race condition.
-            accept_them = student_enrollment_details.accept_students(enrollees)
+            accept_them = student_enrollment_details.accept_students(
+                enrollees, self.request.user)
 
             if not accept_them:
                 return Response({"Warning": "Primary keys of enrollees no longer exist as pending enrollees."}, status=status.HTTP_409_CONFLICT)

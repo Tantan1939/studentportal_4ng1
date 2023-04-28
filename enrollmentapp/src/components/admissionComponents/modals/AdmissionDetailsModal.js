@@ -10,6 +10,7 @@ export default function AdmissionDetailsModal({isHovering, admission}) {
             <img src={akainu} alt='' />
             <div className='modalRight'>
                 <div className='content'>
+                    <p> LRN: {admission.student_lrn} </p>
                     <p> Email: {admission.admission_owner} </p>
                     <p> Birthdate: {admission.date_of_birth} </p>
                     <p> Birthplace: {admission.birthplace} </p>
