@@ -1,21 +1,17 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.shortcuts import HttpResponseRedirect
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView, FormMixin, DeletionMixin
-from django.views.generic.detail import DetailView
+from django.views.generic.edit import FormView, DeletionMixin
 from django.views.generic.list import ListView
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 from datetime import date, datetime, timedelta
 from . forms import *
 from . models import *
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.contrib import messages
-from django.db.models import Q, FilteredRelation, Prefetch, Count, Case, When, Value, F
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.db.models import Q, Prefetch, Count, Case, When, Value, F
 from formtools.wizard.views import SessionWizardView
 from string import ascii_uppercase
 from registrarportal.models import schoolYear, enrollment_admission_setup

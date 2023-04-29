@@ -1,7 +1,7 @@
-from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from . models import *
 from adminportal.models import schoolSections
+from studentportal.models import documentRequest
 
 
 def add_school_year(start_year, year):
@@ -54,12 +54,18 @@ class AdmissionSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='strand_name'
     )
+    audited_by = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='display_name',
+        required=False
+    )
 
     class Meta:
         model = student_admission_details
         fields = ['id', 'admission_owner', 'first_name', 'middle_name', 'last_name', 'sex', 'date_of_birth', 'birthplace', 'nationality',
                   'elem_name', 'elem_address', 'elem_region', 'elem_year_completed', 'student_lrn',
-                  'jhs_name', 'jhs_address', 'jhs_region', 'jhs_year_completed',
+                  'jhs_name', 'jhs_address', 'jhs_region', 'jhs_year_completed', 'audited_by',
                   'first_chosen_strand', 'second_chosen_strand', 'type',
                   'softCopy_admissionRequirements_phBorn', 'softCopy_admissionRequirements_foreigner', 'softCopy_admissionRequirements_dualCitizen']
 
@@ -113,13 +119,19 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='cellphone_number'
     )
+    audited_by = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='display_name',
+        required=False
+    )
     report_card = ReportCardSerializer(many=True, read_only=True)
     stud_pict = StudentPicSerializer(many=True, read_only=True)
 
     class Meta:
         model = student_enrollment_details
         fields = ['id', 'applicant', 'strand', 'year_level', 'full_name', 'age',
-                  'enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict']
+                  'enrollment_address', 'enrollment_contactnumber', 'report_card', 'stud_pict', 'audited_by']
 
 
 class Batch_AssignedSection_Serializer(serializers.RelatedField):
@@ -218,3 +230,15 @@ class re_token_enrollment_Serializer(serializers.ModelSerializer):
     class Meta:
         model = student_admission_details
         fields = ['id', 'admission_owner']
+
+
+class student_document_serializer(serializers.ModelSerializer):
+    document = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field='documentName')
+    scheduled_date = serializers.DateField()
+    is_cancelledByRegistrar = serializers.BooleanField()
+
+    class Meta:
+        model = documentRequest
+        fields = ['id', 'document', 'scheduled_date',
+                  'is_cancelledByRegistrar']

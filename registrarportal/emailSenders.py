@@ -20,7 +20,6 @@ def loop_enrollment_invitation(request, invitation):
         "domain": get_current_site(request).domain,
         "uid": urlsafe_base64_encode(force_bytes(invitation.pk)),
         "token": new_enrollment_token_for_old_students.make_token(invitation),
-        "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p"),
     })
     email_enrollment_invitation.delay(
         message, invitation.invitation_to.admission_owner.email)

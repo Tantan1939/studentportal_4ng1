@@ -57,7 +57,6 @@ def email_tokenized_enrollment_link(instance_dict, send_to):
             "domain": instance_dict["domain"],
             "uid": instance_dict["uid"],
             "token": instance_dict["token"],
-            "expiration_date": instance_dict["expiration_date"],
         })
         email = EmailMessage(mail_subject, message, to=[send_to])
         email.send()

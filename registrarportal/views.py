@@ -1,34 +1,27 @@
-from django.shortcuts import render
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.sites.shortcuts import get_current_site
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic.base import TemplateView, RedirectView, View
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import FormView, CreateView, DeletionMixin
-from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import TemplateView, View
+from django.views.generic import ListView
+from django.views.generic.edit import DeletionMixin
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.urls import reverse
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value, F, OuterRef, Subquery
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.exceptions import ObjectDoesNotExist
 from adminportal.models import *
 from datetime import date, datetime
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
-from django.db import IntegrityError
 from django.middleware import csrf
 from studentportal.models import documentRequest
-from formtools.wizard.views import SessionWizardView
 from registrarportal.tasks import email_tokenized_enrollment_link
 from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email, cancelDocumentRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework import status
 from openpyxl import Workbook
 from openpyxl.styles import Border, Side, Alignment, Font
@@ -1166,3 +1159,120 @@ class get_admission_with_pending_token_enrollment_v1(APIView):
         except Exception as e:
             print(e)
             return Response([])
+
+
+class student_repositories(APIView):
+    permission_classes = [EnrollmentValidationPermissions]
+
+    def get_student_documents(self, student):
+        requestedDocuments = documentRequest.objects.filter(request_by=student)
+        serializer = student_document_serializer(requestedDocuments, many=True)
+        return serializer.data
+
+    def get_student_admission(self, student):
+        studentAdmission = student_admission_details.objects.filter(admission_owner=student).prefetch_related(
+            Prefetch("softCopy_admissionRequirements_phBorn", queryset=ph_born.objects.all(
+            )),
+            Prefetch("softCopy_admissionRequirements_foreigner", queryset=foreign_citizen_documents.objects.all(
+            )),
+            Prefetch("softCopy_admissionRequirements_dualCitizen", queryset=dual_citizen_documents.objects.all())).first()
+        serializer = AdmissionSerializer(studentAdmission, many=False)
+        return serializer.data
+
+    def get_enrollment(self, student, yearLevel):
+        studentEnrollment = student_enrollment_details.validatedObjects.filter(applicant=student, year_level=yearLevel).prefetch_related(
+            Prefetch("enrollment_address",
+                     queryset=student_home_address.objects.all()),
+            Prefetch("enrollment_contactnumber",
+                     queryset=student_contact_number.objects.all()),
+            Prefetch("report_card",
+                     queryset=student_report_card.objects.all()),
+            Prefetch("stud_pict", queryset=student_id_picture.objects.all())).first()
+        serializer = EnrollmentSerializer(studentEnrollment, many=False)
+        return serializer.data
+
+    def get_classes(self, student):
+        this_classes = schoolSections.objects.filter(
+            classmate__enrollment__applicant=student)
+
+        studentClasses = list()
+
+        for key, section in enumerate(this_classes):
+            studentClasses.append({})
+            studentClasses[key]["section_name"] = section.name
+
+            studentClasses[key]["First_sem_subjects"] = dict()
+            for index, subject_details in enumerate(section.first_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
+                studentClasses[key]["First_sem_subjects"][
+                    subject_details.subject.title] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+
+            studentClasses[key]["Second_sem_subjects"] = dict()
+            for index, subject_details in enumerate(section.second_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
+                studentClasses[key]["Second_sem_subjects"][
+                    subject_details.subject.title] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+        return studentClasses
+
+    def student_grades(self, student):
+        grades = dict()
+        this_student_grades = student_grades.objects.filter(
+            student=student).select_related("subject").order_by("quarter", "-yearLevel")
+
+        for std_grds_indx, std_grds in enumerate(this_student_grades):
+            if std_grds.get_yearLevel_display() not in grades:
+                grades[std_grds.get_yearLevel_display()] = dict()
+                grades[std_grds.get_yearLevel_display(
+                )][std_grds.get_quarter_display()] = dict()
+                grades[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                )][std_grds.subject.title] = std_grds.grade if std_grds.grade else ""
+
+            else:
+                if std_grds.get_quarter_display() not in grades[std_grds.get_yearLevel_display()]:
+                    grades[std_grds.get_yearLevel_display(
+                    )][std_grds.get_quarter_display()] = dict()
+                    grades[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                    )][std_grds.subject.title] = std_grds.grade if std_grds.grade else ""
+                else:
+                    grades[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
+                    )][std_grds.subject.title] = std_grds.grade if std_grds.grade else ""
+        return grades
+
+    def student_list(self, user_lists):
+        archives = []
+        year_levels = student_enrollment_details.year_levels.choices
+        for student_index, student in enumerate(user_lists):
+            archives.append({})
+            archives[student_index]["user_id"] = student.id
+            archives[student_index]["user_name"] = student.display_name
+            archives[student_index]["email"] = student.email
+            archives[student_index]["requested_documents"] = self.get_student_documents(
+                student)
+            archives[student_index]["admission"] = self.get_student_admission(
+                student)
+            archives[student_index]["11_enrollment"] = self.get_enrollment(
+                student, year_levels[0][0])
+            archives[student_index]["12_enrollment"] = self.get_enrollment(
+                student, year_levels[1][0])
+            archives[student_index]["class_schedules"] = self.get_classes(
+                student)
+            archives[student_index]["grades"] = self.student_grades(student)
+
+        return archives
+
+    def get(self, request, format=None):
+        csrf_token = csrf.get_token(request)
+        results = User.objects.alias(count_enrollment=Count(
+            "stud_enrollment", filter=Q(stud_enrollment__is_accepted=True, stud_enrollment__is_denied=False))).exclude(
+                Q(is_active=False) | Q(count_enrollment__lt=1))
+
+        return Response([csrf_token, self.student_list(results)])
+
+    def post(self, request, format=None):
+        to_search = str(request.data['key'])
+        csrf_token = csrf.get_token(request)
+
+        search_results = User.objects.alias(count_enrollment=Count(
+            "stud_enrollment", filter=Q(stud_enrollment__is_accepted=True, stud_enrollment__is_denied=False))).exclude(
+                Q(is_active=False) | Q(count_enrollment__lt=1)).filter(
+                    Q(email__unaccent__icontains=to_search) | Q(display_name__unaccent__icontains=to_search), is_student=True)
+
+        return Response([csrf_token, self.student_list(search_results)])

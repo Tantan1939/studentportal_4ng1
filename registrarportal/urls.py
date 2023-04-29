@@ -68,4 +68,10 @@ urlpatterns = [
         ])),
     ])),
 
+    path("Archives/", include([
+        path("Api/", include([
+            path("Get/", student_repositories.as_view()),
+        ]))
+    ]))
+
 ]
