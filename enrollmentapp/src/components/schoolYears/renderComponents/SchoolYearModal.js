@@ -118,7 +118,7 @@ export default function SchoolYearModal({open, close, syname}) {
                 </div>
 
                 <div class="buttonz d-flex justify-content-end">
-                    <button class="btn btn-primary btn-md mt-3" onClick={close}>
+                    <button class="btn btn-primary btn-md mt-3 mb-2" onClick={close}>
                         Exit
                     </button>
                 </div>
