@@ -34,7 +34,6 @@ from registrarportal.tokenGenerators import generate_enrollment_token, new_enrol
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
 from studentportal.tasks import admission_batching, enrollment_batching
-from ipware import get_client_ip
 
 
 User = get_user_model()
