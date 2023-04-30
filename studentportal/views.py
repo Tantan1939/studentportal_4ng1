@@ -1,35 +1,25 @@
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic.base import TemplateView, RedirectView
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import FormView, CreateView
+from django.http import HttpResponseRedirect
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value
 from . forms import *
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.core.mail import EmailMessage
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
 from adminportal.models import *
 from formtools.wizard.views import SessionWizardView
-from datetime import date, datetime
-from smtplib import SMTPException
+from datetime import date
 from usersPortal.models import user_photo
 from . models import *
 from . email_token import *
 from collections import OrderedDict
 from django.core.files.storage import DefaultStorage
 from registrarportal.models import student_admission_details
-from PIL import Image
 from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
@@ -104,6 +94,8 @@ class index(TemplateView):
 
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
+
+        context["enroll_now"] = self.check_enrollment()
 
         return context
 
@@ -201,6 +193,7 @@ class admission(SessionWizardView):
         return form_list
 
     def initialize_row(self, myDict):
+        # Loop the form fields and get its value to initialize the self.get_admission instance
         for key, value in myDict.items():
             match key:
                 case ("first_chosen_strand" | "second_chosen_strand"):
@@ -472,6 +465,7 @@ class enrollment_new_admission(FormView):
                     self.request, "Enrollment Failed. Please complete your profile to continue.")
                 return self.form_invalid(form)
         except Exception as e:
+            messages.error(self.request, e)
             # messages.error(
             #     self.request, "Enrollment Failed. Nakapag-apply kana this school year.")
             return self.form_invalid(form)
@@ -880,12 +874,12 @@ class view_classes(TemplateView):
 
             for index, subject_details in enumerate(section.first_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
                 context["classes"][key]["First_sem_subjects"][
-                    subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+                    subject_details.subject.title] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
 
             context["classes"][key]["Second_sem_subjects"] = dict()
             for index, subject_details in enumerate(section.second_sem_subjects.through.objects.filter(section=section).order_by('time_in')):
                 context["classes"][key]["Second_sem_subjects"][
-                    subject_details.subject.code] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
+                    subject_details.subject.title] = f"{subject_details.time_in.strftime('%I:%M %p %Z')} - {subject_details.time_out.strftime('%I:%M %p %Z')}"
 
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
@@ -912,17 +906,17 @@ class view_grades(TemplateView):
                     dct[std_grds.get_yearLevel_display(
                     )][std_grds.get_quarter_display()] = dict()
                     dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
-                    )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+                    )][std_grds.subject.title] = std_grds.grade if std_grds.grade else ""
 
                 else:
                     if std_grds.get_quarter_display() not in dct[std_grds.get_yearLevel_display()]:
                         dct[std_grds.get_yearLevel_display(
                         )][std_grds.get_quarter_display()] = dict()
                         dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
-                        )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+                        )][std_grds.subject.title] = std_grds.grade if std_grds.grade else ""
                     else:
                         dct[std_grds.get_yearLevel_display()][std_grds.get_quarter_display(
-                        )][std_grds.subject.code] = std_grds.grade if std_grds.grade else ""
+                        )][std_grds.subject.title] = std_grds.grade if std_grds.grade else ""
 
         except Exception as e:
             dct = dict()

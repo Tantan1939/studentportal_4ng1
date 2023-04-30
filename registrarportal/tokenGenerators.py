@@ -1,9 +1,10 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 import six
-from datetime import time, datetime
+from datetime import date
 from django.conf import settings
 from django.utils.crypto import constant_time_compare, salted_hmac
 from django.utils.http import base36_to_int, int_to_base36
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class enrollment_token_generator(PasswordResetTokenGenerator):
@@ -12,6 +13,8 @@ class enrollment_token_generator(PasswordResetTokenGenerator):
         """
         Check that a enrollment token is correct for a given user.
         """
+        from registrarportal.models import schoolYear, enrollment_admission_setup
+
         if not (enrObj and token):
             return False
         # Parse the token
@@ -35,25 +38,45 @@ class enrollment_token_generator(PasswordResetTokenGenerator):
         else:
             return False
 
-        # Check the timestamp is within limit.
-        if (self._num_seconds(self._now()) - ts) > settings.ENROLLMENT_TOKEN_TIMEOUT:
+        # # Check the timestamp is within limit.
+        # if (self._num_seconds(self._now()) - ts) > settings.ENROLLMENT_TOKEN_TIMEOUT:
+        #     return False
+        this_sy = schoolYear.objects.first()
+
+        if not this_sy:
+            return False
+
+        if this_sy.until < date.today():
+            return False
+
+        try:
+            admission_period = enrollment_admission_setup.objects.get(
+                ea_setup_sy=this_sy)
+
+            if admission_period.end_date < date.today():
+                return False
+
+        except ObjectDoesNotExist:
             return False
 
         return True
 
     def _make_hash_value(self, enrObj, timestamp):
         return (
-            six.text_type(enrObj.pk) + six.text_type(timestamp) + six.text_type(enrObj.admission_owner.id) + six.text_type(enrObj.first_name) + six.text_type(enrObj.is_accepted) +
-            six.text_type(enrObj.admission_sy.id) + six.text_type(enrObj.type) + six.text_type(
-                enrObj.is_denied) + six.text_type(enrObj.with_enrollment) + six.text_type(enrObj.created_on)
+            six.text_type(enrObj.pk) + six.text_type(timestamp) + six.text_type(enrObj.admission_owner.id) + six.text_type(enrObj.first_name) + six.text_type(
+                enrObj.is_accepted) + six.text_type(enrObj.admission_sy.id) + six.text_type(enrObj.type) + six.text_type(enrObj.is_denied) + six.text_type(
+                    enrObj.with_enrollment) + six.text_type(enrObj.created_on) + six.text_type(enrObj.admission_owner.is_active)
         )
 
 
 class re_enroll_token_generator(PasswordResetTokenGenerator):
+
     def check_token(self, inv_object, token):
         """
         Check that a enrollment token is correct for a given user.
         """
+        from registrarportal.models import schoolYear, enrollment_admission_setup
+
         if not (inv_object and token):
             return False
         # Parse the token
@@ -78,7 +101,25 @@ class re_enroll_token_generator(PasswordResetTokenGenerator):
             return False
 
         # Check the timestamp is within limit.
-        if (self._num_seconds(self._now()) - ts) > settings.ENROLLMENT_TOKEN_TIMEOUT:
+        # if (self._num_seconds(self._now()) - ts) > settings.ENROLLMENT_TOKEN_TIMEOUT:
+        #     return False
+
+        this_sy = schoolYear.objects.first()
+
+        if not this_sy:
+            return False
+
+        if this_sy.until < date.today():
+            return False
+
+        try:
+            admission_period = enrollment_admission_setup.objects.get(
+                ea_setup_sy=this_sy)
+
+            if admission_period.end_date < date.today():
+                return False
+
+        except ObjectDoesNotExist:
             return False
 
         return True

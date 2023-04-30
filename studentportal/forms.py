@@ -75,6 +75,8 @@ class admission_personal_details(forms.Form):
         self.fields["second_chosen_strand"] = forms.TypedChoiceField(
             choices=second_strand_choices)
 
+    student_lrn = forms.CharField(
+        label="Student LRN#", max_length=12, widget=forms.NumberInput)
     first_name = forms.CharField(
         label="First Name", max_length=20)
     middle_name = forms.CharField(

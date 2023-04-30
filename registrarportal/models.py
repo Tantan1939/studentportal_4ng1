@@ -79,6 +79,7 @@ class student_admission_details(models.Model):
     date_of_birth = models.DateField()
     birthplace = models.CharField(max_length=200)
     nationality = models.CharField(max_length=50)
+    student_lrn = models.CharField(max_length=12, null=True, unique=True)
 
     # Elementary school details
     elem_name = models.CharField(max_length=50)
@@ -119,6 +120,8 @@ class student_admission_details(models.Model):
 
     is_denied = models.BooleanField(default=False)  # if denied, for review
     with_enrollment = models.BooleanField(default=False)
+    audited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT,
+                                   related_name="audited_admission", null=True, blank=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -130,7 +133,7 @@ class student_admission_details(models.Model):
         get_latest_by = ["created_on"]
 
     def __str__(self):
-        return f"{self.id}: {self.first_name} {self.middle_name} {self.last_name}"
+        return f"{self.student_lrn}: {self.first_name} {self.middle_name} {self.last_name}"
 
     def elementary_school(self):
         return self.elem_name
@@ -139,10 +142,11 @@ class student_admission_details(models.Model):
         return self.jhs_name
 
     @classmethod
-    def admit_this_students(cls, request, iDs):
+    def admit_this_students(cls, request, iDs, validated_by):
         for id in iDs:
             with transaction.atomic():
                 obj = cls.objects.select_for_update().get(id=id)
+                obj.audited_by = validated_by
                 obj.is_accepted = True
                 if obj.is_denied:
                     obj.is_denied = False
@@ -152,8 +156,7 @@ class student_admission_details(models.Model):
                     "username": obj.admission_owner.display_name,
                     "domain": get_current_site(request).domain,
                     "uid": urlsafe_base64_encode(force_bytes(obj.pk)),
-                    "token": generate_enrollment_token.make_token(obj),
-                    "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p")},
+                    "token": generate_enrollment_token.make_token(obj)},
                     send_to=obj.admission_owner.email)
 
 
@@ -265,6 +268,8 @@ class student_enrollment_details(models.Model):
     is_denied = models.BooleanField(default=False)
     enrolled_school_year = models.ForeignKey(
         schoolYear, on_delete=models.RESTRICT, related_name="sy_enrollee")
+    audited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT,
+                                   related_name="audited_enrollment", null=True, blank=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -276,12 +281,13 @@ class student_enrollment_details(models.Model):
         unique_together = ["applicant", "admission", "enrolled_school_year"]
 
     @classmethod
-    def accept_students(cls, pks):
+    def accept_students(cls, pks, validated_by):
         pk_list = []
         for pk in pks:
             with transaction.atomic():
                 stud = cls.objects.select_for_update().get(pk=pk)
                 stud.is_accepted = True
+                stud.audited_by = validated_by
                 if stud.is_denied:
                     stud.is_denied = False
                 stud.save()
