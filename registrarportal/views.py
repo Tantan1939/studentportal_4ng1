@@ -1244,14 +1244,13 @@ class student_repositories(APIView):
             archives[student_index]["user_id"] = student.id
             archives[student_index]["user_name"] = student.display_name
             archives[student_index]["email"] = student.email
+            archives[student_index]["lrn"] = student.admission_details.student_lrn
             archives[student_index]["requested_documents"] = self.get_student_documents(
                 student)
             archives[student_index]["admission"] = self.get_student_admission(
                 student)
-            archives[student_index]["11_enrollment"] = self.get_enrollment(
-                student, year_levels[0][0])
-            archives[student_index]["12_enrollment"] = self.get_enrollment(
-                student, year_levels[1][0])
+            archives[student_index]["enrollment"] = [self.get_enrollment(
+                student, year_levels[0][0]), self.get_enrollment(student, year_levels[1][0])]
             archives[student_index]["class_schedules"] = self.get_classes(
                 student)
             archives[student_index]["grades"] = self.student_grades(student)
@@ -1273,6 +1272,6 @@ class student_repositories(APIView):
         search_results = User.objects.alias(count_enrollment=Count(
             "stud_enrollment", filter=Q(stud_enrollment__is_accepted=True, stud_enrollment__is_denied=False))).exclude(
                 Q(is_active=False) | Q(count_enrollment__lt=1)).filter(
-                    Q(email__unaccent__icontains=to_search) | Q(display_name__unaccent__icontains=to_search), is_student=True)
+                    Q(email__unaccent__icontains=to_search) | Q(display_name__unaccent__icontains=to_search) | Q(admission_details__student_lrn__icontains=to_search), is_student=True)
 
         return Response([csrf_token, self.student_list(search_results)])

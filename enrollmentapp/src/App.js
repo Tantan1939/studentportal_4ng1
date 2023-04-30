@@ -10,6 +10,7 @@ import RenderSchoolYears from "./components/schoolYears/RenderSchoolYears";
 import ClassLists from "./components/classListComponents/ClassLists";
 import ReToken from "./components/enrollmentComponents/ReToken";
 import RenderClassListGrades from "./components/classListComponents/RenderClassListGrades";
+import RenderStudentList from "./components/archivesComponents/RenderStudentList";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/Registrar/Classlist/" exact component={ClassLists} />
           <Route path="/Registrar/Enrollment/Re_token/" exact component={ReToken} />
           <Route path="/Registrar/Classlist/Grades/:section_id/" exact component={RenderClassListGrades} />
+          <Route path="/Registrar/Archives/" exact component={RenderStudentList} />
         </div>
       </div>
     </Router>

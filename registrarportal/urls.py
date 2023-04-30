@@ -69,6 +69,7 @@ urlpatterns = [
     ])),
 
     path("Archives/", include([
+        path("", get_react_app.as_view(), name="view_archives"),
         path("Api/", include([
             path("Get/", student_repositories.as_view()),
         ]))
