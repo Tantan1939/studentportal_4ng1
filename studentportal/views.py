@@ -95,6 +95,8 @@ class index(TemplateView):
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
 
+        context["enroll_now"] = self.check_enrollment()
+
         return context
 
     def check_enrollment(self):

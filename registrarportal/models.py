@@ -79,7 +79,7 @@ class student_admission_details(models.Model):
     date_of_birth = models.DateField()
     birthplace = models.CharField(max_length=200)
     nationality = models.CharField(max_length=50)
-    student_lrn = models.CharField(max_length=12, null=True)
+    student_lrn = models.CharField(max_length=12, null=True, unique=True)
 
     # Elementary school details
     elem_name = models.CharField(max_length=50)
