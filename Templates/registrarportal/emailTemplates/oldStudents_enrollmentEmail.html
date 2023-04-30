@@ -6,7 +6,7 @@
     Enrollment for the new school year has started.
     To continue, please click the link below to access your enrollment form.
     The link will only work to your account. Other users will not be able to access it with their accounts.
-    Note: The activation link will expire on {{expiration_date}}.
+    Note: The link will only work until admission period ends.
 
-    http://{{domain}}{% url "studentportal:oldStudents_enrollment" uidb64=uid token=token %}
+    https://{{domain}}{% url "studentportal:oldStudents_enrollment" uidb64=uid token=token %}
 {% endautoescape %}

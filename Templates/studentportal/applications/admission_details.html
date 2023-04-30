@@ -24,6 +24,7 @@
         {% if detail.can_resub %} <a href="{% url 'studentportal:resend_admission' %}" class="resub btn btn-lg mb-3" > Resubmit </a> {% endif %}
         <div class="detail_wrapper  rounded p-3 border" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;">
             <p> Name: {{detail.first_name}} {{detail.middle_name}} {{detail.last_name}} - {{detail.sex}} </p>
+            <p> LRN: {{detail.student_lrn}} </p>
             <p> Date of Birth: {{detail.date_of_birth|date:"l, j M o"}} </p>
             <p> Birthplace: {{detail.birthplace}} </p>
             <p> Nationality: {{detail.nationality}} </p>

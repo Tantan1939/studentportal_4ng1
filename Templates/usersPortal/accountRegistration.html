@@ -18,7 +18,7 @@
             <!-- Input Field -->
             <span class="line"></span>
             <label for="{{ form.email.id_for_label }}" class="em form-label">
-              Email:
+              {{ form.email.label }}
             </label>
           </div>
           {{ form.email.errors }}
@@ -37,7 +37,7 @@
               for="{{ form.display_name.id_for_label }}"
               class="form-label"
             >
-              Username:
+              {{ form.display_name.label }}
             </label>
           </div>
           {{ form.display_name.errors }}
@@ -54,7 +54,7 @@
             </div>
             <span></span>
             <label for="{{ form.password.id_for_label }}" class="form-label">
-              Password:
+              {{ form.password.label }}
             </label>
           </div>
         </div>
@@ -73,7 +73,7 @@
               for="{{ form.confirmpassword.id_for_label }}"
               class="form-label"
             >
-              Confirm Password:
+            {{ form.confirmpassword.label }}
             </label>
           </div>
         </div>

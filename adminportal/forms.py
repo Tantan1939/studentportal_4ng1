@@ -2,8 +2,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from . models import *
-from datetime import date, datetime
-from django.forms.widgets import DateInput
 from registrarportal.forms import validate_startDate
 
 User = get_user_model()

@@ -75,20 +75,22 @@ class admission_personal_details(forms.Form):
         self.fields["second_chosen_strand"] = forms.TypedChoiceField(
             choices=second_strand_choices)
 
+    student_lrn = forms.CharField(
+        label="Student LRN#", max_length=12, widget=forms.NumberInput)
     first_name = forms.CharField(
-        label="First Name", max_length=20, required=False)
+        label="First Name", max_length=20)
     middle_name = forms.CharField(
-        label="Middle Name", max_length=20, required=False)
+        label="Middle Name", max_length=20)
     last_name = forms.CharField(
-        label="Last Name", max_length=20, required=False)
+        label="Last Name", max_length=20)
     sex = forms.TypedChoiceField(
-        label="Sex", choices=(), coerce=str, required=False)
+        label="Sex", choices=(), coerce=str)
     date_of_birth = forms.DateField(label="Birthdate", validators=[
-        birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+        birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}))
     birthplace = forms.CharField(
-        label="Place of birth", max_length=200, required=False)
+        label="Place of birth", max_length=200)
     nationality = forms.CharField(
-        label="Nationality", max_length=50, required=False)
+        label="Nationality", max_length=50)
     first_chosen_strand = forms.TypedChoiceField(
         label="Choose First Strand", choices=(), coerce=str)
     second_chosen_strand = forms.TypedChoiceField(
@@ -97,13 +99,13 @@ class admission_personal_details(forms.Form):
 
 class elementary_school_details(forms.Form):
     elem_name = forms.CharField(
-        label="Elementary School Name", max_length=50, required=False)
+        label="Elementary School Name", max_length=50)
     elem_address = forms.CharField(
-        label="Elementary School Address", max_length=50, required=False)
+        label="Elementary School Address", max_length=50)
     elem_region = forms.CharField(
-        label="School Region", max_length=30, required=False)
+        label="School Region", max_length=30)
     elem_year_completed = forms.DateField(label="Year Completed", validators=[
-                                          birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+                                          birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}))
     elem_pept_passer = forms.TypedChoiceField(
         label="Are you a passer of Philippine Educational Placement Test (PEPT) for Elementary Level?", choices=boolean_choices(), coerce=str, required=False)
     elem_pept_date_completion = forms.DateField(label="Date Completed", validators=[
@@ -120,13 +122,13 @@ class elementary_school_details(forms.Form):
 
 class jhs_details(forms.Form):
     jhs_name = forms.CharField(
-        label="Junior High School Name", max_length=50, required=False)
+        label="Junior High School Name", max_length=50)
     jhs_address = forms.CharField(
-        label="Junior High School Address", max_length=50, required=False)
+        label="Junior High School Address", max_length=50)
     jhs_region = forms.CharField(
-        label="School Region", max_length=30, required=False)
+        label="School Region", max_length=30)
     jhs_year_completed = forms.DateField(label="Year Completed", validators=[
-        birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+        birthdate_validator], widget=forms.DateInput(attrs={'type': 'date'}))
     jhs_pept_passer = forms.TypedChoiceField(
         label="Are you a passer of Philippine Educational Placement Test (PEPT) for JHS Level?", coerce=str, choices=boolean_choices(), required=False)
     jhs_pept_date_completion = forms.DateField(label="Date Completed", validators=[

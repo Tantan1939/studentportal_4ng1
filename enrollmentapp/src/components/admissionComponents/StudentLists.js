@@ -32,7 +32,7 @@ export default function StudentLists({admission, DeniedHandler}) {
   return (
     <div className='container'>
       <div class="d-flex align-items-center justify-content-between p-3 mt-2 mb-2 text-dark border rounded">
-        <h5 style={{maxWidth:'400px',width:'100%'}} onMouseMove={() => setOpenModal(true)} onMouseOut={() => setOpenModal(false)}> {admission.first_name} {admission.middle_name} {admission.last_name} - {admission.sex} </h5>
+        <h5 style={{maxWidth:'400px',width:'100%'}} onMouseMove={() => setOpenModal(true)} onMouseOut={() => setOpenModal(false)}> {admission.student_lrn} - {admission.first_name} {admission.middle_name} {admission.last_name} - {admission.sex} </h5>
         <AdmissionDetailsModal isHovering={openModal} admission={admission}/>
      
  

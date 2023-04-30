@@ -29,14 +29,14 @@
 
 </div> -->
 <div class="container mt-5 mb-5 px-4 px-md-0" >
-    <div class="box_shadow"style="box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;">
-        <div class="row">
-            <div class="col-md-3" style="background: rgb(138, 21, 21);">
+    <div class="box_shadow">
+        <div class="row" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;">
+            <div class="col-md-3" style="background: rgb(138, 21, 21); border-top-left-radius:8px; border-bottom-left-radius:8px;">
                 <div class="l_img w-100 d-flex justify-content-center pt-3">
-                    <img src="{{ userDetails.userimage.image.url }}" alt="" style="border-radius: 50%;">
+                    <img src="{{ userDetails.userimage.image.url }}" alt="" style="border-radius: 50%; object-fit: cover">
                 </div>
             </div>
-            <div class="col-md-9 px-2 px-lg-5 pt-4 pb-4 bg-white">
+            <div class="col-md-9 px-2 px-lg-5 pt-4 pb-4 border" style="border-top-right-radius:8px; border-bottom-right-radius:8px;">
                 <div class="r_content">
                     <div class="content_wrapper">
     
@@ -48,9 +48,9 @@
                         <p> Contact: <span>{{userDetails.contactnum}}</span>  </p>
                         <p> Address: <span>{{userDetails.useraddress}}</span>  </p>
                         <div class="mt-4">
-                            <a href="{% url 'usersPortal:updateAccountProfile' %}" class="btn btn-primary" style="transition: 0.3s ease;"> Edit </a>
-                            <a href="{% url 'usersPortal:changepassword' %}" class="btn btn-dark mx-2" style="transition: 0.3s ease;"> Change Password </a>
-                            <a href="{% url 'usersPortal:resetpassword' %}" class="btn btn-dark" style="transition: 0.3s ease;"> Reset Password </a>
+                            <a href="{% url 'usersPortal:updateAccountProfile' %}" class="btn btn-primary m-2 m-sm-0 mx-sm-1" style="transition: 0.3s ease;"> Edit </a>
+                            <a href="{% url 'usersPortal:changepassword' %}" class="btn btn-dark m-2 m-sm-0 mx-sm-1" style="transition: 0.3s ease;"> Change Password </a>
+                            <a href="{% url 'usersPortal:resetpassword' %}" class="btn btn-dark m-2 m-sm-0 mx-sm-1" style="transition: 0.3s ease;"> Reset Password </a>
         
                         </div>
                     </div>
