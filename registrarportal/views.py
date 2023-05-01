@@ -19,14 +19,14 @@ from datetime import date, datetime
 from django.middleware import csrf
 from studentportal.models import documentRequest
 from registrarportal.tasks import email_tokenized_enrollment_link
-from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email, cancelDocumentRequest
+from . emailSenders import enrollment_invitation_emails, enrollment_acceptance_email, denied_enrollment_email, denied_admission_email, cancelDocumentRequest, denied_newEnrollment_email
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from openpyxl import Workbook
 from openpyxl.styles import Border, Side, Alignment, Font
 from . drf_permissions import EnrollmentValidationPermissions
-from . tokenGenerators import generate_enrollment_token
+from . tokenGenerators import generate_enrollment_token, admissionAccessToken, enrollmentAccessToken
 from . serializers import *
 from . models import *
 from . forms import *
@@ -375,6 +375,13 @@ class get_admissions(APIView):
 class denied_admission(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
+    def generate_access_token(self, deniedAdmission):
+        uid = urlsafe_base64_encode(force_bytes(deniedAdmission.id))
+        pwd = urlsafe_base64_encode(force_bytes(
+            f"{deniedAdmission.admission_owner.email}+{deniedAdmission.student_lrn}"))
+        token = admissionAccessToken.make_token(deniedAdmission)
+        return (uid, pwd, token)
+
     def post(self, request, format=None):
         data = request.data
         try:
@@ -388,8 +395,9 @@ class denied_admission(APIView):
             to_deny.save()
             get_batch.members.remove(to_deny)
 
+            uid, pwd, token = self.generate_access_token(to_deny)
             denied_admission_email(
-                request, to_deny.admission_owner.email, to_deny.last_name)
+                request, to_deny.admission_owner.email, to_deny.last_name, uid, pwd, token)
 
             return Response({"Done": "Admission Denied"}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
@@ -440,22 +448,36 @@ class denied_enrollee(APIView):
     def post(self, request, format=None):
         data = request.data
         try:
+
+            # Denied enrollee
             with transaction.atomic():
                 to_denied = student_enrollment_details.objects.select_for_update().get(
                     pk=int(data["key"]))
                 to_denied.is_denied = True
                 to_denied.audited_by = self.request.user
                 to_denied.save()
-
             denied_stud = student_enrollment_details.objects.get(
                 id=int(data['key']))
 
+            # Remove enrollee from the batch
             get_batch = enrollment_batch.new_batches.filter(
                 members__id=denied_stud.id).first()
             get_batch.members.remove(denied_stud)
 
-            denied_enrollment_email(
-                request, denied_stud.applicant.email, denied_stud.full_name)
+            # Count validated enrollment of the enrollee
+            count_enrollment = student_enrollment_details.validatedObjects.filter(
+                applicant__id=denied_stud.id).count()
+
+            if not count_enrollment:
+                uid = urlsafe_base64_encode(force_bytes(denied_stud.id))
+                pwd = urlsafe_base64_encode(force_bytes(
+                    f"{denied_stud.applicant.email}+{denied_stud.admission.student_lrn}"))
+                token = enrollmentAccessToken.make_token(denied_stud)
+                denied_newEnrollment_email(
+                    request, denied_stud.applicant.email, denied_stud.full_name, uid, pwd, token)
+            else:
+                denied_enrollment_email(
+                    request, denied_stud.applicant.email, denied_stud.full_name)
 
             return Response({"Done": "Successfully Denied Enrollee."}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -465,6 +487,18 @@ class denied_enrollee(APIView):
 
 class accept_enrollees(APIView):
     permission_classes = [EnrollmentValidationPermissions]
+
+    def generate_new_account_password(self, account_id, lrn):
+        return urlsafe_base64_encode(force_bytes(f"{account_id}+#{lrn}"))
+
+    def activate_account(self, account, lrn):
+        new_password = self.generate_new_account_password(account.id, lrn)
+        activate_account = User.objects.get(pk=account.id)
+        activate_account.is_active = True
+        activate_account.set_password(new_password)
+        activate_account.save()
+        activate_account.refresh_from_db()
+        return new_password
 
     def post(self, request, format=None):
         data = request.data
@@ -485,13 +519,16 @@ class accept_enrollees(APIView):
                     section_batch__id=int(batch_id))
 
                 for student in student_enrollment_details.objects.filter(pk__in=accept_them):
+                    new_password = self.activate_account(
+                        student.applicant, student.admission.student_lrn)
+
                     # Assign each enrolled students to the designated section.
                     class_student.objects.create(
                         section=get_section, enrollment=student)
 
                     # Create an email template to send section, subject, and schedule details with the user enrollment parameters.
                     enrollment_acceptance_email(
-                        request, student.applicant.email, student.applicant.display_name, get_section)
+                        request, student.applicant.email, student.applicant.display_name, get_section, student.applicant.email, new_password)
                 else:
                     return Response({"Success": "success enrollment validation."}, status=status.HTTP_200_OK)
 
@@ -1126,6 +1163,7 @@ class post_grades(APIView):
 
 class get_admission_with_pending_token_enrollment_v1(APIView):
     permission_classes = [EnrollmentValidationPermissions]
+    # Re token
 
     # For new students
     def get(self, request, format=None):
@@ -1150,7 +1188,7 @@ class get_admission_with_pending_token_enrollment_v1(APIView):
                         "domain": get_current_site(request).domain,
                         "uid": urlsafe_base64_encode(force_bytes(re_token.pk)),
                         "token": generate_enrollment_token.make_token(re_token),
-                        "expiration_date": (timezone.now() + relativedelta(seconds=settings.ENROLLMENT_TOKEN_TIMEOUT)).strftime("%A, %B %d, %Y - %I:%M: %p")},
+                        "pwd": urlsafe_base64_encode(force_bytes(f"{re_token.admission_owner.email}+{re_token.student_lrn}"))},
                         send_to=re_token.admission_owner.email)
                 return Response({"Done": "Re_token Student/s."}, status=status.HTTP_200_OK)
             else:
