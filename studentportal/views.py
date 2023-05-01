@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.db import transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value
 from . forms import *
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_str, force_bytes
 from adminportal.models import *
 from formtools.wizard.views import SessionWizardView
 from datetime import date
@@ -39,6 +39,7 @@ def load_userPic(user):
 
 
 def not_authenticated_user(user):
+    # Return True if user is not authenticated
     return not user.is_authenticated
 
 
@@ -100,10 +101,10 @@ class index(TemplateView):
         return context
 
     def check_enrollment(self):
-        if not self.request.user.is_authenticated:
+        if self.request.user.is_authenticated:
             return False
         else:
-            if user_no_admission(self.request.user) and check_for_admission_availability(self.request.user):
+            if check_for_admission_availability(self.request.user):
                 return True
             return False
 
@@ -117,7 +118,7 @@ def check_for_admission_availability(user):
     sy = schoolYear.objects.first()
     if sy:
         if sy.until > date.today():
-            return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gt=date.today()).exists()
+            return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gte=date.today()).exists()
         return False
     return False
 
@@ -126,7 +127,7 @@ admission_decorators = [login_required(login_url="usersPortal:login"), user_pass
     user_no_admission, login_url="studentportal:index"), user_passes_test(check_for_admission_availability, login_url="studentportal:index")]
 
 
-@method_decorator(admission_decorators, name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class select_admission_type(TemplateView):
     template_name = "studentportal/admissionForms/chooseAdmissionType.html"
     http_method_names = ["get"]
@@ -135,8 +136,6 @@ class select_admission_type(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Type of Applicant"
         context["types"] = student_admission_details.applicant_type.choices
-        context["user_profilePicture"] = load_userPic(
-            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -150,9 +149,10 @@ class select_admission_type(TemplateView):
         return HttpResponseRedirect(reverse("studentportal:index"))
 
 
-@method_decorator(admission_decorators, name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class admission(SessionWizardView):
     templates = {
+        "enter_email": "studentportal/admissionForms/enterEmail.html",
         "admission_personal_details": "studentportal/admissionForms/studentDetailsForm.html",
         "elementary_school_details": "studentportal/admissionForms/addPrimarySchoolForm.html",
         "jhs_details": "studentportal/admissionForms/addJHSForm.html",
@@ -163,6 +163,7 @@ class admission(SessionWizardView):
     }
 
     form_list = [
+        ("enter_email", enterAdmissionEmail),
         ("admission_personal_details", admission_personal_details),
         ("elementary_school_details", elementary_school_details),
         ("jhs_details", jhs_details),
@@ -177,6 +178,7 @@ class admission(SessionWizardView):
     def get_form_list(self):
         form_list = OrderedDict()
 
+        form_list["enter_email"] = enterAdmissionEmail
         form_list["admission_personal_details"] = admission_personal_details
         form_list["elementary_school_details"] = elementary_school_details
         form_list["jhs_details"] = jhs_details
@@ -218,8 +220,33 @@ class admission(SessionWizardView):
         for key, value in myDict.items():
             setattr(self.init_docu, key, value)
 
+    def generate_password(self, lrn, email):
+        return urlsafe_base64_encode(force_bytes(f"{email}+{lrn}"))
+
+    def create_temporary_account(self, email, lrn, name):
+        generated_password = self.generate_password(lrn, email)
+        self.new_user = User.objects.create_user(
+            email, name, generated_password)
+        return self.new_user
+
+    def autoFill_userProfile(self, first_name, middle_name, last_name, birth_date, sex):
+        try:
+            createdUserProfile = user_profile.objects.get(user=self.new_user)
+            createdUserProfile.first_name = first_name
+            createdUserProfile.middle_name = middle_name
+            createdUserProfile.last_name = last_name
+            createdUserProfile.birth_date = birth_date
+            createdUserProfile.sex = sex
+            createdUserProfile.save()
+
+        except ObjectDoesNotExist:
+            createNewProfile = user_profile.objects.create(
+                user=self.new_user, first_name=first_name)
+            user_photo.objects.create(photo_of=createNewProfile)
+
     def done(self, form_list, **kwargs):
         try:
+            emailForm = self.get_cleaned_data_for_step("enter_email")
             personalDetails = self.get_cleaned_data_for_step(
                 "admission_personal_details")
             primarySchoolDetails = self.get_cleaned_data_for_step(
@@ -241,12 +268,21 @@ class admission(SessionWizardView):
                     "dualCitizenApplicantForm")
                 self.init_docu = dual_citizen_documents()
 
+            self.create_temporary_account(
+                emailForm["email"], personalDetails["student_lrn"], personalDetails["first_name"])
+            self.autoFill_userProfile(
+                personalDetails["first_name"],
+                personalDetails["middle_name"],
+                personalDetails["last_name"],
+                personalDetails["date_of_birth"],
+                personalDetails["sex"])
+
             self.get_admission = student_admission_details.objects.filter(
-                admission_owner=self.request.user).first()
+                admission_owner=self.new_user).first()
             if not self.get_admission:
                 self.get_admission = student_admission_details()
 
-            self.get_admission.admission_owner = self.request.user
+            self.get_admission.admission_owner = self.new_user
             self.get_admission.is_accepted = False
             self.get_admission.is_denied = False
             self.get_admission.type = int(kwargs["pk"])
@@ -288,8 +324,6 @@ class admission(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
         context["title"] = "Admission"
-        context["user_profilePicture"] = load_userPic(
-            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -418,7 +452,7 @@ class reschedDocumentRequest(FormView):
         return HttpResponseRedirect(reverse("studentportal:view_myDocumentRequest"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class enrollment_new_admission(FormView):
     template_name = "studentportal/enrollmentForms/enrollment.html"
     form_class = enrollment_form1
