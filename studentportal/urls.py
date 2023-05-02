@@ -23,7 +23,7 @@ urlpatterns = [
     ])),
 
     path("Enrollment/", include([
-        path("apply/<uidb64>/<token>/",
+        path("apply/<uidb64>/<token>/<pwd>/",
              enrollment_new_admission.as_view(), name="enrollment_new_admission"),
         path("Old_students/<uidb64>/<token>/",
              enrollment_old_students.as_view(), name="oldStudents_enrollment"),
@@ -32,12 +32,15 @@ urlpatterns = [
     path("Applications/", include([
         path("", get_submitted_admission.as_view(),
              name="get_submitted_admission"),
-        path("Resubmit/", resend_admission.as_view(), name="resend_admission"),
+        path("Resubmit/<uid>/<pwd>/<token>/",
+             resend_admission.as_view(), name="resend_admission"),
         path("Enrollment/", include([
             re_path(r"(?:(?P<key>[0-9]+)/)?$", get_submitted_enrollments.as_view(),
                     name="get_submitted_enrollments"),
             path("Resubmit/<key>/", resend_enrollment.as_view(),
                  name="resubmit_enrollment"),
+            path("Resubmit_newEnrollee/<uid>/<pwd>/<token>/",
+                 resend_newEnrollee_enrollment.as_view(), name="resubmit_new_enrollee"),
         ])),
     ])),
 

@@ -142,17 +142,9 @@ class login(FormView):
                 self.request, f"You're now logged-in as {user.display_name}.")
             return super().form_valid(form)
         else:
-            try:
-                user_details = User.objects.get(email=email, is_active=False)
-                if user_details.check_password(password):
-                    return self.activate_account_request(self.request, user_details.display_name, email)
-                messages.warning(
-                    self.request, "Email or Password is incorrect. Try again.")
-                return self.form_invalid(form)
-            except Exception as e:
-                messages.warning(
-                    self.request, "Email or Password is incorrect. Try again.")
-                return self.form_invalid(form)
+            messages.warning(
+                self.request, "Email or Password is incorrect. Try again.")
+            return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -161,9 +153,6 @@ class login(FormView):
 
     def form_invalid(self, form):
         return super().form_invalid(form)
-
-    def activate_account_request(self, request, name, email):
-        return render(request, "usersPortal/loginTemplates/activate_account_request.html", {"name": name, "email": email})
 
 
 @method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
