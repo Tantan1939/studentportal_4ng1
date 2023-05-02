@@ -144,9 +144,9 @@ export default function RenderStudentList() {
     }
 
     let render_archives = studentLists.map((studentDetails, index) => (
-        <div key={index}>
-            <p> {studentDetails.lrn}: {studentDetails.email} </p>
-            <button key={index} className='btn btn-primary mb-3' onClick={() => {
+        <div className='d-flex align-items-center py-3 px-4 border-bottom' key={index}>
+            <p style={{fontSize:'17px',fontWeight:'600',color:'#343434'}} className='me-2 m-0'> {studentDetails.lrn}: {studentDetails.email} </p>
+            <button key={index} className='btn btn-primary ms-auto' onClick={() => {
                 stdDispatcher({ type : LIST_ACTIONS.SELECT_STUDENT, payload: { data : studentDetails } })
             }}>
                 View
@@ -154,16 +154,22 @@ export default function RenderStudentList() {
         </div>
     ));
 
+    const searchStyle = {
+        width:'100%',
+        maxWidth:'500px',
+        outline:'none',
+        padding:'5px 10px'
+    }
     let render_search_engine = (
-        <form onSubmit={handleSearchSubmit}>
-            <input type={'text'} style={{width:'100px',textAlign:'center'}} placeholder={"Search"} onChange={handleSearchInput} required/>
-            <button className='btn btn-primary mb-3'> Search </button>
+        <form className='d-flex justify-content-start align-items-center mb-4 bg-light p-4 rounded' onSubmit={handleSearchSubmit}>
+            <input type={'text'} style={searchStyle} className='form-control me-2' placeholder={"Search"} onChange={handleSearchInput} required/>
+            <button className='btn btn-primary'> Search </button>
         </form>
     )
 
   return (
     <div>
-        <button className='btn btn-danger mb-3' onClick={() => window.location.href = '/Registrar/'}> Exit </button>
+        <button className='btn btn-danger mb-5' onClick={() => window.location.href = '/Registrar/'}> Exit </button>
 
       {initForce.is_loading ? (
         <h4> Loading... </h4>
@@ -174,20 +180,23 @@ export default function RenderStudentList() {
             ) : (
                 <div>
                     {studentRepositories.select_a_student ? (
-                        <div>
+                        <div className='mb-3'>
                             <button className='btn btn-danger mb-3' onClick={() => stdDispatcher({ type : LIST_ACTIONS.EXIT })}> Back </button>
-                            <p> User ID: {studentRepositories.user_id} </p>
-                            <p> User_name: {studentRepositories.user_name} </p>
-                            <p> Email: {studentRepositories.email} </p>
-                            <p> LRN: {studentRepositories.lrn} </p>
+                            <p className='p-3 m-0 border-bottom' style={{fontSize:'17px',fontWeight:'600',color:'#343434'}}> User ID: {studentRepositories.user_id} </p>
+                            <p className='p-3 m-0 border-bottom' style={{fontSize:'17px',fontWeight:'600',color:'#343434'}}> User_name: {studentRepositories.user_name} </p>
+                            <p className='p-3 m-0 border-bottom' style={{fontSize:'17px',fontWeight:'600',color:'#343434'}}> Email: {studentRepositories.email} </p>
+                            <p className='p-3 m-0 border-bottom' style={{fontSize:'17px',fontWeight:'600',color:'#343434'}}> LRN: {studentRepositories.lrn} </p>
 
-                            <button className='btn btn-info mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.requested_documents, type : DATA_TYPES.DOCUMENTS } })}> Requested Documents </button>
-                            <button className='btn btn-info mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.admission, type : DATA_TYPES.ADMISSION } })}> Admission </button>
-                            <button className='btn btn-info mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.enrollment, type : DATA_TYPES.ENROLLMENT } })}> Enrollment </button>
-                            <button className='btn btn-info mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.class_schedules, type : DATA_TYPES.CLASS_SCHEDULES } })}> Class Schedules </button>
-                            <button className='btn btn-info mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.grades, type : DATA_TYPES.GRADES } })}> Grades </button>
-                            <button className='btn btn-danger mb-3' onClick={() => stdDispatcher({ type : LIST_ACTIONS.EXIT })}> Back </button>
-                            <RendererProxy selected_type={studentRepositories.selected_type} selected_details={studentRepositories.selected_details} />
+                            <div className='p-4 mt-3 bg-light rounded'>
+                                <button className='btn btn-dark  me-2 mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.requested_documents, type : DATA_TYPES.DOCUMENTS } })}> Requested Documents </button>
+                                <button className='btn btn-dark me-2 mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.admission, type : DATA_TYPES.ADMISSION } })}> Admission </button>
+                                <button className='btn btn-dark me-2 mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.enrollment, type : DATA_TYPES.ENROLLMENT } })}> Enrollment </button>
+                                <button className='btn btn-dark me-2 mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.class_schedules, type : DATA_TYPES.CLASS_SCHEDULES } })}> Class Schedules </button>
+                                <button className='btn btn-dark me-2 mb-3' onClick={()=> stdDispatcher({ type : LIST_ACTIONS.SELECT_DETAILS, payload : { data:studentRepositories.grades, type : DATA_TYPES.GRADES } })}> Grades </button>
+                           
+                                <RendererProxy selected_type={studentRepositories.selected_type} selected_details={studentRepositories.selected_details} />
+                                <button className='btn btn-danger mb-3' onClick={() => stdDispatcher({ type : LIST_ACTIONS.EXIT })}> Back </button>
+                            </div>
                         </div>
                     ) : (
                         <div>

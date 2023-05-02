@@ -116,6 +116,15 @@
       bars.addEventListener('click', () => {
         admin_sidebar.classList.toggle('active')
       })
+      
+        window.addEventListener('resize', () => {
+            if(window.innerWidth > 983){
+                if(admin_sidebar.classList.contains('active')){
+                    admin_sidebar.classList.remove('active')
+                }
+            }
+        })
+
     </script>
 
 </body>
