@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.db import transaction
 from django.db.models import Prefetch, Count, Q, Case, When, Value
 from . forms import *
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_str, force_bytes
 from adminportal.models import *
 from formtools.wizard.views import SessionWizardView
 from datetime import date
@@ -20,7 +20,7 @@ from . email_token import *
 from collections import OrderedDict
 from django.core.files.storage import DefaultStorage
 from registrarportal.models import student_admission_details
-from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students
+from registrarportal.tokenGenerators import generate_enrollment_token, new_enrollment_token_for_old_students, admissionAccessToken, enrollmentAccessToken
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
 from studentportal.tasks import admission_batching, enrollment_batching
@@ -39,6 +39,7 @@ def load_userPic(user):
 
 
 def not_authenticated_user(user):
+    # Return True if user is not authenticated
     return not user.is_authenticated
 
 
@@ -100,10 +101,10 @@ class index(TemplateView):
         return context
 
     def check_enrollment(self):
-        if not self.request.user.is_authenticated:
+        if self.request.user.is_authenticated:
             return False
         else:
-            if user_no_admission(self.request.user) and check_for_admission_availability(self.request.user):
+            if check_for_admission_availability(self.request.user):
                 return True
             return False
 
@@ -117,7 +118,7 @@ def check_for_admission_availability(user):
     sy = schoolYear.objects.first()
     if sy:
         if sy.until > date.today():
-            return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gt=date.today()).exists()
+            return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gte=date.today()).exists()
         return False
     return False
 
@@ -126,7 +127,7 @@ admission_decorators = [login_required(login_url="usersPortal:login"), user_pass
     user_no_admission, login_url="studentportal:index"), user_passes_test(check_for_admission_availability, login_url="studentportal:index")]
 
 
-@method_decorator(admission_decorators, name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class select_admission_type(TemplateView):
     template_name = "studentportal/admissionForms/chooseAdmissionType.html"
     http_method_names = ["get"]
@@ -135,8 +136,6 @@ class select_admission_type(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Type of Applicant"
         context["types"] = student_admission_details.applicant_type.choices
-        context["user_profilePicture"] = load_userPic(
-            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -150,9 +149,10 @@ class select_admission_type(TemplateView):
         return HttpResponseRedirect(reverse("studentportal:index"))
 
 
-@method_decorator(admission_decorators, name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class admission(SessionWizardView):
     templates = {
+        "enter_email": "studentportal/admissionForms/enterEmail.html",
         "admission_personal_details": "studentportal/admissionForms/studentDetailsForm.html",
         "elementary_school_details": "studentportal/admissionForms/addPrimarySchoolForm.html",
         "jhs_details": "studentportal/admissionForms/addJHSForm.html",
@@ -163,6 +163,7 @@ class admission(SessionWizardView):
     }
 
     form_list = [
+        ("enter_email", enterAdmissionEmail),
         ("admission_personal_details", admission_personal_details),
         ("elementary_school_details", elementary_school_details),
         ("jhs_details", jhs_details),
@@ -177,6 +178,7 @@ class admission(SessionWizardView):
     def get_form_list(self):
         form_list = OrderedDict()
 
+        form_list["enter_email"] = enterAdmissionEmail
         form_list["admission_personal_details"] = admission_personal_details
         form_list["elementary_school_details"] = elementary_school_details
         form_list["jhs_details"] = jhs_details
@@ -218,8 +220,33 @@ class admission(SessionWizardView):
         for key, value in myDict.items():
             setattr(self.init_docu, key, value)
 
+    def generate_password(self, lrn, email):
+        return urlsafe_base64_encode(force_bytes(f"{email}+{lrn}"))
+
+    def create_temporary_account(self, email, lrn, name):
+        generated_password = self.generate_password(lrn, email)
+        self.new_user = User.objects.create_user(
+            email, name, generated_password)
+        return self.new_user
+
+    def autoFill_userProfile(self, first_name, middle_name, last_name, birth_date, sex):
+        try:
+            createdUserProfile = user_profile.objects.get(user=self.new_user)
+            createdUserProfile.first_name = first_name
+            createdUserProfile.middle_name = middle_name
+            createdUserProfile.last_name = last_name
+            createdUserProfile.birth_date = birth_date
+            createdUserProfile.sex = sex
+            createdUserProfile.save()
+
+        except ObjectDoesNotExist:
+            createNewProfile = user_profile.objects.create(
+                user=self.new_user, first_name=first_name)
+            user_photo.objects.create(photo_of=createNewProfile)
+
     def done(self, form_list, **kwargs):
         try:
+            emailForm = self.get_cleaned_data_for_step("enter_email")
             personalDetails = self.get_cleaned_data_for_step(
                 "admission_personal_details")
             primarySchoolDetails = self.get_cleaned_data_for_step(
@@ -241,12 +268,21 @@ class admission(SessionWizardView):
                     "dualCitizenApplicantForm")
                 self.init_docu = dual_citizen_documents()
 
+            self.create_temporary_account(
+                emailForm["email"], personalDetails["student_lrn"], personalDetails["first_name"])
+            self.autoFill_userProfile(
+                personalDetails["first_name"],
+                personalDetails["middle_name"],
+                personalDetails["last_name"],
+                personalDetails["date_of_birth"],
+                personalDetails["sex"])
+
             self.get_admission = student_admission_details.objects.filter(
-                admission_owner=self.request.user).first()
+                admission_owner=self.new_user).first()
             if not self.get_admission:
                 self.get_admission = student_admission_details()
 
-            self.get_admission.admission_owner = self.request.user
+            self.get_admission.admission_owner = self.new_user
             self.get_admission.is_accepted = False
             self.get_admission.is_denied = False
             self.get_admission.type = int(kwargs["pk"])
@@ -288,8 +324,6 @@ class admission(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
         context["title"] = "Admission"
-        context["user_profilePicture"] = load_userPic(
-            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -418,7 +452,7 @@ class reschedDocumentRequest(FormView):
         return HttpResponseRedirect(reverse("studentportal:view_myDocumentRequest"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class enrollment_new_admission(FormView):
     template_name = "studentportal/enrollmentForms/enrollment.html"
     form_class = enrollment_form1
@@ -426,10 +460,10 @@ class enrollment_new_admission(FormView):
 
     def form_valid(self, form):
         try:
-            get_age = user_profile.objects.get(user=self.request.user)
+            get_age = user_profile.objects.get(user=self.get_user)
             if get_age.user_age():
                 save_this = student_enrollment_details()
-                save_this.applicant = self.request.user
+                save_this.applicant = self.get_user
                 save_this.admission = self.admObj
                 save_this.strand = shs_strand.objects.get(
                     id=int(form.cleaned_data["select_strand"]))
@@ -441,9 +475,9 @@ class enrollment_new_admission(FormView):
                 save_this.save()
 
                 student_home_address.objects.create(
-                    home_of=self.request.user, enrollment=save_this, permanent_home_address=form.cleaned_data["home_address"])
+                    home_of=self.get_user, enrollment=save_this, permanent_home_address=form.cleaned_data["home_address"])
                 student_contact_number.objects.create(
-                    own_by=self.request.user, enrollment=save_this, cellphone_number=form.cleaned_data["contact_number"])
+                    own_by=self.get_user, enrollment=save_this, cellphone_number=form.cleaned_data["contact_number"])
                 student_report_card.objects.create(
                     card_from=save_this, report_card=form.cleaned_data["card"])
                 student_id_picture.objects.create(
@@ -462,7 +496,7 @@ class enrollment_new_admission(FormView):
                 return super().form_valid(form)
             else:
                 messages.warning(
-                    self.request, "Enrollment Failed. Please complete your profile to continue.")
+                    self.request, "Enrollment Failed. Incomplete profile.")
                 return self.form_invalid(form)
         except Exception as e:
             messages.error(self.request, e)
@@ -473,19 +507,19 @@ class enrollment_new_admission(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Enrollment"
-        context["user_profilePicture"] = load_userPic(
-            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def dispatch(self, request, *args, **kwargs):
         try:
             uid = force_str(urlsafe_base64_decode(self.kwargs['uidb64']))
-            self.admObj = student_admission_details.objects.get(
-                pk=uid, admission_owner=request.user)
+            pwd = force_str(urlsafe_base64_decode(self.kwargs["pwd"]))
+            self.admObj = student_admission_details.objects.get(pk=uid)
+            self.get_user = User.objects.get(
+                admission_details__id=self.admObj.id)
         except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
             self.admObj = None
 
-        if self.admObj is not None and generate_enrollment_token.check_token(self.admObj, self.kwargs['token']):
+        if self.admObj is not None and generate_enrollment_token.check_token(self.admObj, self.kwargs['token']) and self.get_user.check_password(pwd):
             # Return true if token is still valid
             return super().dispatch(request, *args, **kwargs)
         else:
@@ -588,12 +622,6 @@ class get_submitted_admission(TemplateView):
                      queryset=foreign_citizen_documents.objects.all(), to_attr="fborndocx"),
             Prefetch("softCopy_admissionRequirements_dualCitizen",
                      queryset=dual_citizen_documents.objects.all(), to_attr="dborndocx")
-        ).annotate(
-            can_resub=Case(
-                When(is_accepted=False, is_denied=True, admission_sy__until__gt=date.today(
-                ), admission_sy__e_a_setup__end_date__gte=date.today(), then=Value(True)),
-                default=Value(False)
-            )
         )
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
@@ -601,17 +629,15 @@ class get_submitted_admission(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
 class resend_admission(FormView):
     template_name = "studentportal/applications/admissionForm.html"
     form_class = phb_admForms
-    success_url = "/Applications/"
+    success_url = "/"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Resend Admission"
-        context["user_profilePicture"] = load_userPic(
-            self.request.user) if self.request.user.is_authenticated else ""
         return context
 
     def check_docu_changes(self, form_docx, change_fields):
@@ -715,19 +741,20 @@ class resend_admission(FormView):
         return initial
 
     def dispatch(self, request, *args, **kwargs):
-        self.get_adm = student_admission_details.objects.filter(admission_owner=request.user).annotate(
-            can_resub=Case(
-                When(is_accepted=False, is_denied=True, admission_sy__until__gt=date.today(
-                ), admission_sy__e_a_setup__end_date__gte=date.today(), then=Value(True)),
-                default=Value(False)
-            )
-        ).first()
-        if self.get_adm and self.get_adm.can_resub:
+        try:
+            uid = force_str(urlsafe_base64_decode(self.kwargs['uid']))
+            pwd = force_str(urlsafe_base64_decode(self.kwargs['pwd']))
+            token = self.kwargs['token']
+            self.get_adm = student_admission_details.objects.get(pk=uid)
+            self.get_user = User.objects.get(
+                admission_details__id=self.get_adm.id)
+        except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+            self.get_adm = None
+
+        if self.get_adm is not None and admissionAccessToken.check_token(self.get_adm, token) and self.get_user.check_password(pwd):
             return super().dispatch(request, *args, **kwargs)
-        else:
-            messages.warning(
-                request, "Application can no longer be resubmitted.")
-            return HttpResponseRedirect(reverse("studentportal:get_submitted_admission"))
+        messages.error(request, "Enrollment link is no longer valid!")
+        return HttpResponseRedirect(reverse("studentportal:index"))
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
@@ -760,8 +787,13 @@ class get_submitted_enrollments(TemplateView):
             ).first()
 
         else:
-            context["enrollments"] = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(Prefetch("enrollment_address", queryset=student_home_address.objects.all(), to_attr="address"), Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(), to_attr="contactnumber"), Prefetch(
-                "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch("stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(), enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
+            context["enrollments"] = student_enrollment_details.objects.filter(id=int(self.kwargs["key"]), applicant=self.request.user).prefetch_related(
+                Prefetch("enrollment_address", queryset=student_home_address.objects.all(), to_attr="address"), Prefetch(
+                    "enrollment_contactnumber", queryset=student_contact_number.objects.all(), to_attr="contactnumber"), Prefetch(
+                        "report_card", queryset=student_report_card.objects.all(), to_attr="reportcard"), Prefetch(
+                            "stud_pict", queryset=student_id_picture.objects.all(), to_attr="studentpicture")).annotate(
+                                can_resub=Case(When(is_accepted=False, is_denied=True, enrolled_school_year__until__gt=date.today(),
+                                                    enrolled_school_year__e_a_setup__end_date__gte=date.today(), then=Value(True)), default=Value(False))).first()
 
         context["user_profilePicture"] = load_userPic(
             self.request.user) if self.request.user.is_authenticated else ""
@@ -853,6 +885,96 @@ class resend_enrollment(FormView):
             return super().dispatch(request, *args, **kwargs)
         else:
             return HttpResponseRedirect(reverse("studentportal:get_submitted_enrollments"))
+
+
+@method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
+class resend_newEnrollee_enrollment(FormView):
+    template_name = "studentportal/applications/resubmit_enrollment.html"
+    form_class = resend_enrollment_form
+    success_url = "/"
+
+    def form_valid(self, form):
+        try:
+            if form.has_changed():
+                for field in form.changed_data:
+                    match field:
+                        case "select_strand":
+                            setattr(self.get_enrollment, "strand", shs_strand.objects.get(
+                                id=int(form.cleaned_data[field])))
+                        case "home_address":
+                            student_home_address.objects.filter(id=self.get_enrollment.address[0].id).update(
+                                permanent_home_address=form.cleaned_data[field])
+                        case "contact_number":
+                            student_contact_number.objects.filter(id=self.get_enrollment.contactnumber[0].id).update(
+                                cellphone_number=form.cleaned_data[field])
+                        case "card":
+                            student_report_card.objects.create(
+                                card_from=self.get_enrollment, report_card=form.cleaned_data[field])
+                        case "profile_image":
+                            student_id_picture.objects.create(
+                                image_from=self.get_enrollment, user_image=form.cleaned_data[field])
+                        case _:
+                            setattr(self.get_enrollment, field,
+                                    form.cleaned_data[field])
+                self.get_enrollment.is_accepted = False
+                self.get_enrollment.is_denied = False
+
+                to_updateFields = [field for field in form.changed_data if not field in (
+                    "home_address", "contact_number", "card", "profile_image")]
+                to_updateFields.append("is_accepted")
+                to_updateFields.append("is_denied")
+
+                self.get_enrollment.save(update_fields=to_updateFields)
+                enrollment_batching.delay(self.get_enrollment.id)
+                messages.success(
+                    self.request, "Enrollment resubmitted successfully.")
+
+            return super().form_valid(form)
+        except Exception as e:
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Enrollment Resubmission"
+        return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["full_name"] = self.get_enrollment.full_name
+        initial["year_level"] = self.get_enrollment.year_level
+        initial["select_strand"] = str(self.get_enrollment.strand.id)
+        initial["home_address"] = str(
+            self.get_enrollment.address[0].permanent_home_address)
+        initial["contact_number"] = str(
+            self.get_enrollment.contactnumber[0].cellphone_number)
+        return initial
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(self.kwargs['uid']))
+            pwd = force_str(urlsafe_base64_decode(self.kwargs['pwd']))
+            token = self.kwargs['token']
+            self.dispatch_enrollment = student_enrollment_details.objects.get(
+                id=uid)
+            self.get_user = User.objects.get(
+                stud_enrollment__id=self.dispatch_enrollment.id)
+        except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+            self.dispatch_enrollment = None
+
+        if self.dispatch_enrollment is not None and enrollmentAccessToken.check_token(self.dispatch_enrollment, token) and self.get_user.check_password(pwd):
+            self.get_enrollment = student_enrollment_details.objects.filter(id=uid, applicant=self.get_user).prefetch_related(
+                Prefetch("enrollment_address",
+                         queryset=student_home_address.objects.all(), to_attr="address"),
+                Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(
+                ), to_attr="contactnumber"),
+                Prefetch("report_card", queryset=student_report_card.objects.all(
+                ), to_attr="reportcard"),
+                Prefetch("stud_pict", queryset=student_id_picture.objects.all(
+                ), to_attr="studentpicture")
+            ).first()
+            return super().dispatch(request, *args, **kwargs)
+        messages.error(request, "Enrollment link is no longer valid!")
+        return HttpResponseRedirect(reverse("studentportal:index"))
 
 
 @method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")

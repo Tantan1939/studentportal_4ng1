@@ -8,15 +8,38 @@
     {% for yearlevel, quarters in grade_levels.items %}
     
         <h5 class="mb-4"> {{yearlevel}} </h5>
-        {% for q_name, q_subjects in quarters.items %}
-        <div class="bg-light border mb-3 rounded p-3">
-            <h4 class="mb-2"> {{q_name}} </h4>
-            {% for subject_code, subject_grade in q_subjects.items %}
-                <p class="m-0"> {{subject_code}}: {{subject_grade}} </p>
+        <div class="row">
+            {% for q_name, q_subjects in quarters.items %}
+            <div class="col-md-6 mb-4">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">{{q_name}}</th>
+                        <th scope="col">Subjects</th>
+                        <th scope="col">Grades</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row"></th>
+                        {% for subject_code, subject_grade in q_subjects.items %}
+                        <td>
+                            <p class="m-0"> {{subject_code}} </p>
+                        </td>
+                        {% endfor %}
+                        {% for subject_code, subject_grade in q_subjects.items %}
+                        <td>
+                            <p class="m-0">{{subject_grade}} </p>
+                        </td>
+                        {% endfor %}
+                      </tr>
+                    </tbody>
+                  </table>
+
+            </div>
             {% endfor %}
 
         </div>
-        {% endfor %}
     {% endfor %}
 
 </div>

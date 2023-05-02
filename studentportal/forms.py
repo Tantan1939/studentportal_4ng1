@@ -4,9 +4,27 @@ from django.contrib.auth import get_user_model
 import re
 from adminportal.models import *
 from registrarportal.models import *
-# from usersPortal.forms import validate_imageSize
+from email_validator import validate_email, EmailUndeliverableError
 
 User = get_user_model()
+
+
+def validateLrnUniqueness(lrn):
+    if student_admission_details.objects.filter(student_lrn=lrn).exists():
+        raise ValidationError(f"{lrn} has already applied.")
+
+
+def validateEmailDomain(email):
+    try:
+        validate_email(email)
+    except EmailUndeliverableError:
+        raise ValidationError(f"{email} is an invalid email.")
+
+
+def validate_emailIntegrity(email):
+    if User.objects.filter(email=email).exists():
+        raise ValidationError(
+            f"{email} is already in use! Try again with different email.")
 
 
 def validate_imageSize(picture):
@@ -61,6 +79,11 @@ def validate_schedule(dt):
         raise ValidationError("Invalid Date.")
 
 
+class enterAdmissionEmail(forms.Form):
+    email = forms.EmailField(label="Enter your email", max_length=50, validators=[
+                             validateEmailDomain, validate_emailIntegrity])
+
+
 class admission_personal_details(forms.Form):
     def __init__(self, *args, **kwargs):
         sex_choices = student_admission_details.SexChoices.choices
@@ -75,8 +98,8 @@ class admission_personal_details(forms.Form):
         self.fields["second_chosen_strand"] = forms.TypedChoiceField(
             choices=second_strand_choices)
 
-    student_lrn = forms.CharField(
-        label="Student LRN#", max_length=12, widget=forms.NumberInput)
+    student_lrn = forms.CharField(label="Student LRN#", max_length=12, validators=[
+                                  validateLrnUniqueness], widget=forms.NumberInput)
     first_name = forms.CharField(
         label="First Name", max_length=20)
     middle_name = forms.CharField(
@@ -239,7 +262,9 @@ class enrollment_form2(forms.Form):
 
 
 class admission_forms(jhs_details, elementary_school_details, admission_personal_details):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(admission_forms, self).__init__(*args, **kwargs)
+        self.fields["student_lrn"].validators = []
 
 
 class phb_admForms(admissionRequirementsForm, admission_forms):

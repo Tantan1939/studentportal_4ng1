@@ -40,7 +40,7 @@ def enrollment_invitation_emails(request, invitations):
         pass
 
 
-def enrollment_acceptance_email(request, recipient, name, classDetails):
+def enrollment_acceptance_email(request, recipient, name, classDetails, email, pwd):
     get_firstSemDetails = firstSemSchedule.objects.filter(section__id=classDetails.id).order_by(
         "time_in").values('subject__title', 'time_in', 'time_out')
 
@@ -53,7 +53,9 @@ def enrollment_acceptance_email(request, recipient, name, classDetails):
         "yearlevel": classDetails.get_yearLevel_display(),
         "strand": classDetails.assignedStrand.strand_name,
         "first_sem": get_firstSemDetails,
-        "second_sem": get_secondSemDetails
+        "second_sem": get_secondSemDetails,
+        "email": email,
+        "pwd": pwd
     })
     enrollment_acceptance.delay(mail, recipient)
 
@@ -66,10 +68,24 @@ def denied_enrollment_email(request, recipient, name):
     failed_enrollment.delay(mail, recipient)
 
 
-def denied_admission_email(request, recipient, name):
+def denied_newEnrollment_email(request, recipient, name, uid, pwd, token):
+    mail = render_to_string("registrarportal/emailTemplates/deniedNewEnrollmentEmail.html", {
+        "account_name": name,
+        "domain": get_current_site(request).domain,
+        "uid": uid,
+        "pwd": pwd,
+        "token": token
+    })
+    failed_enrollment.delay(mail, recipient)
+
+
+def denied_admission_email(request, recipient, name, uid, pwd, token):
     mail = render_to_string("registrarportal/emailTemplates/deniedAdmissionEmail.html", {
         "account_name": name,
         "domain": get_current_site(request).domain,
+        "uid": uid,
+        "pwd": pwd,
+        "token": token
     })
     failed_admission.delay(mail, recipient)
 

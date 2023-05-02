@@ -17,7 +17,7 @@ export default function RenderDocx({image}) {
 
   return (
     <div>
-      <img src={imageUrl} />
+      <img style={{width:'400px',height:'auto'}} src={imageUrl} />
     </div>
   )
 }

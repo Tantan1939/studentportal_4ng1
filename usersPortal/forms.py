@@ -42,8 +42,8 @@ def validate_cp_number(number):
 
 
 class accountRegistrationForm(forms.Form):
-    email = forms.EmailField(
-        label="Email", max_length=50, validators=[validate_emailIntegrity])
+    email = forms.EmailField(label="Email", max_length=50, validators=[
+                             validate_emailIntegrity])
     display_name = forms.CharField(
         label="Name", max_length=25, validators=[validate_username, ])
     password = forms.CharField(

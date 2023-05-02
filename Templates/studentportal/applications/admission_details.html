@@ -21,7 +21,6 @@
 
 <div class="container col-md-8 mt-4 mb-4">
     {% for detail in details|slice:"1" %}
-        {% if detail.can_resub %} <a href="{% url 'studentportal:resend_admission' %}" class="resub btn btn-lg mb-3" > Resubmit </a> {% endif %}
         <div class="detail_wrapper  rounded p-3 border" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;">
             <p> Name: {{detail.first_name}} {{detail.middle_name}} {{detail.last_name}} - {{detail.sex}} </p>
             <p> LRN: {{detail.student_lrn}} </p>
