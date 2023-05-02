@@ -31,6 +31,8 @@ from . serializers import *
 from . models import *
 from . forms import *
 import re
+import random
+import string
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -376,9 +378,10 @@ class denied_admission(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
     def generate_access_token(self, deniedAdmission):
-        uid = urlsafe_base64_encode(force_bytes(deniedAdmission.id))
-        pwd = urlsafe_base64_encode(force_bytes(
+        pwd_f = urlsafe_base64_encode(force_bytes(
             f"{deniedAdmission.admission_owner.email}+{deniedAdmission.student_lrn}"))
+        uid = urlsafe_base64_encode(force_bytes(deniedAdmission.id))
+        pwd = urlsafe_base64_encode(force_bytes(pwd_f))
         token = admissionAccessToken.make_token(deniedAdmission)
         return (uid, pwd, token)
 
@@ -470,8 +473,9 @@ class denied_enrollee(APIView):
 
             if not count_enrollment:
                 uid = urlsafe_base64_encode(force_bytes(denied_stud.id))
-                pwd = urlsafe_base64_encode(force_bytes(
+                pwd_f = urlsafe_base64_encode(force_bytes(
                     f"{denied_stud.applicant.email}+{denied_stud.admission.student_lrn}"))
+                pwd = urlsafe_base64_encode(force_bytes(pwd_f))
                 token = enrollmentAccessToken.make_token(denied_stud)
                 denied_newEnrollment_email(
                     request, denied_stud.applicant.email, denied_stud.full_name, uid, pwd, token)
@@ -488,11 +492,14 @@ class denied_enrollee(APIView):
 class accept_enrollees(APIView):
     permission_classes = [EnrollmentValidationPermissions]
 
-    def generate_new_account_password(self, account_id, lrn):
-        return urlsafe_base64_encode(force_bytes(f"{account_id}+#{lrn}"))
+    def generate_new_account_password(self):
+        size = 8
+        generate_pwd = ''.join([random.choice(
+            string.ascii_uppercase + string.ascii_lowercase + string.digits) for n in range(size)])
+        return generate_pwd
 
-    def activate_account(self, account, lrn):
-        new_password = self.generate_new_account_password(account.id, lrn)
+    def activate_account(self, account):
+        new_password = self.generate_new_account_password()
         activate_account = User.objects.get(pk=account.id)
         activate_account.is_active = True
         activate_account.set_password(new_password)
@@ -519,8 +526,7 @@ class accept_enrollees(APIView):
                     section_batch__id=int(batch_id))
 
                 for student in student_enrollment_details.objects.filter(pk__in=accept_them):
-                    new_password = self.activate_account(
-                        student.applicant, student.admission.student_lrn)
+                    new_password = self.activate_account(student.applicant)
 
                     # Assign each enrolled students to the designated section.
                     class_student.objects.create(

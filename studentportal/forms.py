@@ -262,7 +262,9 @@ class enrollment_form2(forms.Form):
 
 
 class admission_forms(jhs_details, elementary_school_details, admission_personal_details):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(admission_forms, self).__init__(*args, **kwargs)
+        self.fields["student_lrn"].validators = []
 
 
 class phb_admForms(admissionRequirementsForm, admission_forms):

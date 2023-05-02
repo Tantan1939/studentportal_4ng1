@@ -152,12 +152,14 @@ class student_admission_details(models.Model):
                     obj.is_denied = False
                 obj.save()
 
+                gen_pass = urlsafe_base64_encode(force_bytes(
+                    f"{obj.admission_owner.email}+{obj.student_lrn}"))
                 email_tokenized_enrollment_link.delay({
                     "username": obj.admission_owner.display_name,
                     "domain": get_current_site(request).domain,
                     "uid": urlsafe_base64_encode(force_bytes(obj.pk)),
                     "token": generate_enrollment_token.make_token(obj),
-                    "pwd": urlsafe_base64_encode(force_bytes(f"{obj.admission_owner.email}+{obj.student_lrn}"))},
+                    "pwd": urlsafe_base64_encode(force_bytes(gen_pass))},
                     send_to=obj.admission_owner.email)
 
 

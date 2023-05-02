@@ -744,12 +744,12 @@ class resend_admission(FormView):
         try:
             uid = force_str(urlsafe_base64_decode(self.kwargs['uid']))
             pwd = force_str(urlsafe_base64_decode(self.kwargs['pwd']))
-            token = force_str(urlsafe_base64_decode(self.kwargs['token']))
-            self.get_adm = student_admission_details.objects.get(id=uid)
+            token = self.kwargs['token']
+            self.get_adm = student_admission_details.objects.get(pk=uid)
             self.get_user = User.objects.get(
                 admission_details__id=self.get_adm.id)
         except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
-            self.admObj = None
+            self.get_adm = None
 
         if self.get_adm is not None and admissionAccessToken.check_token(self.get_adm, token) and self.get_user.check_password(pwd):
             return super().dispatch(request, *args, **kwargs)
@@ -953,15 +953,25 @@ class resend_newEnrollee_enrollment(FormView):
         try:
             uid = force_str(urlsafe_base64_decode(self.kwargs['uid']))
             pwd = force_str(urlsafe_base64_decode(self.kwargs['pwd']))
-            token = force_str(urlsafe_base64_decode(self.kwargs['token']))
-            self.get_enrollment = student_enrollment_details.objects.get(
+            token = self.kwargs['token']
+            self.dispatch_enrollment = student_enrollment_details.objects.get(
                 id=uid)
             self.get_user = User.objects.get(
-                stud_enrollment__id=self.get_enrollment.id)
+                stud_enrollment__id=self.dispatch_enrollment.id)
         except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
-            self.get_enrollment = None
+            self.dispatch_enrollment = None
 
-        if self.get_enrollment is not None and enrollmentAccessToken.check_token(self.get_enrollment, token) and self.get_user.check_password(pwd):
+        if self.dispatch_enrollment is not None and enrollmentAccessToken.check_token(self.dispatch_enrollment, token) and self.get_user.check_password(pwd):
+            self.get_enrollment = student_enrollment_details.objects.filter(id=uid, applicant=self.get_user).prefetch_related(
+                Prefetch("enrollment_address",
+                         queryset=student_home_address.objects.all(), to_attr="address"),
+                Prefetch("enrollment_contactnumber", queryset=student_contact_number.objects.all(
+                ), to_attr="contactnumber"),
+                Prefetch("report_card", queryset=student_report_card.objects.all(
+                ), to_attr="reportcard"),
+                Prefetch("stud_pict", queryset=student_id_picture.objects.all(
+                ), to_attr="studentpicture")
+            ).first()
             return super().dispatch(request, *args, **kwargs)
         messages.error(request, "Enrollment link is no longer valid!")
         return HttpResponseRedirect(reverse("studentportal:index"))
