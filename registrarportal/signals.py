@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from . models import student_admission_details, admission_batch, student_enrollment_details, enrollment_batch
 from django.db.models import Case, When, Value, Count, Q, F, Min

@@ -231,7 +231,7 @@ class class_student(models.Model):
     section = models.ForeignKey(
         schoolSections, on_delete=models.RESTRICT, related_name="classmate")
     enrollment = models.ForeignKey(
-        "registrarportal.student_enrollment_details", on_delete=models.RESTRICT, related_name="class_group")
+        "registrarportal.student_enrollment_details", on_delete=models.CASCADE, related_name="class_group")
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 

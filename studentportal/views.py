@@ -655,6 +655,12 @@ class resend_admission(FormView):
                                 id=int(form.cleaned_data[field])))
                         case ("good_moral" | "report_card" | "psa" | "alien_certificate_of_registration" | "study_permit" | "f137" | "dual_citizenship" | "philippine_passport"):
                             pass
+                        case "student_lrn":
+                            self.get_user.set_password(urlsafe_base64_encode(
+                                force_bytes(f"{self.get_user.email}+{form.cleaned_data[field]}")))
+                            self.get_user.save()
+                            setattr(self.get_adm, field,
+                                    form.cleaned_data[field])
                         case _:
                             setattr(self.get_adm, field,
                                     form.cleaned_data[field])
