@@ -15,37 +15,44 @@ export default function Admission({selected_details}) {
       }
     });
   }, [selected_details]);
-
+  const pStyle = {
+    color: '#202020',
+    fontWeight: '600',
+    marginTop: '0',
+    marginbottom: '1rem'
+    }
   return (
     <div>
-      <h4> Admission </h4>
+      <h4 className='border-bottom py-3' style={{fontSize:'27px',marginBottom:'15px'}}> Admission </h4>
 
-        <p> Email: {selected_details.admission_owner} </p>
-        <p> First Name: {selected_details.first_name} </p>
-        <p> Middle Name: {selected_details.middle_name} </p>
-        <p> Last Name: {selected_details.last_name} </p>
-        <p> Sex: {selected_details.sex} </p>
-        <p> Birthdate: {selected_details.date_of_birth} </p>
-        <p> Birthplace: {selected_details.birthplace} </p>
-        <p> Nationality: {selected_details.nationality} </p>
-        <p> Elementary School: {selected_details.elem_name} </p>
-        <p> Address: {selected_details.elem_address} </p>
-        <p> Region: {selected_details.elem_region} </p>
-        <p> Year Completed: {selected_details.elem_year_completed} </p>
-        <p> Junior High School: {selected_details.jhs_name} </p>
-        <p> Address: {selected_details.jhs_address} </p>
-        <p> Region: {selected_details.jhs_region} </p>
-        <p> Year Completed: {selected_details.jhs_year_completed} </p>
-        <p> First Strand: {selected_details.first_chosen_strand} </p>
-        <p> Second Strand: {selected_details.second_chosen_strand} </p>
-        <p> Application Type: {selected_details.type} </p>
+        <p style={pStyle}> Email: {selected_details.admission_owner} </p>
+        <p style={pStyle}> First Name: {selected_details.first_name} </p>
+        <p style={pStyle}> Middle Name: {selected_details.middle_name} </p>
+        <p style={pStyle}> Last Name: {selected_details.last_name} </p>
+        <p style={pStyle}> Sex: {selected_details.sex} </p>
+        <p style={pStyle}> Birthdate: {selected_details.date_of_birth} </p>
+        <p style={pStyle}> Birthplace: {selected_details.birthplace} </p>
+        <p style={pStyle}> Nationality: {selected_details.nationality} </p>
+        <p style={pStyle}> Elementary School: {selected_details.elem_name} </p>
+        <p style={pStyle}> Address: {selected_details.elem_address} </p>
+        <p style={pStyle}> Region: {selected_details.elem_region} </p>
+        <p style={pStyle}> Year Completed: {selected_details.elem_year_completed} </p>
+        <p style={pStyle}> Junior High School: {selected_details.jhs_name} </p>
+        <p style={pStyle}> Address: {selected_details.jhs_address} </p>
+        <p style={pStyle}> Region: {selected_details.jhs_region} </p>
+        <p style={pStyle}> Year Completed: {selected_details.jhs_year_completed} </p>
+        <p style={pStyle}> First Strand: {selected_details.first_chosen_strand} </p>
+        <p style={pStyle}> Second Strand: {selected_details.second_chosen_strand} </p>
+        <p style={pStyle}> Application Type: {selected_details.type} </p>
 
         {docType && (
           <div>
             {Object.keys(selected_details[docType][0]).map((key, index) => (
-              <div key={index}>
-                <p> {key} </p>
-                <RenderDocx image={selected_details[docType][0][key]} />
+              <div className='py-4 border-bottom' key={index}>
+                    <div style={{fontSize:'20px',fontWeight:'600'}} class="alert alert-dark" role="alert">
+                    {key}
+                </div>
+                <RenderDocx  image={selected_details[docType][0][key]} />
               </div>
             ))}
           </div>

@@ -85,7 +85,7 @@ export default function ReToken() {
 
     let render_admissions = admissions.map((admission, index) => (
         <div key={index}>
-            <input type='checkbox' key={admission.admission_owner} name={admission.id} checked={checkBoxes[admission.id]} onChange={handleCheckboxChanges} />
+            <input className='me-2' type='checkbox' key={admission.admission_owner} name={admission.id} checked={checkBoxes[admission.id]} onChange={handleCheckboxChanges} />
             <label> {admission.admission_owner} </label>
         </div>
     ));
@@ -93,7 +93,7 @@ export default function ReToken() {
 
   return (
     <div>
-        <button onClick={() => window.location.href = '/Registrar/Enrollment/'}> Back </button>
+        <button className='btn btn-dark mb-3' onClick={() => window.location.href = '/Registrar/Enrollment/'}> Back </button>
       {initForce.is_loading ? (
         <div>
             <h4> Loading... </h4>
@@ -108,9 +108,12 @@ export default function ReToken() {
                 <div>
                     {admissions.length ? (
                         <div>
-                            {render_admissions}
-                            <button onClick={()=> re_token()}> Re_token </button>
-                            <button onClick={() => window.location.href = '/Registrar/Enrollment/'}> Back </button>
+                            <div className='p-3 border bg-light mb-3'>
+                                {render_admissions}
+
+                            </div>
+                            <button className='btn btn-success me-2' onClick={()=> re_token()}> Re_token </button>
+                            <button className='btn btn-dark' onClick={() => window.location.href = '/Registrar/Enrollment/'}> Back </button>
                         </div>
                     ) : (
                         <div>
