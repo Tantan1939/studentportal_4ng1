@@ -9,6 +9,7 @@ from django.urls import reverse
 from datetime import date, datetime, timedelta
 from . forms import *
 from . models import *
+from . tasks import remove_dump_datas
 from django.db import IntegrityError
 from django.contrib import messages
 from django.db.models import Q, Prefetch, Count, Case, When, Value, F
@@ -1281,6 +1282,7 @@ class add_schoolYear(SessionWizardView):
                 return HttpResponseRedirect(reverse("adminportal:add_schoolyear"))
             self.create_schoolyear(sy)
             self.start_admission(ea)
+            remove_dump_datas.delay()
             messages.success(
                 self.request, f"SY: {self.new_sy.display_sy()} is created. Make a new section now.")
             return HttpResponseRedirect(reverse("adminportal:new_section"))

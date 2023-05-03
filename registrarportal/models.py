@@ -71,7 +71,7 @@ class student_admission_details(models.Model):
         FEMALE = 'F', _('Female')
 
     admission_owner = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="admission_details")
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="admission_details")
     first_name = models.CharField(max_length=20)
     middle_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
@@ -176,7 +176,7 @@ class admission_requirements(models.Model):
 
 class ph_born(admission_requirements):
     admission = models.ForeignKey(
-        student_admission_details, on_delete=models.RESTRICT, related_name="softCopy_admissionRequirements_phBorn")
+        student_admission_details, on_delete=models.CASCADE, related_name="softCopy_admissionRequirements_phBorn")
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -189,7 +189,7 @@ class ph_born(admission_requirements):
 
 class foreign_citizen_documents(admission_requirements):
     admission = models.ForeignKey(
-        student_admission_details, on_delete=models.RESTRICT, related_name="softCopy_admissionRequirements_foreigner")
+        student_admission_details, on_delete=models.CASCADE, related_name="softCopy_admissionRequirements_foreigner")
     alien_certificate_of_registration = models.ImageField(
         upload_to="admission/foreignCitizenDocuments/alienRegistration/%Y", db_index=True)
     study_permit = models.ImageField(
@@ -208,7 +208,7 @@ class foreign_citizen_documents(admission_requirements):
 
 class dual_citizen_documents(admission_requirements):
     admission = models.ForeignKey(
-        student_admission_details, on_delete=models.RESTRICT, related_name="softCopy_admissionRequirements_dualCitizen")
+        student_admission_details, on_delete=models.CASCADE, related_name="softCopy_admissionRequirements_dualCitizen")
     dual_citizenship = models.ImageField(
         upload_to="admission/dualCitizenDocuments/dualCitizenshipCertificates/%Y", db_index=True)
     philippine_passport = models.ImageField(
@@ -259,9 +259,9 @@ class student_enrollment_details(models.Model):
         grade_12 = '12', _('Grade 12')
 
     applicant = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="stud_enrollment")
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="stud_enrollment")
     admission = models.ForeignKey(
-        student_admission_details, on_delete=models.RESTRICT, related_name="enrollment")
+        student_admission_details, on_delete=models.CASCADE, related_name="enrollment")
     strand = models.ForeignKey(
         "adminportal.shs_strand", on_delete=models.RESTRICT, related_name="strand_enrollment")
     year_level = models.CharField(max_length=7, choices=year_levels.choices)
@@ -301,10 +301,10 @@ class student_enrollment_details(models.Model):
 
 class student_home_address(models.Model):
     home_of = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="user_address")
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_address")
     permanent_home_address = models.CharField(max_length=50)
     enrollment = models.ForeignKey(
-        student_enrollment_details, on_delete=models.RESTRICT, related_name="enrollment_address", null=True)
+        student_enrollment_details, on_delete=models.CASCADE, related_name="enrollment_address", null=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -317,12 +317,12 @@ class student_home_address(models.Model):
 
 class student_contact_number(models.Model):
     own_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="user_contact")
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_contact")
     cp_number_regex = RegexValidator(regex=r"^(09)([0-9]{9})$")
     cellphone_number = models.CharField(
         max_length=11, validators=[cp_number_regex])
     enrollment = models.ForeignKey(
-        student_enrollment_details, on_delete=models.RESTRICT, related_name="enrollment_contactnumber", null=True)
+        student_enrollment_details, on_delete=models.CASCADE, related_name="enrollment_contactnumber", null=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -335,7 +335,7 @@ class student_contact_number(models.Model):
 
 class student_report_card(models.Model):
     card_from = models.ForeignKey(
-        student_enrollment_details, on_delete=models.RESTRICT, related_name="report_card")
+        student_enrollment_details, on_delete=models.CASCADE, related_name="report_card")
     report_card = models.ImageField(
         upload_to="enrollment/report_cards/%Y", db_index=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -350,7 +350,7 @@ class student_report_card(models.Model):
 
 class student_id_picture(models.Model):
     image_from = models.ForeignKey(
-        student_enrollment_details, on_delete=models.RESTRICT, related_name="stud_pict")
+        student_enrollment_details, on_delete=models.CASCADE, related_name="stud_pict")
     user_image = models.ImageField(
         upload_to="enrollment/user_pic/%Y", db_index=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -390,7 +390,7 @@ class enrollment_batch(models.Model):
 
 class enrollment_invitations(models.Model):
     invitation_to = models.OneToOneField(
-        student_admission_details, on_delete=models.RESTRICT, related_name="invitation")
+        student_admission_details, on_delete=models.CASCADE, related_name="invitation")
     is_accepted = models.BooleanField(default=False)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -411,7 +411,7 @@ class student_grades(models.Model):
         fourth_quarter = '4_Q', _('Fourth Quarter')
 
     student = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name="grades")
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="grades")
     subject = models.ForeignKey(
         "adminportal.subjects", on_delete=models.RESTRICT, related_name="subject_grades")
     quarter = models.CharField(max_length=3, choices=quarter_choices.choices)

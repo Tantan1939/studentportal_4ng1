@@ -15,7 +15,7 @@ class documentRequest(models.Model):
     document = models.ForeignKey(
         studentDocument, on_delete=models.RESTRICT, related_name="documentRequestDetails")
     request_by = models.ForeignKey(
-        User, on_delete=models.RESTRICT, related_name="documentRequestedBy")
+        User, on_delete=models.CASCADE, related_name="documentRequestedBy")
     scheduled_date = models.DateField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
