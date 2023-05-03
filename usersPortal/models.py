@@ -96,7 +96,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class user_address(models.Model):
     address = models.CharField(max_length=100)
     location_of = models.ForeignKey(
-        "user_profile", on_delete=models.RESTRICT, related_name="address")
+        "user_profile", on_delete=models.CASCADE, related_name="address")
     date_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -109,7 +109,7 @@ class user_address(models.Model):
 
 class user_contactNumber(models.Model):
     contactNumber_of = models.ForeignKey(
-        "user_profile", on_delete=models.RESTRICT, related_name="contactNumber")
+        "user_profile", on_delete=models.CASCADE, related_name="contactNumber")
     cp_number_regex = RegexValidator(regex=r"^(09)([0-9]{9})$")
     cellphone_number = models.CharField(
         max_length=11, unique=True, validators=[cp_number_regex])
@@ -124,7 +124,7 @@ class user_contactNumber(models.Model):
 
 class user_photo(models.Model):
     photo_of = models.ForeignKey(
-        "user_profile", on_delete=models.RESTRICT, related_name="user_pic")
+        "user_profile", on_delete=models.CASCADE, related_name="user_pic")
     image = models.ImageField(
         default="user_images/default_male.png", upload_to="user_images/%Y/%m/%d/", db_index=True)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -142,7 +142,7 @@ class user_profile(models.Model):
         Female = 'F', _('Female')
 
     user = models.OneToOneField(
-        User, on_delete=models.RESTRICT, related_name="profile")
+        User, on_delete=models.CASCADE, related_name="profile")
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=20, null=True)
     last_name = models.CharField(max_length=50, null=True)

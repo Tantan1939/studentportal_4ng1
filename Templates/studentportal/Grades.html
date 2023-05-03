@@ -11,28 +11,25 @@
         <div class="row">
             {% for q_name, q_subjects in quarters.items %}
             <div class="col-md-6 mb-4">
-                <table class="table">
+              <h4 class="mb-4">{{q_name}}</h4>
+                <table class="table table-bordered table-striped">
                     <thead>
                       <tr>
-                        <th scope="col">{{q_name}}</th>
                         <th scope="col">Subjects</th>
-                        <th scope="col">Grades</th>
+                        <th class="text-center" scope="col">Grades</th>
                       </tr>
                     </thead>
                     <tbody>
+                      {% for subject_code, subject_grade in q_subjects.items %}
                       <tr>
-                        <th scope="row"></th>
-                        {% for subject_code, subject_grade in q_subjects.items %}
-                        <td>
-                            <p class="m-0"> {{subject_code}} </p>
+                        <td class="border-right">
+                            <p class="m-0 "> {{subject_code}} </p>
                         </td>
-                        {% endfor %}
-                        {% for subject_code, subject_grade in q_subjects.items %}
-                        <td>
-                            <p class="m-0">{{subject_grade}} </p>
-                        </td>
-                        {% endfor %}
+                          <td>
+                            <p class="m-0 text-center">{{subject_grade}} </p>
+                          </td>
                       </tr>
+                      {% endfor %}
                     </tbody>
                   </table>
 

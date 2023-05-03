@@ -77,6 +77,7 @@ CELERY_IMPORTS = {
     'registrarportal.tasks',
     'studentportal.tasks',
     'usersPortal.tasks',
+    'adminportal.tasks'
 }
 CELERY_BROKER_URL = 'amqp://djangoapp:djangoapp@localhost:5672/'
 CELERY_RESULT_BACKEND = 'rpc://'
@@ -86,7 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'db4ng1',
         'USER': 'postgres',
-        'PASSWORD': '',
+        'PASSWORD': 'SIGMA2022',
         'HOST': 'localhost'
     }
 }

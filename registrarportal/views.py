@@ -1194,7 +1194,7 @@ class get_admission_with_pending_token_enrollment_v1(APIView):
                         "domain": get_current_site(request).domain,
                         "uid": urlsafe_base64_encode(force_bytes(re_token.pk)),
                         "token": generate_enrollment_token.make_token(re_token),
-                        "pwd": urlsafe_base64_encode(force_bytes(f"{re_token.admission_owner.email}+{re_token.student_lrn}"))},
+                        "pwd": self.hash_password(re_token.admission_owner.email, re_token.student_lrn)},
                         send_to=re_token.admission_owner.email)
                 return Response({"Done": "Re_token Student/s."}, status=status.HTTP_200_OK)
             else:
@@ -1203,6 +1203,10 @@ class get_admission_with_pending_token_enrollment_v1(APIView):
         except Exception as e:
             print(e)
             return Response([])
+
+    def hash_password(self, email, lrn):
+        pwd = urlsafe_base64_encode(force_bytes(f"{email}+{lrn}"))
+        return urlsafe_base64_encode(force_bytes(pwd))
 
 
 class student_repositories(APIView):
