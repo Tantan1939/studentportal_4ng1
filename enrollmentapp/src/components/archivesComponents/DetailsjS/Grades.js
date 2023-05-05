@@ -11,7 +11,7 @@ export default function Grades({selected_details}) {
           {Object.keys(selected_details[key]).map((quarter, index_q) => (
 
               <div className='' key={index_q}>
-                  <table class="table">
+                  <table class="table bg-white table-bordered table-striped">
                     <thead>
                       <tr>
                         <th scope="col">{quarter}</th>
@@ -20,19 +20,17 @@ export default function Grades({selected_details}) {
                       </tr>
                     </thead>
                     <tbody>
+                    {Object.keys(selected_details[key][quarter]).map((subject, index_sub) => (
                       <tr>
                         <th scope="row"></th>
-                        {Object.keys(selected_details[key][quarter]).map((subject, index_sub) => (
                           <td key={index_sub}>
                             <p style={{fontSize:'18px',fontWeight:'600'}}> {subject}:</p>
                           </td>
-                        ))}
-                        {Object.keys(selected_details[key][quarter]).map((subject, index_sub) => (
-                            <td key={index_sub}>
-                              <p style={{fontSize:'18px',fontWeight:'600'}}>{selected_details[key][quarter][subject]} </p>
-                            </td>
-                        ))}
+                          <td key={index_sub}>
+                            <p style={{fontSize:'18px',fontWeight:'600'}}>{selected_details[key][quarter][subject]} </p>
+                          </td>
                       </tr>
+                      ))}
                     </tbody>
                   </table>
               

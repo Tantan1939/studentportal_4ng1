@@ -16,26 +16,48 @@
         margin-top: 0;
     }
 </style>
-    <div class="container bg-light border mt-4 py-4">
+    <div class="container  mt-4 py-4">
         <h4 class="mb-4"> {{class.section_name}} </h4>
 
         <div class="row">
             <div class="col-md-6">
-                <div class="first border rounded bg-white mb-3 p-3">
-                    <h6> First Semester </h6>
-                    {% for key, value in class.First_sem_subjects.items %}
-                        <h6 class="sched"> {{key}}: {{value}} </h6>
-                    {% endfor %}
-                </div>
+                <table class="table table-bordered bg-white table-striped">
+                    <h5 class="mb-4">First Semester</h5>
+                    <thead>
+                      <tr>
+                        <th scope="col">Subjects</th>
+                        <th scope="col">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in class.First_sem_subjects.items %}
+                      <tr>
+                        <td>{{key}}</td>
+                        <td>{{value}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
             </div>
             <div class="col-md-6">
-                <div class="second border rounded bg-white mb-3 p-3">
-                    <h6> Second Semester </h6>
-                    {% for key, value in class.Second_sem_subjects.items %}
-                        <h6 class="sched"> {{key}}: {{value}} </h6>
-                    {% endfor %}
-        
-                </div>
+                <table class="table table-bordered bg-white table-striped">
+                    <h5 class="mb-4">Second Semester</h5>
+                    <thead>
+                      <tr>
+                        <th scope="col">Subjects</th>
+                        <th scope="col">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in class.Second_sem_subjects.items %}
+                      <tr>
+                        <td>{{key}}</td>
+                        <td>{{value}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+           
 
             </div>
         
