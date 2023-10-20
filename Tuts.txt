@@ -1,5 +1,0 @@
-1: Delete db4ng1 database
-2: Create db4ng1 database
-3: enter pip install -r requirements.txt
-4: run python manage.py migrate
-5: End
