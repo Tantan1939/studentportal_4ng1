@@ -17,12 +17,13 @@ from .tokens import account_activation_token, password_reset_token
 from adminportal.models import *
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from studentportal.views import student_access_only
 from . models import *
-from adminportal.views import superuser_only
 from django.core.exceptions import ObjectDoesNotExist
 from email_validator import validate_email, EmailUndeliverableError
 from django.utils.translation import gettext_lazy as _
+from studentportal_4ng1.url_router import login_router
+from studentportal.mixins import StudentAccessMixin
+from adminportal.mixins import AdminAccessMixin
 
 
 User = get_user_model()
@@ -120,16 +121,11 @@ def activate_account(request, uidb64, token):
 class login(FormView):
     template_name = "usersPortal/loginTemplates/login.html"
     form_class = loginForm
-    success_url = "/"
 
     def get_success_url(self):
         # Custom redirection according to user type
-        if self.request.user.is_superuser:
-            return "/School_admin/"
-        elif self.request.user.is_registrar:
-            return "/Registrar/"
-        else:
-            return super().get_success_url()
+        next = self.request.GET.get("next")
+        return login_router(user=self.request.user, next=next)
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
@@ -287,8 +283,7 @@ class passwordReset(FormView):
                 return super().form_valid(form)
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class userAccountProfile(TemplateView):
+class userAccountProfile(StudentAccessMixin, TemplateView):
     template_name = "usersPortal/profile/profileDetails.html"
     http_method_names = ["get"]
 
@@ -315,8 +310,7 @@ class userAccountProfile(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class updateAccountProfile(FormView):
+class updateAccountProfile(StudentAccessMixin, FormView):
     template_name = "usersPortal/profile/profileUpdate.html"
     success_url = "/users/Profile/"
     form_class = profileDetailsForm
@@ -488,8 +482,7 @@ class authenticatedUser_resetPassword(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class create_adminAccount(FormView):
+class create_adminAccount(AdminAccessMixin, FormView):
     template_name = "usersPortal/accountRegistration.html"
     success_url = "/users/create_adminAccount/"
     form_class = accountRegistrationForm
@@ -535,8 +528,7 @@ class create_adminAccount(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class create_registrarAccount(FormView):
+class create_registrarAccount(AdminAccessMixin, FormView):
     template_name = "usersPortal/accountRegistration.html"
     success_url = "/users/create_registrarAccount/"
     form_class = accountRegistrationForm

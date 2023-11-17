@@ -16,6 +16,7 @@ from django.db.models import Q, Prefetch, Count, Case, When, Value, F
 from formtools.wizard.views import SessionWizardView
 from string import ascii_uppercase
 from registrarportal.models import schoolYear, enrollment_admission_setup
+from . mixins import AdminAccessMixin
 
 
 def superuser_only(user):
@@ -31,13 +32,11 @@ def validate_latestSchoolYear(sy):
         return False
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class index(TemplateView):
+class index(AdminAccessMixin, TemplateView):
     template_name = "adminportal/dashboard.html"
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class shs_courses(TemplateView):
+class shs_courses(AdminAccessMixin, TemplateView):
     # View courses
     template_name = "adminportal/Shs_courses/courses.html"
 
@@ -50,8 +49,7 @@ class shs_courses(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class add_courseTrack(FormView):
+class add_courseTrack(AdminAccessMixin, FormView):
     template_name = "adminportal/Shs_courses/create_track.html"
     form_class = add_shs_track
     success_url = "/School_admin/Courses/"
@@ -106,8 +104,7 @@ class add_courseTrack(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class edit_courseTrack(FormView):
+class edit_courseTrack(AdminAccessMixin, FormView):
     template_name = "adminportal/Shs_courses/edit_track.html"
     form_class = add_shs_track
     success_url = "/School_admin/Courses/"
@@ -164,8 +161,7 @@ class edit_courseTrack(FormView):
             return HttpResponseRedirect(reverse("adminportal:view_courses"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class delete_courseTrack(TemplateView):
+class delete_courseTrack(AdminAccessMixin, TemplateView):
     template_name = "adminportal/Shs_courses/delete_track.html"
 
     def post(self, request, *args, **kwargs):
@@ -203,8 +199,7 @@ class delete_courseTrack(TemplateView):
         return HttpResponseRedirect(reverse("adminportal:view_courses"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class add_trackStrand(FormView):
+class add_trackStrand(AdminAccessMixin, FormView):
     success_url = "/School_admin/Courses/"
     form_class = add_strand_form
     template_name = "adminportal/Shs_courses/create_strands.html"
@@ -291,8 +286,7 @@ class add_trackStrand(FormView):
             return HttpResponseRedirect(reverse("adminportal:view_courses"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class update_trackStrand(FormView):
+class update_trackStrand(AdminAccessMixin, FormView):
     template_name = "adminportal/Shs_courses/edit_strand.html"
     form_class = edit_strand_form
     success_url = "/School_admin/Courses/"
@@ -344,8 +338,7 @@ class update_trackStrand(FormView):
             return HttpResponseRedirect(reverse("adminportal:view_courses"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class delete_trackStrand(TemplateView):
+class delete_trackStrand(AdminAccessMixin, TemplateView):
     template_name = "adminportal/Shs_courses/delete_strand.html"
 
     def post(self, request, *args, **kwargs):
@@ -374,8 +367,7 @@ class delete_trackStrand(TemplateView):
             return HttpResponseRedirect(reverse("adminportal:view_courses"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class view_schoolDocuments_canRequest(TemplateView):
+class view_schoolDocuments_canRequest(AdminAccessMixin, TemplateView):
     template_name = "adminportal/schoolDocuments/ListOfDocuments.html"
     http_method_names = ["get"]
 
@@ -389,8 +381,7 @@ class view_schoolDocuments_canRequest(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class addEditDocument(FormView):
+class addEditDocument(AdminAccessMixin, FormView):
     template_name = "adminportal/schoolDocuments/documentDetails.html"
     success_url = "/School_admin/schoolDocuments/"
     form_class = makeDocument
@@ -454,8 +445,7 @@ class addEditDocument(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class hideDocument(TemplateView):
+class hideDocument(AdminAccessMixin, TemplateView):
     template_name = "adminportal/schoolDocuments/hideDocumentConfirmation.html"
     http_method_names = ["get", "post"]
 
@@ -484,8 +474,7 @@ class hideDocument(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class get_ongoingSchoolEvents(TemplateView, DeletionMixin):
+class get_ongoingSchoolEvents(AdminAccessMixin, TemplateView, DeletionMixin):
     template_name = "adminportal/schoolEvents/ongoingSchoolEvents.html"
     http_method_names = ["get", "post"]
     success_url = "/School_admin/school_events/"
@@ -526,8 +515,7 @@ class get_ongoingSchoolEvents(TemplateView, DeletionMixin):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class add_schoolEvent(FormView):
+class add_schoolEvent(AdminAccessMixin, FormView):
     template_name = "adminportal/schoolEvents/newEvent.html"
     success_url = "/School_admin/school_events/"
     form_class = addEventForm
@@ -548,8 +536,7 @@ class add_schoolEvent(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class edit_schoolEvent(FormView):
+class edit_schoolEvent(AdminAccessMixin, FormView):
     template_name = "adminportal/schoolEvents/updateEvent.html"
     success_url = "/School_admin/school_events/"
     form_class = updateEventForm
@@ -595,8 +582,7 @@ class edit_schoolEvent(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class add_subjects(FormView):
+class add_subjects(AdminAccessMixin, FormView):
     template_name = "adminportal/subjects/subjectDetails.html"
     success_url = "/School_admin/subjects/"
     form_class = addSubjectForm
@@ -634,8 +620,7 @@ class add_subjects(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class get_subjects(ListView):
+class get_subjects(AdminAccessMixin, ListView):
     allow_empty = True
     context_object_name = "subjects"
     paginate_by = 15
@@ -662,8 +647,7 @@ class get_subjects(ListView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class update_subjects(FormView):
+class update_subjects(AdminAccessMixin, FormView):
     template_name = "adminportal/subjects/subjectDetails.html"
     success_url = "/School_admin/subjects/"
     form_class = addSubjectForm
@@ -709,8 +693,7 @@ class update_subjects(FormView):
         return HttpResponseRedirect(reverse("adminportal:getSubjects"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class view_curriculum(ListView):
+class view_curriculum(AdminAccessMixin, ListView):
     allow_empty = True
     context_object_name = "curriculums"
     paginate_by = 1
@@ -742,8 +725,7 @@ class view_curriculum(ListView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class add_curriculum(SessionWizardView):
+class add_curriculum(AdminAccessMixin, SessionWizardView):
     templates = {
         "g11_firstSem": "adminportal/curriculum/addCurriculumHTMLfiles/g11firstsem.html",
         "g11_secondSem": "adminportal/curriculum/addCurriculumHTMLfiles/g11secondsem.html",
@@ -813,8 +795,7 @@ class add_curriculum(SessionWizardView):
             return HttpResponseRedirect(reverse("adminportal:addSubjects"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class update_curriculum(SessionWizardView):
+class update_curriculum(AdminAccessMixin, SessionWizardView):
     templates = {
         "g11_firstSem": "adminportal/curriculum/addCurriculumHTMLfiles/g11firstsem.html",
         "g11_secondSem": "adminportal/curriculum/addCurriculumHTMLfiles/g11secondsem.html",
@@ -907,8 +888,7 @@ class update_curriculum(SessionWizardView):
             return HttpResponseRedirect(reverse("adminportal:view_curriculum"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class make_section(FormView):
+class make_section(AdminAccessMixin, FormView):
     template_name = "adminportal/schoolSection/makeSections.html"
     success_url = "/School_admin/Sections/"
     form_class = makeSectionForm
@@ -1065,8 +1045,7 @@ class make_section(FormView):
         return HttpResponseRedirect(reverse("adminportal:add_schoolyear"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class get_sections(TemplateView):
+class get_sections(AdminAccessMixin, TemplateView):
     template_name = "adminportal/schoolSection/getSections.html"
     http_method_names = ["get"]
 
@@ -1099,8 +1078,7 @@ class get_sections(TemplateView):
             return HttpResponseRedirect(reverse("adminportal:get_sections", kwargs={"year": "11"}))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class generate_classSchedule(FormView):
+class generate_classSchedule(AdminAccessMixin, FormView):
     # Generate class schedule for all latest section from the given strand
     template_name = "adminportal/schoolSection/generateSchedule.html"
     success_url = "/School_admin/Sections/"
@@ -1238,7 +1216,6 @@ class generate_classSchedule(FormView):
             return HttpResponseRedirect(reverse("adminportal:new_section"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
 class school_year_index(TemplateView):
     template_name = "adminportal/SchoolYears/index.html"
 
@@ -1256,8 +1233,7 @@ class school_year_index(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(superuser_only, login_url="registrarportal:dashboard")], name="dispatch")
-class add_schoolYear(SessionWizardView):
+class add_schoolYear(AdminAccessMixin, SessionWizardView):
     templates = {
         "add_schoolyear_form": "adminportal/SchoolYears/addSchoolYear.html",
         "ea_setup_form": "adminportal/SchoolYears/admissionScheduling.html",

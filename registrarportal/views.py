@@ -36,6 +36,7 @@ import string
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from . mixins import RegistrarAccessMixin
 
 
 User = get_user_model()
@@ -95,8 +96,7 @@ def countDocumentRequests():
     return documentRequest.registrarObjects.count()
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class registrarDashboard(TemplateView):
+class registrarDashboard(RegistrarAccessMixin, TemplateView):
     template_name = "registrarportal/dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -108,8 +108,7 @@ class registrarDashboard(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class getList_documentRequest(ListView, DeletionMixin):
+class getList_documentRequest(RegistrarAccessMixin, ListView, DeletionMixin):
     allow_empty = True
     context_object_name = "listOfDocumentRequests"
     http_method_names = ["get", "post"]
@@ -150,8 +149,8 @@ class getList_documentRequest(ListView, DeletionMixin):
             return HttpResponseRedirect(reverse("registrarportal:requestedDocuments"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index"), user_passes_test(check_admissionSched, login_url="registrarportal:dashboard")], name="dispatch")
-class enrollment_invitation_oldStudents(View):
+@method_decorator([user_passes_test(check_admissionSched, login_url="registrarportal:dashboard")], name="dispatch")
+class enrollment_invitation_oldStudents(RegistrarAccessMixin, View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -202,8 +201,7 @@ def dts_to_list(val):
         return False
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class get_admitted_students(ListView):
+class get_admitted_students(RegistrarAccessMixin, ListView):
     allow_empty = True
     context_object_name = "students"
     paginate_by = 40
@@ -278,8 +276,7 @@ class get_admitted_students(ListView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class get_enrolled_students(ListView):
+class get_enrolled_students(RegistrarAccessMixin, ListView):
     allow_empty = True
     context_object_name = "students"
     paginate_by = 40
@@ -349,8 +346,7 @@ class get_enrolled_students(ListView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class get_react_app(TemplateView):
+class get_react_app(RegistrarAccessMixin, TemplateView):
     # This class will render the react app
     template_name = 'index.html'
 
@@ -999,8 +995,7 @@ class get_classLists(APIView):
         return Response(serializer.data)
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(registrar_only, login_url="studentportal:index")], name="dispatch")
-class print_sections(TemplateView):
+class print_sections(RegistrarAccessMixin, TemplateView):
     template_name = "registrarportal/classList/printing.html"
 
     def post(self, request, *args, **kwargs):
