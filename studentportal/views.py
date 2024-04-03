@@ -24,6 +24,7 @@ from registrarportal.tokenGenerators import generate_enrollment_token, new_enrol
 from usersPortal.models import user_profile
 from django.core.exceptions import ObjectDoesNotExist
 from studentportal.tasks import admission_batching, enrollment_batching
+from . mixins import StudentAccessMixin
 
 
 User = get_user_model()
@@ -121,10 +122,6 @@ def check_for_admission_availability(user):
             return enrollment_admission_setup.objects.filter(ea_setup_sy=sy, start_date__lte=date.today(), end_date__gte=date.today()).exists()
         return False
     return False
-
-
-admission_decorators = [login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index"), user_passes_test(
-    user_no_admission, login_url="studentportal:index"), user_passes_test(check_for_admission_availability, login_url="studentportal:index")]
 
 
 @method_decorator(user_passes_test(not_authenticated_user, login_url="studentportal:index"), name="dispatch")
@@ -339,8 +336,7 @@ class admission(SessionWizardView):
             return HttpResponseRedirect(reverse("studentportal:select_type"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class view_myDocumentRequest(TemplateView):
+class view_myDocumentRequest(StudentAccessMixin, TemplateView):
     template_name = "studentportal/documentRequests/requestedDocuments.html"
     http_method_names = ["get"]
 
@@ -370,8 +366,7 @@ class view_myDocumentRequest(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class create_documentRequest(FormView):
+class create_documentRequest(StudentAccessMixin, FormView):
     template_name = "studentportal/documentRequests/makeDocumentRequest.html"
     form_class = makeDocumentRequestForm
     success_url = "/DocumentRequests/"
@@ -410,8 +405,7 @@ class create_documentRequest(FormView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class reschedDocumentRequest(FormView):
+class reschedDocumentRequest(StudentAccessMixin, FormView):
     template_name = "studentportal/documentRequests/reschedRequest.html"
     form_class = makeDocumentRequestForm
     success_url = "/DocumentRequests/"
@@ -528,8 +522,7 @@ class enrollment_new_admission(FormView):
             return HttpResponseRedirect(reverse("studentportal:index"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class enrollment_old_students(FormView):
+class enrollment_old_students(StudentAccessMixin, FormView):
     template_name = "studentportal/enrollmentForms/oldStudent_form.html"
     form_class = enrollment_form2
     success_url = "/"
@@ -607,8 +600,7 @@ class enrollment_old_students(FormView):
             return HttpResponseRedirect(reverse("studentportal:index"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class get_submitted_admission(TemplateView):
+class get_submitted_admission(StudentAccessMixin, TemplateView):
     template_name = "studentportal/applications/admission_details.html"
 
     def get_context_data(self, **kwargs):
@@ -763,8 +755,7 @@ class resend_admission(FormView):
         return HttpResponseRedirect(reverse("studentportal:index"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class get_submitted_enrollments(TemplateView):
+class get_submitted_enrollments(StudentAccessMixin, TemplateView):
     template_name = "studentportal/applications/enrollment_details.html"
 
     def get_context_data(self, **kwargs):
@@ -807,8 +798,7 @@ class get_submitted_enrollments(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class resend_enrollment(FormView):
+class resend_enrollment(StudentAccessMixin, FormView):
     template_name = "studentportal/applications/resubmit_enrollment.html"
     form_class = resend_enrollment_form
     success_url = "/Applications/Enrollment/"
@@ -983,8 +973,7 @@ class resend_newEnrollee_enrollment(FormView):
         return HttpResponseRedirect(reverse("studentportal:index"))
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class view_classes(TemplateView):
+class view_classes(StudentAccessMixin, TemplateView):
     template_name = "studentportal/ClassList.html"
 
     def get_context_data(self, **kwargs):
@@ -1015,8 +1004,7 @@ class view_classes(TemplateView):
         return context
 
 
-@method_decorator([login_required(login_url="usersPortal:login"), user_passes_test(student_access_only, login_url="studentportal:index")], name="dispatch")
-class view_grades(TemplateView):
+class view_grades(StudentAccessMixin, TemplateView):
     template_name = "studentportal/Grades.html"
 
     def get_context_data(self, **kwargs):
